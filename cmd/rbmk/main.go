@@ -21,9 +21,9 @@ func main() {
 //go:embed README.txt
 var readme string
 
-// newCommand constructs a new [cliutils.Command] for the `buresu` command.
+// newCommand constructs a new [cliutils.Command] for the `rbmk` command.
 func newCommand() cliutils.Command {
-	return cliutils.NewCommandWithSubCommands("buresu", readme, map[string]cliutils.Command{
+	return cliutils.NewCommandWithSubCommands("rbmk", readme, map[string]cliutils.Command{
 		"dig": dig.NewCommand(),
 	})
 }

@@ -19,8 +19,8 @@ func TestCommand(t *testing.T) {
 	})
 
 	t.Run("normal run", func(t *testing.T) {
-		err := cmd.Main(context.Background(), "www.example.com")
-		if err == nil || err.Error() != "not implemented" {
+		err := cmd.Main(context.Background(), "dig")
+		if err == nil || err.Error() != "missing name to resolve" {
 			t.Fatalf("expected 'not implemented', got %v", err)
 		}
 	})

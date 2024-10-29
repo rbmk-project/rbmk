@@ -33,28 +33,28 @@ func TestCommandWithSubCommands(t *testing.T) {
 	}
 
 	cases := []testcase{{
-		argv:    []string{"buresu"},
+		argv:    []string{"rbmk"},
 		failure: "",
 	}, {
-		argv:    []string{"buresu", "-h"},
+		argv:    []string{"rbmk", "-h"},
 		failure: "",
 	}, {
-		argv:    []string{"buresu", "--help"},
+		argv:    []string{"rbmk", "--help"},
 		failure: "",
 	}, {
-		argv:    []string{"buresu", "help"},
+		argv:    []string{"rbmk", "help"},
 		failure: "",
 	}, {
-		argv:    []string{"buresu", "help", "env"},
+		argv:    []string{"rbmk", "help", "env"},
 		failure: "",
 	}, {
-		argv:    []string{"buresu", "help", "__nonexistent__"},
+		argv:    []string{"rbmk", "help", "__nonexistent__"},
 		failure: "no such help topic",
 	}, {
-		argv:    []string{"buresu", "env"},
+		argv:    []string{"rbmk", "env"},
 		failure: "",
 	}, {
-		argv:    []string{"buresu", "__nonexistent__"},
+		argv:    []string{"rbmk", "__nonexistent__"},
 		failure: "no such command",
 	}}
 
