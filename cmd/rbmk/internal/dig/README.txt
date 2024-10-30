@@ -87,7 +87,7 @@ To only print structured logs use `+noall +logs`:
 
     $ rbmk dig www.example.com MX +noall +logs
 
-To append structured logs to a separate file, use:
+To append structured logs to a separate file, use the `--logs` flag:
 
     $ rbmk dig --logs LOGS.jsonl www.example.com MX
 
