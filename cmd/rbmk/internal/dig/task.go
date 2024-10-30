@@ -26,10 +26,6 @@ type Task struct {
 	// Name is the MANDATORY name to query.
 	Name string
 
-	// OutputWriter is the MANDATORY [io.Writer] where we should
-	// write the output of the command.
-	OutputWriter io.Writer
-
 	// Protocol is the MANDATORY protocol to use,
 	// expressed as a string. For example, "udp" or "tcp".
 	//
@@ -39,6 +35,14 @@ type Task struct {
 	// QueryType is the MANDATORY query type expressed
 	// as a string. For example, "A" or "AAAA".
 	QueryType string
+
+	// QueryWriter is the MANDATORY [io.Writer] where we should
+	// write the query before sending it.
+	QueryWriter io.Writer
+
+	// ResponseWriter is the MANDATORY [io.Writer] where we should
+	// write the the response when we received it.
+	ResponseWriter io.Writer
 
 	// ServerAddr is the MANDATORY address of the server
 	// to query, for example "8.8.8.8", "1.1.1.1".
@@ -129,14 +133,14 @@ func (task *Task) Run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("cannot create query: %w", err)
 	}
-	fmt.Fprintf(task.OutputWriter, ";; Query:\n%s\n", query.String())
+	fmt.Fprintf(task.QueryWriter, ";; Query:\n%s\n", query.String())
 
 	// Perform the DNS query
 	response, err := transport.Query(context.Background(), server, query)
 	if err != nil {
 		return fmt.Errorf("query round-trip failed: %w", err)
 	}
-	fmt.Fprintf(task.OutputWriter, "\n;; Response:\n%s\n\n", response.String())
+	fmt.Fprintf(task.ResponseWriter, "\n;; Response:\n%s\n\n", response.String())
 
 	// Validate the DNS response
 	if err = dnscore.ValidateResponse(query, response); err != nil {

@@ -26,7 +26,30 @@ a query for the `A` record type. We support these record types:
 
 We currently do not support any command line flags.
 
-We currently do not support any query options.
+We currently support the following query options:
+
+    +https
+        Uses DNS-over-HTTPS. The @server argument is the hostname or IP
+        address to use. The implied port is `443/tcp`. The implied URL
+        path is `/dns-query`. That is, if you use:
+
+            @8.8.8.8 +https
+
+        We use `https://8.8.8.8/dns-query` to resolve the domain name.
+
+    +noall
+        Suppress printing to the stdout.
+
+    +qr
+        Prints the query to the stdout before sending it.
+
+    +tcp
+        Uses DNS-over-TCP. The @server argument is the hostname or IP
+        address to use. The implied port is `53/tcp`.
+
+    +tls
+        Uses DNS-over-TLS. The @server argument is the hostname or IP
+        address to use. The implied port is `853/tcp`.
 
 For example, the following invocation resolves `www.example.com` IPv6 address
 (i.e., `AAAA` records) using the `1.1.1.1` name server:

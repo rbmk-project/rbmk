@@ -46,9 +46,10 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	task := &Task{
 		MeasurementsWriter: os.Stdout,
 		Name:               "",
-		OutputWriter:       os.Stdout,
 		Protocol:           "udp",
 		QueryType:          "A",
+		QueryWriter:        io.Discard,
+		ResponseWriter:     os.Stdout,
 		ServerAddr:         "8.8.8.8",
 		ServerPort:         "53",
 		URLPath:            "/dns-query",
@@ -105,7 +106,12 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 				continue
 
 			case arg == "+noall":
-				task.OutputWriter = io.Discard
+				task.QueryWriter = io.Discard
+				task.ResponseWriter = io.Discard
+				continue
+
+			case arg == "+qr":
+				task.QueryWriter = os.Stdout
 				continue
 
 			case arg == "+tcp":
