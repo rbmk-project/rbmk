@@ -7,6 +7,9 @@ print output on the standard output emulating what `dig(1)` would print.
 Command line flags start with the `-` character, while query-specific
 options start with the `+` character, just like in `dig(1)`.
 
+Flags MUST come first. The relative order of `@SERVER`, `NAME`, `TYPE`, and
+`+options` is not significant, as long as they come after the flags.
+
 The optional `@SERVER` argument indicates the name server to use for the
 query. If omitted, we use `8.8.8.8` as the resolver.
 
@@ -28,7 +31,16 @@ a query for the `A` record type. We support these record types:
 
     - NS: resolves the name servers associated with a domain name;
 
-We currently do not support any command line flags.
+We currently support the following command line flags:
+
+    -h, --help
+        Print this help message.
+
+    --logs FILE
+        Writes structured logs to the given FILE. If FILE already exists, we
+        append to it. If FILE does not exist, we create it. If FILE is a single
+        dash (`-`), we write to the stdout. If you specify `--logs` multiple
+        times, we write to the last FILE specified.
 
 We currently support the following query options:
 
@@ -70,5 +82,9 @@ For example, the following invocation resolves `www.example.com` IPv6 address
 To only print structured logs use `+noall +logs`:
 
     $ rbmk dig www.example.com MX +noall +logs
+
+To append structured logs to a separate file, use:
+
+    $ rbmk dig --logs LOGS.jsonl www.example.com MX
 
 This command exits with `0` on success and `1` on failure.

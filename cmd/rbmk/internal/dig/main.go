@@ -60,7 +60,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	clip := pflag.NewFlagSet("rbmk dig", pflag.ContinueOnError)
 
 	// 4. add flags to the parser
-	// TODO(bassosimone): add flags to the parser
+	logfile := clip.String("logs", "", "path where to write structured logs")
 
 	// 5. parse command line arguments
 	if err := clip.Parse(argv[1:]); err != nil {
@@ -170,10 +170,38 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		return err
 	}
 
-	// 8. finally run the task
+	// 8. possibly open the log file
+	var filep *os.File
+	switch *logfile {
+	case "":
+		// nothing
+	case "-":
+		task.LogsWriter = os.Stdout
+	default:
+		var err error
+		filep, err = os.OpenFile(*logfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+		if err != nil {
+			err = fmt.Errorf("cannot open log file: %w", err)
+			fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
+			return err
+		}
+		defer filep.Close() // ensure we always close
+		task.LogsWriter = io.MultiWriter(task.LogsWriter, filep)
+	}
+
+	// 9. run the task
 	if err := task.Run(ctx); err != nil {
 		fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
 		return err
+	}
+
+	// 10. ensure we close the logfile
+	if filep != nil {
+		if err := filep.Close(); err != nil {
+			err = fmt.Errorf("cannot close log file: %w", err)
+			fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
+			return err
+		}
 	}
 	return nil
 }
