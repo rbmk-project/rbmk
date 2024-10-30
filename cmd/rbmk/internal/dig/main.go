@@ -89,10 +89,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		if strings.HasPrefix(arg, "@") {
 			countServers++
 			if countServers > 1 {
-				err := fmt.Errorf("you specified more than one server to query: %s", arg)
-				fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
-				fmt.Fprintf(os.Stderr, "Run `rbmk dig --help` for usage.\n")
-				return err
+				fmt.Fprintf(os.Stderr, "rbmk dig: warning: you specified more than one server to query\n")
+				// fallthrough
 			}
 			task.ServerAddr = arg[1:]
 			continue
@@ -148,10 +146,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		if _, ok := queryTypeMap[arg]; ok {
 			countQueryTypes++
 			if countQueryTypes > 1 {
-				err := fmt.Errorf("you specified more than one query type: %s", arg)
-				fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
-				fmt.Fprintf(os.Stderr, "Run `rbmk dig --help` for usage.\n")
-				return err
+				fmt.Fprintf(os.Stderr, "rbmk dig: warning: you specified more than one query type\n")
+				// fallthrough
 			}
 			task.QueryType = arg
 			continue

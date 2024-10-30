@@ -11,9 +11,11 @@ Flags MUST come first. The relative order of `@SERVER`, `NAME`, `TYPE`, and
 `+options` is not significant, as long as they come after the flags.
 
 The optional `@SERVER` argument indicates the name server to use for the
-query. If omitted, we use `8.8.8.8` as the resolver.
+query. If omitted, we use `8.8.8.8` as the resolver. If `@SERVER` is specified
+multiple times, we emit a warning and use the last one.
 
-The mandatory `NAME` argument indicates the domain name to query.
+The mandatory `NAME` argument indicates the domain name to query. We do
+not support specifying the `NAME` argument more than once.
 
 The optional `TYPE` argument indicates the query type. If missing, we issue
 a query for the `A` record type. We support these record types:
@@ -24,12 +26,14 @@ a query for the `A` record type. We support these record types:
 
     - CNAME: resolves the canonical name of a domain name;
 
-    - HTTPS: resolves the ALPNs and possibly IP address associaed
+    - HTTPS: resolves the ALPNs and possibly IP address associated
       with a domain name;
 
     - MX: resolves the mail exchange servers associated with a domain name;
 
-    - NS: resolves the name servers associated with a domain name;
+    - NS: resolves the name servers associated with a domain name.
+
+If you specify `TYPE` multiple times, we emit a warning and use the last one.
 
 We currently support the following command line flags:
 
