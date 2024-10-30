@@ -50,6 +50,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		QueryType:          "A",
 		QueryWriter:        io.Discard,
 		ResponseWriter:     os.Stdout,
+		ShortWriter:        io.Discard,
 		ServerAddr:         "8.8.8.8",
 		ServerPort:         "53",
 		URLPath:            "/dns-query",
@@ -108,10 +109,16 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 			case arg == "+noall":
 				task.QueryWriter = io.Discard
 				task.ResponseWriter = io.Discard
+				task.ShortWriter = io.Discard
 				continue
 
 			case arg == "+qr":
 				task.QueryWriter = os.Stdout
+				continue
+
+			case arg == "+short":
+				task.ResponseWriter = io.Discard
+				task.ShortWriter = os.Stdout
 				continue
 
 			case arg == "+tcp":

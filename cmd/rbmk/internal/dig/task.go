@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net"
 	"net/url"
+	"strings"
 
 	"github.com/miekg/dns"
 	"github.com/rbmk-project/dnscore"
@@ -41,8 +42,12 @@ type Task struct {
 	QueryWriter io.Writer
 
 	// ResponseWriter is the MANDATORY [io.Writer] where we should
-	// write the the response when we received it.
+	// write the full response when we received it.
 	ResponseWriter io.Writer
+
+	// ShortWriter is the MANDATORY [io.Writer] where we should
+	// write the short response when we received it.
+	ShortWriter io.Writer
 
 	// ServerAddr is the MANDATORY address of the server
 	// to query, for example "8.8.8.8", "1.1.1.1".
@@ -62,6 +67,8 @@ var queryTypeMap = map[string]uint16{
 	"AAAA":  dns.TypeAAAA,
 	"CNAME": dns.TypeCNAME,
 	"HTTPS": dns.TypeHTTPS,
+	"MX":    dns.TypeMX,
+	"NS":    dns.TypeNS,
 }
 
 // protocolMap maps protocol strings to DNS protocols.
@@ -141,6 +148,7 @@ func (task *Task) Run(ctx context.Context) error {
 		return fmt.Errorf("query round-trip failed: %w", err)
 	}
 	fmt.Fprintf(task.ResponseWriter, "\n;; Response:\n%s\n\n", response.String())
+	fmt.Fprintf(task.ShortWriter, "%s", task.formatShort(response))
 
 	// Validate the DNS response
 	if err = dnscore.ValidateResponse(query, response); err != nil {
@@ -152,4 +160,37 @@ func (task *Task) Run(ctx context.Context) error {
 		return fmt.Errorf("response code indicates error: %w", err)
 	}
 	return nil
+}
+
+// formatShort returns a short string representation of the DNS response.
+func (task *Task) formatShort(response *dns.Msg) string {
+	var builder strings.Builder
+	for _, ans := range response.Answer {
+		switch ans := ans.(type) {
+		case *dns.A:
+			fmt.Fprintf(&builder, "%s\n", ans.A.String())
+
+		case *dns.AAAA:
+			fmt.Fprintf(&builder, "%s\n", ans.AAAA.String())
+
+		case *dns.CNAME:
+			fmt.Fprintf(&builder, "%s\n", ans.Target)
+
+		case *dns.HTTPS:
+			value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
+			fmt.Fprintf(&builder, "%s\n", value)
+
+		case *dns.MX:
+			value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
+			fmt.Fprintf(&builder, "%s\n", value)
+
+		case *dns.NS:
+			value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
+			fmt.Fprintf(&builder, "%s\n", value)
+
+		default:
+			// TODO(bassosimone): implement the other answer types
+		}
+	}
+	return builder.String()
 }

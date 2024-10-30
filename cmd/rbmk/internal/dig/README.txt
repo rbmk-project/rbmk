@@ -24,6 +24,10 @@ a query for the `A` record type. We support these record types:
     - HTTPS: resolves the ALPNs and possibly IP address associaed
       with a domain name;
 
+    - MX: resolves the mail exchange servers associated with a domain name;
+
+    - NS: resolves the name servers associated with a domain name;
+
 We currently do not support any command line flags.
 
 We currently support the following query options:
@@ -42,6 +46,9 @@ We currently support the following query options:
 
     +qr
         Prints the query to the stdout before sending it.
+
+    +short
+        Print a short response rather than the full response.
 
     +tcp
         Uses DNS-over-TCP. The @server argument is the hostname or IP
