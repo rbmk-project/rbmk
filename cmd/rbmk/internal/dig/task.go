@@ -20,9 +20,9 @@ import (
 // The zero value is not ready to use. Please, make sure
 // to initialize all the fields marked as MANDATORY.
 type Task struct {
-	// MeasurementsWriter is the MANDATORY [io.Writer] where
-	// we should write the measurement results.
-	MeasurementsWriter io.Writer
+	// LogsWriter is the MANDATORY [io.Writer] where
+	// we should write structured logs.
+	LogsWriter io.Writer
 
 	// Name is the MANDATORY name to query.
 	Name string
@@ -102,7 +102,7 @@ func (task *Task) newServerAddr(protocol dnscore.Protocol) string {
 // Run runs the task and returns an error.
 func (task *Task) Run(ctx context.Context) error {
 	// Set up the JSON logger for writing the measurements
-	logger := slog.New(slog.NewJSONHandler(task.MeasurementsWriter, &slog.HandlerOptions{}))
+	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
 
 	// Create a new transport using the logger
 	transport := dnscore.NewTransport()

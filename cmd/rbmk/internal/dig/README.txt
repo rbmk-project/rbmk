@@ -41,6 +41,10 @@ We currently support the following query options:
 
         We use `https://8.8.8.8/dns-query` to resolve the domain name.
 
+    +logs
+        Prints to the stdout structured logs showing network events
+        occurred during the DNS resolution.
+
     +noall
         Suppress printing to the stdout.
 
@@ -62,5 +66,9 @@ For example, the following invocation resolves `www.example.com` IPv6 address
 (i.e., `AAAA` records) using the `1.1.1.1` name server:
 
     $ rbmk dig @1.1.1.1 www.example.com AAAA
+
+To only print structured logs use `+noall +logs`:
+
+    $ rbmk dig www.example.com MX +noall +logs
 
 This command exits with `0` on success and `1` on failure.

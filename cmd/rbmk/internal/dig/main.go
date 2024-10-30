@@ -44,16 +44,16 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 2. create an initial task to be filled according to the command line arguments
 	task := &Task{
-		MeasurementsWriter: os.Stdout,
-		Name:               "",
-		Protocol:           "udp",
-		QueryType:          "A",
-		QueryWriter:        io.Discard,
-		ResponseWriter:     os.Stdout,
-		ShortWriter:        io.Discard,
-		ServerAddr:         "8.8.8.8",
-		ServerPort:         "53",
-		URLPath:            "/dns-query",
+		LogsWriter:     io.Discard,
+		Name:           "",
+		Protocol:       "udp",
+		QueryType:      "A",
+		QueryWriter:    io.Discard,
+		ResponseWriter: os.Stdout,
+		ShortWriter:    io.Discard,
+		ServerAddr:     "8.8.8.8",
+		ServerPort:     "53",
+		URLPath:        "/dns-query",
 	}
 
 	// 3. create command line parser
@@ -106,7 +106,12 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 				task.ServerPort = "443"
 				continue
 
+			case arg == "+logs":
+				task.LogsWriter = os.Stdout
+				continue
+
 			case arg == "+noall":
+				task.LogsWriter = io.Discard
 				task.QueryWriter = io.Discard
 				task.ResponseWriter = io.Discard
 				task.ShortWriter = io.Discard
