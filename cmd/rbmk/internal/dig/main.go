@@ -12,7 +12,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/rbmk-project/rbmk/cmd/internal/cliutils"
+	"github.com/rbmk-project/common/cliutils"
 	"github.com/spf13/pflag"
 )
 

@@ -7,8 +7,8 @@ import (
 	_ "embed"
 	"os"
 
-	"github.com/rbmk-project/rbmk/cmd/internal/climain"
-	"github.com/rbmk-project/rbmk/cmd/internal/cliutils"
+	"github.com/rbmk-project/common/climain"
+	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/cmd/rbmk/internal/dig"
 )
 
