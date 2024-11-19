@@ -165,6 +165,9 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		fmt.Fprintf(os.Stderr, "Run `rbmk dig --help` for usage.\n")
 		return err
 	}
+	if task.Name == "" {
+		task.Name = "www.example.com."
+	}
 
 	// 8. possibly open the log file
 	var filep *os.File

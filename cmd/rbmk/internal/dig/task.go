@@ -8,11 +8,14 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/miekg/dns"
 	"github.com/rbmk-project/dnscore"
+	"github.com/rbmk-project/x/connpool"
+	"github.com/rbmk-project/x/netcore"
 )
 
 // Task runs the `dig` task.
@@ -104,8 +107,30 @@ func (task *Task) Run(ctx context.Context) error {
 	// Set up the JSON logger for writing the measurements
 	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
 
-	// Create a new transport using the logger
+	// Create a connection pool
+	pool := connpool.New()
+	defer pool.Close()
+
+	// Create netcore network instance
+	netx := netcore.NewNetwork()
+	netx.Logger = logger
+	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {
+		conn = netcore.WrapConn(ctx, netx, conn)
+		pool.Add(conn)
+		return conn
+	}
+
+	// Create a new transport using the logger and the network
 	transport := dnscore.NewTransport()
+	transport.DialContext = netx.DialContext
+	transport.DialTLSContext = netx.DialTLSContext
+	transport.HTTPClient = &http.Client{
+		Transport: &http.Transport{
+			DialContext:       netx.DialContext,
+			DialTLSContext:    netx.DialTLSContext,
+			ForceAttemptHTTP2: true,
+		},
+	}
 	transport.Logger = logger
 
 	// TODO(bassosimone): allow to edit the transport somehow
@@ -149,6 +174,9 @@ func (task *Task) Run(ctx context.Context) error {
 	}
 	fmt.Fprintf(task.ResponseWriter, "\n;; Response:\n%s\n\n", response.String())
 	fmt.Fprintf(task.ShortWriter, "%s", task.formatShort(response))
+
+	// Explicitly close the connections in the pool
+	pool.Close()
 
 	// Validate the DNS response
 	if err = dnscore.ValidateResponse(query, response); err != nil {
