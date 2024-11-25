@@ -121,7 +121,7 @@ func (task *Task) Run(ctx context.Context) error {
 	}
 
 	// Create a new transport using the logger and the network
-	transport := dnscore.NewTransport()
+	transport := &dnscore.Transport{}
 	transport.DialContext = netx.DialContext
 	transport.DialTLSContext = netx.DialTLSContext
 	transport.HTTPClient = &http.Client{
