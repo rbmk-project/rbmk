@@ -6,7 +6,7 @@ require (
 	github.com/miekg/dns v1.1.62
 	github.com/rbmk-project/common v0.3.0
 	github.com/rbmk-project/dnscore v0.5.0
-	github.com/rbmk-project/x v0.0.0-20241124141747-75995c71bc38
+	github.com/rbmk-project/x v0.0.0-20241125072405-db22a4ddff57
 	github.com/spf13/pflag v1.0.5
 )
 

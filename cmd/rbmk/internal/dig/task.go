@@ -14,7 +14,7 @@ import (
 
 	"github.com/miekg/dns"
 	"github.com/rbmk-project/dnscore"
-	"github.com/rbmk-project/x/connpool"
+	"github.com/rbmk-project/x/closepool"
 	"github.com/rbmk-project/x/netcore"
 )
 
@@ -107,12 +107,12 @@ func (task *Task) Run(ctx context.Context) error {
 	// Set up the JSON logger for writing the measurements
 	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
 
-	// Create a connection pool
-	pool := connpool.New()
+	// Create a pool containing closers
+	pool := &closepool.Pool{}
 	defer pool.Close()
 
 	// Create netcore network instance
-	netx := netcore.NewNetwork()
+	netx := &netcore.Network{}
 	netx.Logger = logger
 	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {
 		conn = netcore.WrapConn(ctx, netx, conn)
