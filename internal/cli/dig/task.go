@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/miekg/dns"
 	"github.com/rbmk-project/dnscore"
@@ -105,6 +106,10 @@ func (task *Task) newServerAddr(protocol dnscore.Protocol) string {
 
 // Run runs the task and returns an error.
 func (task *Task) Run(ctx context.Context) error {
+	// Setup the overal operation timeout using the context
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
 	// Set up the JSON logger for writing the measurements
 	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
 
@@ -167,7 +172,7 @@ func (task *Task) Run(ctx context.Context) error {
 	fmt.Fprintf(task.QueryWriter, ";; Query:\n%s\n", query.String())
 
 	// Perform the DNS query
-	response, err := transport.Query(context.Background(), server, query)
+	response, err := transport.Query(ctx, server, query)
 	if err != nil {
 		return fmt.Errorf("query round-trip failed: %w", err)
 	}
