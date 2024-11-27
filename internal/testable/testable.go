@@ -1,5 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+/*
+Package testable provides thread-safe singletons for overriding
+fundamental RBMK dependencies in integration tests.
+
+The zero value of each singleton is ready to use and typically
+uses the standard library. Overriding to a different value allows
+to either use mocks or replacements such as the ones implemented
+by the rbmk-project/x/netsim package.
+*/
 package testable
 
 import (
