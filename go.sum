@@ -8,8 +8,8 @@ github.com/rbmk-project/common v0.3.0 h1:g9iX/lg5kvzmgxgr4xbkcCjA2jfazM1zAyLKzLD
 github.com/rbmk-project/common v0.3.0/go.mod h1:uzrFIJl8SEOpgS2pSeBFLUgqc4D1lIcGk/EYuxkFO0U=
 github.com/rbmk-project/dnscore v0.5.0 h1:GaWr4SUJFJzjAgkZ9kJdS0I0BWHPnObD/lZaZzPfB9c=
 github.com/rbmk-project/dnscore v0.5.0/go.mod h1:ENuxqOG44rTIByt412eghWPRvTg/G5RkE6Truv+tapQ=
-github.com/rbmk-project/x v0.0.0-20241127121119-2c8fdce02f3e h1:9klYCRg8zdZcw3jFq4EkaruNL91gxjd2oE/l3owVW6Q=
-github.com/rbmk-project/x v0.0.0-20241127121119-2c8fdce02f3e/go.mod h1:oX91OYzYwrZfFYo91YGcRo2mCa7OthoQuwiXMjKSswE=
+github.com/rbmk-project/x v0.0.0-20241127215443-de4ba98f8496 h1:xV5TOcYSuGfGMUOZJBmpkb8doJg+E4wRWNtGPlnnZ6k=
+github.com/rbmk-project/x v0.0.0-20241127215443-de4ba98f8496/go.mod h1:oX91OYzYwrZfFYo91YGcRo2mCa7OthoQuwiXMjKSswE=
 github.com/rogpeppe/go-internal v1.13.1 h1:KvO1DLK/DRN07sQ1LQKScxyZJuNnedQ5/wKSR38lUII=
 github.com/rogpeppe/go-internal v1.13.1/go.mod h1:uMEvuHeurkdAXX61udpOXGD/AzZDWNMNyH2VO9fmH0o=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=

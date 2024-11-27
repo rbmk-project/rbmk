@@ -9,6 +9,9 @@ import (
 )
 
 func TestQA(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skip test in short mode")
+	}
 	for _, scenario := range qa.Registry {
 		t.Run(scenario.Name, func(t *testing.T) {
 			scenario.Run(t)

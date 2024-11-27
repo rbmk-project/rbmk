@@ -8,6 +8,7 @@ import (
 	"github.com/rbmk-project/rbmk/internal/cli"
 	"github.com/rbmk-project/rbmk/internal/testable"
 	"github.com/rbmk-project/x/netsim"
+	"github.com/rbmk-project/x/netsim/geolink"
 	"github.com/stretchr/testify/require"
 )
 
@@ -59,7 +60,11 @@ func (desc *ScenarioDescriptor) Run(t Driver) {
 	// to dial new network connections, to use the simulated stack
 	// rather than using the host's network stack.
 	stack := scenario.MustNewClientStack()
-	scenario.Attach(stack)
+	linkConfig := &geolink.Config{
+		Delay: 0, // TODO(bassosimone): set delay? make configurable?
+		Log:   true,
+	}
+	scenario.Attach(geolink.Extend(stack, linkConfig))
 	testable.DialContext.Set(stack.DialContext)
 
 	// Create the main RBMK command.
