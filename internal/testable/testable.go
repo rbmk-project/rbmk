@@ -13,6 +13,7 @@ package testable
 
 import (
 	"context"
+	"crypto/x509"
 	"net"
 	"sync"
 )
@@ -46,4 +47,31 @@ func (dcp *DialContextProvider) Get() DialContextFunc {
 	dcp.mu.Lock()
 	defer dcp.mu.Unlock()
 	return dcp.fx
+}
+
+// RootCAsProvider provides a thread-safe way to override the root CAs.
+//
+// The zero value is ready to use and uses the system root CAs.
+type RootCAsProvider struct {
+	pool *x509.CertPool
+	mu   sync.Mutex
+}
+
+// RootCAs is the singleton allowing to override the root CAs.
+//
+// By default, we use the system root CAs.
+var RootCAs = &RootCAsProvider{}
+
+// Set sets the RootCA pool to use.
+func (rcp *RootCAsProvider) Set(pool *x509.CertPool) {
+	rcp.mu.Lock()
+	defer rcp.mu.Unlock()
+	rcp.pool = pool
+}
+
+// Get returns the RootCA pool to use.
+func (rcp *RootCAsProvider) Get() *x509.CertPool {
+	rcp.mu.Lock()
+	defer rcp.mu.Unlock()
+	return rcp.pool
 }

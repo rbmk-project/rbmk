@@ -66,6 +66,7 @@ func (desc *ScenarioDescriptor) Run(t Driver) {
 	}
 	scenario.Attach(geolink.Extend(stack, linkConfig))
 	testable.DialContext.Set(stack.DialContext)
+	testable.RootCAs.Set(scenario.RootCAs())
 
 	// Create the main RBMK command.
 	cmd := cli.NewCommand()

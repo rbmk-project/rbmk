@@ -119,6 +119,7 @@ func (task *Task) Run(ctx context.Context) error {
 
 	// Create netcore network instance
 	netx := &netcore.Network{}
+	netx.RootCAs = testable.RootCAs.Get()
 	netx.DialContextFunc = testable.DialContext.Get()
 	netx.Logger = logger
 	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {
