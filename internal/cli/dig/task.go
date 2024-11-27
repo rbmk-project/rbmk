@@ -14,6 +14,7 @@ import (
 
 	"github.com/miekg/dns"
 	"github.com/rbmk-project/dnscore"
+	"github.com/rbmk-project/rbmk/internal/testable"
 	"github.com/rbmk-project/x/closepool"
 	"github.com/rbmk-project/x/netcore"
 )
@@ -113,6 +114,7 @@ func (task *Task) Run(ctx context.Context) error {
 
 	// Create netcore network instance
 	netx := &netcore.Network{}
+	netx.DialContextFunc = testable.DialContext.Get()
 	netx.Logger = logger
 	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {
 		conn = netcore.WrapConn(ctx, netx, conn)
@@ -132,9 +134,6 @@ func (task *Task) Run(ctx context.Context) error {
 		},
 	}
 	transport.Logger = logger
-
-	// TODO(bassosimone): allow to edit the transport somehow
-	// for testability purposes.
 
 	// Determine the DNS query type
 	queryType, ok := queryTypeMap[task.QueryType]
