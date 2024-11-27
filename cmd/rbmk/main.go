@@ -8,22 +8,11 @@ import (
 	"os"
 
 	"github.com/rbmk-project/common/climain"
-	"github.com/rbmk-project/common/cliutils"
-	"github.com/rbmk-project/rbmk/internal/cli/dig"
+	"github.com/rbmk-project/rbmk/internal/cli"
 )
 
 var mainArgs = os.Args
 
 func main() {
-	climain.Run(newCommand(), os.Exit, mainArgs...)
-}
-
-//go:embed README.txt
-var readme string
-
-// newCommand constructs a new [cliutils.Command] for the `rbmk` command.
-func newCommand() cliutils.Command {
-	return cliutils.NewCommandWithSubCommands("rbmk", readme, map[string]cliutils.Command{
-		"dig": dig.NewCommand(),
-	})
+	climain.Run(cli.NewCommand(), os.Exit, mainArgs...)
 }
