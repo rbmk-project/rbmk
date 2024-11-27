@@ -9,7 +9,7 @@ import (
 
 	"github.com/rbmk-project/common/climain"
 	"github.com/rbmk-project/common/cliutils"
-	"github.com/rbmk-project/rbmk/cmd/rbmk/internal/dig"
+	"github.com/rbmk-project/rbmk/internal/cli/dig"
 )
 
 var mainArgs = os.Args
