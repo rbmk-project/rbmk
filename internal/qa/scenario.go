@@ -122,7 +122,7 @@ func (desc *ScenarioDescriptor) Run(t Driver) io.Reader {
 	//
 	// 2. Wait for the copying goroutine to finish
 	//
-	// 3. Read the collected logs
+	// 3. Return the logs buffer
 	wpipe.Close()
 	<-copyDone
 	return &stdoutBuffer

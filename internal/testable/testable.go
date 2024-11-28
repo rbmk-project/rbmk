@@ -91,7 +91,7 @@ type StdoutProvider struct {
 // By default, we use the standard library [os.Stdout].
 var Stdout = &StdoutProvider{}
 
-// Set sets the stdout to use. Settings to `nil` implicitly restores
+// Set sets the stdout to use. Setting to `nil` implicitly restores
 // using [os.Stdout] as the default stdout implementation.
 func (sp *StdoutProvider) Set(w io.Writer) {
 	sp.mu.Lock()
