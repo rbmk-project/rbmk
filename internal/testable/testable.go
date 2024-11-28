@@ -14,7 +14,9 @@ package testable
 import (
 	"context"
 	"crypto/x509"
+	"io"
 	"net"
+	"os"
 	"sync"
 )
 
@@ -74,4 +76,36 @@ func (rcp *RootCAsProvider) Get() *x509.CertPool {
 	rcp.mu.Lock()
 	defer rcp.mu.Unlock()
 	return rcp.pool
+}
+
+// StdoutProvider provides a thread-safe way to override the stdout.
+//
+// The zero value is ready to use and uses [os.Stdout].
+type StdoutProvider struct {
+	w  io.Writer
+	mu sync.Mutex
+}
+
+// Stdout is the singleton allowing to override the stdout begin used.
+//
+// By default, we use the standard library [os.Stdout].
+var Stdout = &StdoutProvider{}
+
+// Set sets the stdout to use. Settings to `nil` implicitly restores
+// using [os.Stdout] as the default stdout implementation.
+func (sp *StdoutProvider) Set(w io.Writer) {
+	sp.mu.Lock()
+	defer sp.mu.Unlock()
+	sp.w = w
+}
+
+// Get returns the stdout to use.
+func (sp *StdoutProvider) Get() io.Writer {
+	sp.mu.Lock()
+	defer sp.mu.Unlock()
+	w := sp.w
+	if w == nil {
+		w = os.Stdout
+	}
+	return w
 }
