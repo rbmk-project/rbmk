@@ -95,10 +95,10 @@ type Event struct {
 	// DNS-specific fields
 	//
 
-	// RawQuery is the raw DNS query message encoded as base64.
+	// RawQuery contains the raw DNS query message.
 	RawQuery []byte `json:"rawQuery,omitempty"`
 
-	// RawResponse is the raw DNS response message encoded as base64.
+	// RawResponse contains the raw DNS response message.
 	RawResponse []byte `json:"rawResponse,omitempty"`
 
 	//
