@@ -3,8 +3,10 @@
 package qa
 
 import (
+	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 
 	"github.com/rbmk-project/rbmk/internal/cli"
@@ -47,6 +49,10 @@ type ScenarioDescriptor struct {
 	// ExpectedErr is the error we expect from running
 	// the command. If nil, we expect the command to succeed.
 	ExpectedErr error
+
+	// ExpectedSeq contains the sequence of events that we
+	// expect in the resulting structured logs.
+	ExpectedSeq []ExpectedEvent
 }
 
 // Run runs the given [*ScenarioDescriptor] using the given [Driver] and
@@ -126,4 +132,74 @@ func (desc *ScenarioDescriptor) Run(t Driver) io.Reader {
 	wpipe.Close()
 	<-copyDone
 	return &stdoutBuffer
+}
+
+// VerifyEvents checks that the emitted events match expectations.
+//
+// The matching algorithm handles both exact matches and sequences
+// of non-deterministic events (e.g., reads/writes) that may appear
+// zero or more times in the actual event stream.
+func (desc *ScenarioDescriptor) VerifyEvents(t Driver, r io.Reader) {
+	// Implementation note: the algorithm uses two pointers:
+	//
+	// - i: points to current expected event/pattern
+	//
+	// - j: points to current actual event
+	//
+	// For each iteration, we either:
+	//
+	// 1. Consume an actual event that matches a pattern (j++)
+	//
+	// 2. Skip a pattern that doesn't match current event (i++)
+	//
+	// 3. Compare exact events and advance both (i++, j++)
+	//
+	// This allows us to verify the core measurement sequence while
+	// being flexible about the number and timing of I/O operations.
+
+	// Build the list of events to verify
+	var evs []*Event
+	sx := bufio.NewScanner(r)
+	for sx.Scan() {
+		var got Event
+		err := json.Unmarshal(sx.Bytes(), &got)
+		require.NoError(t, err, "failed to parse event")
+		evs = append(evs, &got)
+	}
+	require.NoError(t, sx.Err(), "failed to scan events")
+
+	// Loop until we have events or expectations to compare
+	for i, j := 0, 0; i < len(desc.ExpectedSeq) && j < len(evs); {
+		// Obtain the current expectation and event to compare
+		expect := &desc.ExpectedSeq[i]
+		got := evs[j]
+
+		switch {
+		// Case 1: consume event that matches the pattern
+		case expect.Pattern&MatchAnyRead != 0 && got.Msg == "readStart":
+			fallthrough
+		case expect.Pattern&MatchAnyRead != 0 && got.Msg == "readDone":
+			fallthrough
+		case expect.Pattern&MatchAnyWrite != 0 && got.Msg == "writeStart":
+			fallthrough
+		case expect.Pattern&MatchAnyWrite != 0 && got.Msg == "writeDone":
+			fallthrough
+		case expect.Pattern&MatchAnyClose != 0 && got.Msg == "closeStart":
+			fallthrough
+		case expect.Pattern&MatchAnyClose != 0 && got.Msg == "closeDone":
+			j++
+			continue
+
+		// Case 2: skip pattern that does not match current event
+		case expect.Pattern != 0:
+			i++
+			continue
+
+		// Case 3: compare exact events and advance both
+		default:
+			i, j = i+1, j+1
+			t.Logf("comparing at i=%d, j=%d: %+v to %+v", i, j, expect, got)
+			expect.VerifyEqual(t, got)
+		}
+	}
 }

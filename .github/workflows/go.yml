@@ -1,0 +1,35 @@
+# This workflow builds and tests a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    strategy:
+      matrix:
+        goversion:
+          # The first entry of the matrix should be the
+          # version indicated inside the `go.mod`
+          - "1.23"
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: "${{ matrix.goversion }}"
+
+    - name: Build
+      run: go build ./...
+
+    - name: Test
+      run: go test -race -cover ./...
