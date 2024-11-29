@@ -90,8 +90,9 @@ func (task *Task) Run(ctx context.Context) error {
 	fmt.Fprintf(task.VerboseOutput, "> %s %s HTTP/%d.%d\n",
 		req.Method, req.URL.RequestURI(),
 		req.ProtoMajor, req.ProtoMinor)
+	fmt.Fprintf(task.VerboseOutput, "> Host: %s\n", req.Host)
 	task.printHeaders(req.Header, ">")
-	fmt.Fprintf(task.VerboseOutput, "\n")
+	fmt.Fprintf(task.VerboseOutput, ">\n")
 
 	// Perform the request
 	resp, err := client.Do(req)
@@ -105,7 +106,7 @@ func (task *Task) Run(ctx context.Context) error {
 		resp.ProtoMajor, resp.ProtoMinor,
 		resp.StatusCode, resp.Status)
 	task.printHeaders(resp.Header, "<")
-	fmt.Fprintf(task.VerboseOutput, "\n")
+	fmt.Fprintf(task.VerboseOutput, "<\n")
 
 	// Copy the response body
 	if _, err := io.Copy(task.Output, resp.Body); err != nil {
