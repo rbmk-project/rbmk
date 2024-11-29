@@ -37,9 +37,6 @@ type ExpectedEvent struct {
 	// this field is ignored and the Pattern is used instead.
 	Msg string
 
-	// Pattern indicates if this expectation matches zero or more
-	// events of specific types (e.g., reads, writes, closes).
-	//
 	// When Pattern is non-zero, this [*ExpectedEvent] acts like a
 	// wildcard that consumes all matching events until the next
 	// non-Pattern expectation is found.
