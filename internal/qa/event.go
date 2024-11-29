@@ -81,7 +81,7 @@ type Event struct {
 	// Failure
 	//
 
-	// Err is the Go error that occurred.
+	// Err is the Go error that occurred or "" on success.
 	Err string `json:"err,omitempty"`
 
 	// ErrClass is the error classification to a fixed set
