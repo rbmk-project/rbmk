@@ -7,6 +7,7 @@ import (
 	_ "embed"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/rbmk/internal/cli/curl"
 	"github.com/rbmk-project/rbmk/internal/cli/dig"
 )
 
@@ -16,6 +17,7 @@ var readme string
 // NewCommand constructs a new [cliutils.Command] for the `rbmk` command.
 func NewCommand() cliutils.Command {
 	return cliutils.NewCommandWithSubCommands("rbmk", readme, map[string]cliutils.Command{
-		"dig": dig.NewCommand(),
+		"curl": curl.NewCommand(),
+		"dig":  dig.NewCommand(),
 	})
 }
