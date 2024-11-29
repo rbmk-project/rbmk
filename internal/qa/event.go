@@ -95,16 +95,26 @@ type Event struct {
 	// DNS-specific fields
 	//
 
-	// RawQuery is the raw DNS query message.
-	RawQuery string `json:"rawQuery,omitempty"`
+	// RawQuery contains the raw DNS query message.
+	RawQuery []byte `json:"rawQuery,omitempty"`
 
-	// RawResponse is the raw DNS response message.
-	RawResponse string `json:"rawResponse,omitempty"`
+	// RawResponse contains the raw DNS response message.
+	RawResponse []byte `json:"rawResponse,omitempty"`
 
-	// ServerAddr is the DNS server address.
+	//
+	// Server-specific fields
+	//
+
+	// ServerAddr is the server address.
+	//
+	// This field is currently used for DNS but may be extended
+	// to other applicative protocols in the future.
 	ServerAddr string `json:"serverAddr,omitempty"`
 
-	// ServerProtocol is the DNS server protocol.
+	// ServerProtocol is the server protocol.
+	//
+	// This field is currently used for DNS but may be extended
+	// to other applicative protocols in the future.
 	ServerProtocol string `json:"serverProtocol,omitempty"`
 
 	//
