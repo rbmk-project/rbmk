@@ -46,7 +46,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	// through the `testable` package.
 	//
 	// On the contrary, we care much less about testing logging
-	// the query and response, or other error and output messages,
+	// the request and response, or other error and output messages,
 	// so we just use `os.Stdout` and `os.Stderr` directly.
 	testableStdout := testable.Stdout.Get()
 
