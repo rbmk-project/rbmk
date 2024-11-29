@@ -88,18 +88,27 @@ type Event struct {
 	// I/O operations
 	//
 
-	// Count is the number of bytes read or written.
-	Count int64 `json:"count,omitempty"`
+	// IOBufferSize is the size of the I/O buffer.
+	IOBufferSize int64 `json:"ioBufferSize,omitempty"`
+
+	// IOBytesCount is the number of bytes read or written.
+	IOBytesCount int64 `json:"ioBytesCount,omitempty"`
 
 	//
 	// DNS-specific fields
 	//
 
-	// RawQuery contains the raw DNS query message.
-	RawQuery []byte `json:"rawQuery,omitempty"`
+	// DNSRawQuery is the raw DNS query.
+	DNSRawQuery []byte `json:"dnsRawQuery,omitempty"`
 
-	// RawResponse contains the raw DNS response message.
-	RawResponse []byte `json:"rawResponse,omitempty"`
+	// DNSRawResponse is the raw DNS response.
+	DNSRawResponse []byte `json:"dnsRawResponse,omitempty"`
+
+	// DNSLookupDomain is the domain passed to LookupHost.
+	DNSLookupDomain string `json:"dnsLookupDomain,omitempty"`
+
+	// DNSResolvedAddrs is the list of resolved addresses.
+	DNSResolvedAddrs []string `json:"dnsResolvedAddrs,omitempty"`
 
 	//
 	// Server-specific fields
@@ -150,7 +159,8 @@ func (ev *Event) VerifyReadWriteClose(t Driver) {
 		ev.verifyEndpoint(t, ev.LocalAddr)
 		ev.verifyEndpoint(t, ev.RemoteAddr)
 		ev.verifyErrEmpty(t)
-		ev.verifyCountPositive(t)
+		ev.verifyIOBufferSizePositive(t)
+		ev.verifyIOBytesCountZero(t)
 
 	case "closeStart":
 		ev.verifyStartEventTime(t)
@@ -158,14 +168,16 @@ func (ev *Event) VerifyReadWriteClose(t Driver) {
 		ev.verifyEndpoint(t, ev.LocalAddr)
 		ev.verifyEndpoint(t, ev.RemoteAddr)
 		ev.verifyErrEmpty(t)
-		ev.verifyCountZero(t)
+		ev.verifyIOBufferSizeZero(t)
+		ev.verifyIOBytesCountZero(t)
 
 	case "readDone", "writeDone":
 		ev.verifyDoneEventTime(t)
 		ev.verifyProtocol(t)
 		ev.verifyEndpoint(t, ev.LocalAddr)
 		ev.verifyEndpoint(t, ev.RemoteAddr)
-		ev.verifyCountOrErr(t)
+		ev.verifyIOBufferSizeZero(t)
+		ev.verifyIOBytesCountOrErr(t)
 
 	case "closeDone":
 		ev.verifyDoneEventTime(t)
@@ -173,14 +185,17 @@ func (ev *Event) VerifyReadWriteClose(t Driver) {
 		ev.verifyEndpoint(t, ev.LocalAddr)
 		ev.verifyEndpoint(t, ev.RemoteAddr)
 		// any value of error is okay
-		ev.verifyCountZero(t)
+		ev.verifyIOBufferSizeZero(t)
+		ev.verifyIOBytesCountZero(t)
 
 	default:
 		require.Fail(t, "unexpected message %q", ev.Msg)
 	}
 
-	ev.verifyRawQueryEmpty(t)
-	ev.verifyRawResponseEmpty(t)
+	ev.verifyDNSRawQueryEmpty(t)
+	ev.verifyDNSRawResponseEmpty(t)
+	ev.verifyDNSLookupDomainEmpty(t)
+	ev.verifyDNSResolverAddrsEmpty(t)
 	ev.verifyServerAddrEmpty(t)
 	ev.verifyServerProtocolEmpty(t)
 	ev.verifyTLSServerNameEmpty(t)
@@ -221,24 +236,36 @@ func (ev *Event) verifyErrEmpty(t Driver) {
 	require.Empty(t, ev.Err, "expected empty error field")
 }
 
-func (ev *Event) verifyCountPositive(t Driver) {
-	require.True(t, ev.Count > 0, "expected positive count field")
+func (ev *Event) verifyIOBufferSizePositive(t Driver) {
+	require.True(t, ev.IOBufferSize > 0, "expected positive ioBufferSize field")
 }
 
-func (ev *Event) verifyCountZero(t Driver) {
-	require.Zero(t, ev.Count, "expected zero count field")
+func (ev *Event) verifyIOBufferSizeZero(t Driver) {
+	require.Zero(t, ev.IOBufferSize, "expected zero ioBufferSize field")
 }
 
-func (ev *Event) verifyCountOrErr(t Driver) {
-	require.True(t, ev.Count > 0 || ev.Err != "", "expected count or error")
+func (ev *Event) verifyIOBytesCountZero(t Driver) {
+	require.Zero(t, ev.IOBytesCount, "expected zero ioBytesCount field")
 }
 
-func (ev *Event) verifyRawQueryEmpty(t Driver) {
-	require.Empty(t, ev.RawQuery, "expected empty rawQuery field")
+func (ev *Event) verifyIOBytesCountOrErr(t Driver) {
+	require.True(t, ev.IOBytesCount > 0 || ev.Err != "", "expected ioBytesCount > 0 or err != \"\"")
 }
 
-func (ev *Event) verifyRawResponseEmpty(t Driver) {
-	require.Empty(t, ev.RawResponse, "expected empty rawResponse field")
+func (ev *Event) verifyDNSRawQueryEmpty(t Driver) {
+	require.Empty(t, ev.DNSRawQuery, "expected empty dnsRawQuery field")
+}
+
+func (ev *Event) verifyDNSRawResponseEmpty(t Driver) {
+	require.Empty(t, ev.DNSRawResponse, "expected empty dnsRawResponse field")
+}
+
+func (ev *Event) verifyDNSLookupDomainEmpty(t Driver) {
+	require.Empty(t, ev.DNSLookupDomain, "expected empty dnsLookupDomain field")
+}
+
+func (ev *Event) verifyDNSResolverAddrsEmpty(t Driver) {
+	require.Empty(t, ev.DNSResolvedAddrs, "expected empty dnsResolvedAddrs field")
 }
 
 func (ev *Event) verifyServerAddrEmpty(t Driver) {
