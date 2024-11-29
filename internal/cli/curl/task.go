@@ -111,6 +111,9 @@ func (task *Task) Run(ctx context.Context) error {
 	if _, err := io.Copy(task.Output, resp.Body); err != nil {
 		return fmt.Errorf("reading or writing response body: %w", err)
 	}
+
+	// Explicitly close the connections in the pool
+	pool.Close()
 	return nil
 }
 
