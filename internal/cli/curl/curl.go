@@ -40,6 +40,14 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		return cmd.Help(argv...)
 	}
 
+	// Implementation note: we care about testing whether we
+	// produce the correct logs in several simulated conditions,
+	// therefore, the `stdout` used by logs is overridable
+	// through the `testable` package.
+	//
+	// On the contrary, we care much less about testing logging
+	// the query and response, or other error and output messages,
+	// so we just use `os.Stdout` and `os.Stderr` directly.
 	testableStdout := testable.Stdout.Get()
 
 	// 2. create initial task with defaults
