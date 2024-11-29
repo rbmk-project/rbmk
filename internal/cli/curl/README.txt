@@ -43,7 +43,7 @@ To save structured logs to `logfile.jsonl` use `--logs`:
 
     $ rbmk curl --logs logfile.jsonl https://example.com/
 
-To save the response body to a `output.txt` use `-o`:
+To save the response body to `output.txt` use `-o`:
 
     $ rbmk curl -o output.txt https://example.com/
 
