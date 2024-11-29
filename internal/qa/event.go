@@ -18,8 +18,6 @@ const (
 	// depending on background goroutine scheduling.
 	MatchAnyRead = MatchPattern(1 << iota)
 
-	// MatchAnyWrite indicates that an [*ExpectedEvent] matches
-	// zero or more writeStart or writeDone events.
 	// MatchAnyWrite matches zero or more writeStart/writeDone events.
 	//
 	// Like reads, the number of write operations might vary depending
