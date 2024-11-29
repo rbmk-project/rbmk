@@ -16,6 +16,14 @@ var Registry = []ScenarioDescriptor{
 			"rbmk", "dig", "+logs", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
+		ExpectedSeq: []ExpectedEvent{
+			{Msg: "connectStart"},
+			{Msg: "connectDone"},
+			{Msg: "dnsQuery"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "dnsResponse"},
+			{Pattern: MatchAnyClose},
+		},
 	},
 
 	{
@@ -27,6 +35,14 @@ var Registry = []ScenarioDescriptor{
 			"rbmk", "dig", "+logs", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
+		ExpectedSeq: []ExpectedEvent{
+			{Msg: "connectStart"},
+			{Msg: "connectDone"},
+			{Msg: "dnsQuery"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "dnsResponse"},
+			{Pattern: MatchAnyClose},
+		},
 	},
 
 	//
@@ -40,6 +56,14 @@ var Registry = []ScenarioDescriptor{
 			"rbmk", "dig", "+logs", "+tcp", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
+		ExpectedSeq: []ExpectedEvent{
+			{Msg: "connectStart"},
+			{Msg: "connectDone"},
+			{Msg: "dnsQuery"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "dnsResponse"},
+			{Pattern: MatchAnyClose},
+		},
 	},
 
 	//
@@ -53,6 +77,18 @@ var Registry = []ScenarioDescriptor{
 			"rbmk", "dig", "+logs", "+tls", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
+		ExpectedSeq: []ExpectedEvent{
+			{Msg: "connectStart"},
+			{Msg: "connectDone"},
+			{Msg: "tlsHandshakeStart"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "tlsHandshakeDone"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "dnsQuery"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "dnsResponse"},
+			{Pattern: MatchAnyRead | MatchAnyWrite | MatchAnyClose},
+		},
 	},
 
 	//
