@@ -102,5 +102,17 @@ var Registry = []ScenarioDescriptor{
 			"rbmk", "dig", "+logs", "+https", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
+		ExpectedSeq: []ExpectedEvent{
+			{Msg: "dnsQuery"},
+			{Msg: "connectStart"},
+			{Msg: "connectDone"},
+			{Msg: "tlsHandshakeStart"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "tlsHandshakeDone"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "dnsResponse"},
+			{Pattern: MatchAnyRead | MatchAnyWrite | MatchAnyClose},
+		},
 	},
 }
