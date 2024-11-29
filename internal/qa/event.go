@@ -85,7 +85,7 @@ type Event struct {
 	Err string `json:"err,omitempty"`
 
 	// ErrClass is the error classification to a fixed set
-	// or enumerated strings or "" on success.
+	// of enumerated strings or "" on success.
 	ErrClass string `json:"errClass,omitempty"`
 
 	//
