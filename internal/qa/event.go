@@ -84,6 +84,10 @@ type Event struct {
 	// Err is the Go error that occurred.
 	Err string `json:"err,omitempty"`
 
+	// ErrClass is the error classification to a fixed set
+	// or enumerated strings or "" on success.
+	ErrClass string `json:"errClass,omitempty"`
+
 	//
 	// I/O operations
 	//
@@ -159,6 +163,7 @@ func (ev *Event) VerifyReadWriteClose(t Driver) {
 		ev.verifyEndpoint(t, ev.LocalAddr)
 		ev.verifyEndpoint(t, ev.RemoteAddr)
 		ev.verifyErrEmpty(t)
+		ev.verifyErrClassEmpty(t)
 		ev.verifyIOBufferSizePositive(t)
 		ev.verifyIOBytesCountZero(t)
 
@@ -168,6 +173,7 @@ func (ev *Event) VerifyReadWriteClose(t Driver) {
 		ev.verifyEndpoint(t, ev.LocalAddr)
 		ev.verifyEndpoint(t, ev.RemoteAddr)
 		ev.verifyErrEmpty(t)
+		ev.verifyErrClassEmpty(t)
 		ev.verifyIOBufferSizeZero(t)
 		ev.verifyIOBytesCountZero(t)
 
@@ -178,6 +184,7 @@ func (ev *Event) VerifyReadWriteClose(t Driver) {
 		ev.verifyEndpoint(t, ev.RemoteAddr)
 		ev.verifyIOBufferSizeZero(t)
 		ev.verifyIOBytesCountOrErr(t)
+		ev.verifyIOBytesCountOrErrClass(t)
 
 	case "closeDone":
 		ev.verifyDoneEventTime(t)
@@ -236,6 +243,10 @@ func (ev *Event) verifyErrEmpty(t Driver) {
 	require.Empty(t, ev.Err, "expected empty error field")
 }
 
+func (ev *Event) verifyErrClassEmpty(t Driver) {
+	require.Empty(t, ev.ErrClass, "expected empty errClass field")
+}
+
 func (ev *Event) verifyIOBufferSizePositive(t Driver) {
 	require.True(t, ev.IOBufferSize > 0, "expected positive ioBufferSize field")
 }
@@ -250,6 +261,10 @@ func (ev *Event) verifyIOBytesCountZero(t Driver) {
 
 func (ev *Event) verifyIOBytesCountOrErr(t Driver) {
 	require.True(t, ev.IOBytesCount > 0 || ev.Err != "", "expected ioBytesCount > 0 or err != \"\"")
+}
+
+func (ev *Event) verifyIOBytesCountOrErrClass(t Driver) {
+	require.True(t, ev.IOBytesCount > 0 || ev.ErrClass != "", "expected ioBytesCount > 0 or errClass != \"\"")
 }
 
 func (ev *Event) verifyDNSRawQueryEmpty(t Driver) {
