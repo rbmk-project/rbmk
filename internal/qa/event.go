@@ -13,6 +13,7 @@ type MatchPattern int
 
 const (
 	// MatchAnyRead matches zero or more readStart/readDone events.
+	//
 	// This is useful because the number of read operations might vary
 	// depending on background goroutine scheduling.
 	MatchAnyRead = MatchPattern(1 << iota)
