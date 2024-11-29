@@ -191,7 +191,8 @@ func (ev *Event) VerifyReadWriteClose(t Driver) {
 		ev.verifyProtocol(t)
 		ev.verifyEndpoint(t, ev.LocalAddr)
 		ev.verifyEndpoint(t, ev.RemoteAddr)
-		// any value of error is okay
+		// any value of err is okay
+		// any value of errClass is okay
 		ev.verifyIOBufferSizeZero(t)
 		ev.verifyIOBytesCountZero(t)
 
