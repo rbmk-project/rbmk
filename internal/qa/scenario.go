@@ -157,7 +157,7 @@ func (desc *ScenarioDescriptor) VerifyEvents(t Driver, r io.Reader) {
 	// This allows us to verify the core measurement sequence while
 	// being flexible about the number and timing of I/O operations.
 
-	// Build the list of evs to verify
+	// Build the list of events to verify
 	var evs []*Event
 	sx := bufio.NewScanner(r)
 	for sx.Scan() {
