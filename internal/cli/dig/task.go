@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/miekg/dns"
+	"github.com/rbmk-project/common/closepool"
 	"github.com/rbmk-project/dnscore"
 	"github.com/rbmk-project/rbmk/internal/testable"
-	"github.com/rbmk-project/x/closepool"
 	"github.com/rbmk-project/x/netcore"
 )
 

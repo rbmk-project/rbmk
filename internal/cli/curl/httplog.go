@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/rbmk-project/x/errclass"
+	"github.com/rbmk-project/common/errclass"
 )
 
 // TODO(bassosimone): we should probably share this
