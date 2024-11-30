@@ -2,7 +2,7 @@
 usage: rbmk COMMAND [args...]
 
 RBMK (Really Basic Measurement Kit) is a command-line utility
-to facilitate network epxloration and measurements.
+to facilitate network exploration and measurements.
 
 We support these commands:
 
