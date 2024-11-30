@@ -5,85 +5,55 @@ package curl
 import (
 	"log/slog"
 	"net/http"
+	"net/netip"
 	"time"
 
-	"github.com/rbmk-project/common/errclass"
+	"github.com/rbmk-project/common/httpconntrace"
+	"github.com/rbmk-project/common/httpslog"
 )
 
-// TODO(bassosimone): we should probably share this
-// functionality with the `dig` task as well.
-
-// httpLogTransport is an http.RoundTripper that logs.
-type httpLogTransport struct {
-	// Logger is the optional Logger to use.
-	Logger *slog.Logger
-
-	// RoundTripper is the mandatory http.RoundTripper to use.
-	RoundTripper http.RoundTripper
-
-	// TimeNow is the optional time function to use.
-	TimeNow func() time.Time
-}
-
-// RoundTrip implements [http.RoundTripper].
-func (txp *httpLogTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	// TODO(bassosimone): adapt support for obtaining the
-	// connection information from the dnscore package
-
-	// possibly emit a structured log event before the round trip
-	t0 := txp.timeNow()
-	if txp.Logger != nil {
-		txp.Logger.InfoContext(
-			req.Context(),
-			"httpRoundTripStart",
-			slog.String("httpMethod", req.Method),
-			slog.String("httpUrl", req.URL.String()),
-			slog.Any("httpRequestHeaders", req.Header),
-			slog.Time("t", t0),
-		)
-	}
-
-	// perform the actual round trip
-	resp, err := txp.RoundTripper.RoundTrip(req)
-	t := txp.timeNow()
-
-	// handle the case of failure
-	if err != nil {
-		if txp.Logger != nil {
-			txp.Logger.InfoContext(
-				req.Context(),
-				"httpRoundTripDone",
-				slog.String("errClass", errclass.New(err)),
-				slog.Any("err", err),
-				slog.String("httpMethod", req.Method),
-				slog.String("httpUrl", req.URL.String()),
-				slog.Any("httpRequestHeaders", req.Header),
-				slog.Time("t0", t0),
-				slog.Time("t", t),
-			)
-		}
-		return nil, err
-	}
-
-	// handle the case of success
-	txp.Logger.InfoContext(
-		req.Context(),
-		"httpRoundTripDone",
-		slog.String("httpMethod", req.Method),
-		slog.String("httpUrl", req.URL.String()),
-		slog.Any("httpRequestHeaders", req.Header),
-		slog.Int("httpResponseStatusCode", resp.StatusCode),
-		slog.Any("httpResponseHeaders", resp.Header),
-		slog.Time("t0", t0),
-		slog.Time("t", t),
+// httpDoAndLog performs the request and emits structured logs.
+//
+// We *assume* that the client does not follow redirects, which means
+// the connection we observe is the only one being used.
+//
+// Note: the slogger *may* be nil.
+//
+// We use [httpconntrace] to extract the local and remote addresses
+// emitted as part of the structured log events.
+func httpDoAndLog(
+	client *http.Client,
+	slogger *slog.Logger,
+	req *http.Request,
+) (*http.Response, error) {
+	// possibly emit a structured log event before performing the request
+	t0 := time.Now()
+	httpslog.MaybeLogRoundTripStart(
+		slogger,
+		netip.MustParseAddrPort("[::]:0"), // not known yet
+		"tcp",
+		netip.MustParseAddrPort("[::]:0"), // not known yet
+		req,
+		t0,
 	)
-	return resp, nil
-}
 
-// timeNow returns the current time.
-func (txp *httpLogTransport) timeNow() time.Time {
-	if txp.TimeNow != nil {
-		return txp.TimeNow()
-	}
-	return time.Now()
+	// perform the request
+	resp, epnts, err := httpconntrace.Do(client, req)
+
+	// possibly emit a structured log event after performing the request
+	t := time.Now()
+	httpslog.MaybeLogRoundTripDone(
+		slogger,
+		epnts.LocalAddr,
+		"tcp",
+		epnts.RemoteAddr,
+		req,
+		resp,
+		err,
+		t0,
+		t,
+	)
+
+	// Forward the results to the caller.
+	return resp, err
 }

@@ -4,11 +4,11 @@ go 1.23.3
 
 require (
 	github.com/miekg/dns v1.1.62
-	github.com/rbmk-project/common v0.6.0
-	github.com/rbmk-project/dnscore v0.6.0
-	github.com/rbmk-project/x v0.0.0-20241130100337-30adea10ffc5
+	github.com/rbmk-project/common v0.9.0
+	github.com/rbmk-project/dnscore v0.7.0
+	github.com/rbmk-project/x v0.0.0-20241130105031-0e28dad87694
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
