@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/rbmk-project/common/dialonce"
 	"github.com/rbmk-project/dnscore"
 	"github.com/rbmk-project/rbmk/internal/testable"
 	"github.com/rbmk-project/x/closepool"
@@ -46,9 +47,11 @@ func (task *Task) Run(ctx context.Context) error {
 	pool := &closepool.Pool{}
 	defer pool.Close()
 
-	// Create netcore network instance
+	// Create netcore network instance making sure we dial the
+	// endpoint at most once, thus avoiding infinite dialing loops such
+	// as the one occurring with https://avdox.globalvoices.org/.
 	netx := &netcore.Network{}
-	netx.DialContextFunc = testable.DialContext.Get()
+	netx.DialContextFunc = dialonce.Wrap(testable.DialContext.Get())
 	netx.RootCAs = testable.RootCAs.Get()
 	netx.Logger = logger
 	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {
