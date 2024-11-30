@@ -4,7 +4,7 @@ go 1.23.3
 
 require (
 	github.com/miekg/dns v1.1.62
-	github.com/rbmk-project/common v0.4.0
+	github.com/rbmk-project/common v0.5.0
 	github.com/rbmk-project/dnscore v0.6.0
 	github.com/rbmk-project/x v0.0.0-20241129115026-1ae0b6afd0db
 	github.com/spf13/pflag v1.0.5
