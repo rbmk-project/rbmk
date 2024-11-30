@@ -35,6 +35,8 @@ a query for the `A` record type. We support these record types:
 
 If you specify `TYPE` multiple times, we emit a warning and use the last one.
 
+Note that, by default, the query will timeout after five seconds.
+
 We currently support the following command line flags:
 
     -h, --help
