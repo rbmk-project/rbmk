@@ -73,7 +73,7 @@ We currently support the following query options:
         Print a short response rather than the full response.
 
     +short=ip
-        Like `+short`, but only prints the IP address.
+        Like `+short`, but only prints the IP addresses.
 
     +tcp
         Uses DNS-over-TCP. The @server argument is the hostname or IP
