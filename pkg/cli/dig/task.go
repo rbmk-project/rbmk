@@ -50,6 +50,10 @@ type Task struct {
 	// write the full response when we received it.
 	ResponseWriter io.Writer
 
+	// ShortIP is a flag that ensures that `+short=ip` only
+	// prints the IP addresses in the response.
+	ShortIP bool
+
 	// ShortWriter is the MANDATORY [io.Writer] where we should
 	// write the short response when we received it.
 	ShortWriter io.Writer
@@ -209,19 +213,27 @@ func (task *Task) formatShort(response *dns.Msg) string {
 			fmt.Fprintf(&builder, "%s\n", ans.AAAA.String())
 
 		case *dns.CNAME:
-			fmt.Fprintf(&builder, "%s\n", ans.Target)
+			if !task.ShortIP {
+				fmt.Fprintf(&builder, "%s\n", ans.Target)
+			}
 
 		case *dns.HTTPS:
-			value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
-			fmt.Fprintf(&builder, "%s\n", value)
+			if !task.ShortIP {
+				value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
+				fmt.Fprintf(&builder, "%s\n", value)
+			}
 
 		case *dns.MX:
-			value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
-			fmt.Fprintf(&builder, "%s\n", value)
+			if !task.ShortIP {
+				value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
+				fmt.Fprintf(&builder, "%s\n", value)
+			}
 
 		case *dns.NS:
-			value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
-			fmt.Fprintf(&builder, "%s\n", value)
+			if !task.ShortIP {
+				value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
+				fmt.Fprintf(&builder, "%s\n", value)
+			}
 
 		default:
 			// TODO(bassosimone): implement the other answer types
