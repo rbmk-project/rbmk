@@ -69,27 +69,36 @@ func (task *Task) Run(ctx context.Context) error {
 	}
 
 	// Honour the `--resolve` command line flag
-	netx.LookupHostFunc = func(ctx context.Context, domain string) ([]string, error) {
-		if resolved, ok := task.ResolveMap[domain]; ok {
-			return []string{resolved}, nil
+	if len(task.ResolveMap) > 0 {
+		netx.LookupHostFunc = func(ctx context.Context, domain string) ([]string, error) {
+			if resolved, ok := task.ResolveMap[domain]; ok {
+				return []string{resolved}, nil
+			}
+			return nil, dnscore.ErrNoName
 		}
-		return nil, dnscore.ErrNoName
 	}
 
 	// Create the HTTP client to use and make sure we're using
 	// an overall operation timeout for the transfer
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			// Note: [httpDoAndLog] assumes we don't follow redirects. Changing
+			// this would break connection tracking and logging.
+			//
+			// While this may seem technical debt, we'll most likely want to
+			// perform requests one at a time, in the future, when we will be
+			// following redirects, to observe interim bodies and generate
+			// additional structured logs pertaining to the redirects.
+			//
+			// Also, for measuring, the main use case is that of supplying
+			// this command with the address to use via `--resolve`.
 			return http.ErrUseLastResponse
 		},
 		Timeout: task.MaxTime, // ensure the overall operation is bounded
-		Transport: &httpLogTransport{
-			Logger: logger,
-			RoundTripper: &http.Transport{
-				DialContext:       netx.DialContext,
-				DialTLSContext:    netx.DialTLSContext,
-				ForceAttemptHTTP2: true,
-			},
+		Transport: &http.Transport{
+			DialContext:       netx.DialContext,
+			DialTLSContext:    netx.DialTLSContext,
+			ForceAttemptHTTP2: true,
 		},
 	}
 
@@ -108,7 +117,7 @@ func (task *Task) Run(ctx context.Context) error {
 	fmt.Fprintf(task.VerboseOutput, ">\n")
 
 	// Perform the request
-	resp, err := client.Do(req)
+	resp, err := httpDoAndLog(client, logger, req)
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
