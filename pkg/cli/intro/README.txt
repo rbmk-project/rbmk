@@ -11,14 +11,17 @@ Basic Examples:
     $ rbmk dig +short example.com
     93.184.215.14
 
-2. HTTP fetch using a specific IP:
+2. HTTP fetch:
+    $ rbmk curl https://example.com/
+
+3. HTTP fetch using a specific IP:
     $ rbmk curl --resolve example.com:443:93.184.215.14 https://example.com/
 
-3. Combining commands to measure DNS and HTTP separately:
+4. Combining commands to measure DNS and HTTP separately:
     $ IP=$(rbmk dig +short example.com|head -n1)
     $ rbmk curl --resolve example.com:443:$IP https://example.com/
 
-4. Collecting measurement data:
+5. Collecting measurement data:
     $ rbmk dig --logs dns.jsonl example.com
     $ rbmk curl --logs http.jsonl https://example.com/
 
