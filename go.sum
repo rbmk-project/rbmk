@@ -6,8 +6,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rbmk-project/common v0.9.0 h1:pbGTkGRBmFE065yM5hBLsEOY68L+DJVGGkeEUCc+lCU=
 github.com/rbmk-project/common v0.9.0/go.mod h1:BsIum8cGFuNxktk3yWVGlr2B18wtyzn3evb3nhvGyig=
-github.com/rbmk-project/dnscore v0.7.0 h1:LiCW5kNMjlCHmE+RCFd5P0vJVKDh7OtHff5cTYNHHY4=
-github.com/rbmk-project/dnscore v0.7.0/go.mod h1:AHvX98NAFpV+TGpBdvWAkZuIiRCdepPT/Y7Ddk5KRew=
+github.com/rbmk-project/dnscore v0.8.0 h1:P5qyH1ZSwafdp4b2zbts2DwwuxZvj2BtnwOe9XhJ0bg=
+github.com/rbmk-project/dnscore v0.8.0/go.mod h1:m56W6xysS/Fru7v/6XaSEc6TNZxKxSO6YmnMIIeCP04=
 github.com/rbmk-project/x v0.0.0-20241130105031-0e28dad87694 h1:DvT/Ln2v6qBIW9zVpwhzXldEi+RcRT8qUZCyr3GWZwc=
 github.com/rbmk-project/x v0.0.0-20241130105031-0e28dad87694/go.mod h1:mGhndTpPLX0s8oCATB+sWIpc59yw2y1/q1mmjJ+gvgc=
 github.com/rogpeppe/go-internal v1.13.1 h1:KvO1DLK/DRN07sQ1LQKScxyZJuNnedQ5/wKSR38lUII=
