@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/rbmk-project/common/climain"
-	"github.com/rbmk-project/rbmk/internal/cli"
+	"github.com/rbmk-project/rbmk/pkg/cli"
 )
 
 var mainArgs = os.Args

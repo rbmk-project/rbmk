@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/rbmk-project/rbmk/internal/cli"
 	"github.com/rbmk-project/rbmk/internal/testable"
+	"github.com/rbmk-project/rbmk/pkg/cli"
 	"github.com/rbmk-project/x/netsim"
 	"github.com/rbmk-project/x/netsim/geolink"
 	"github.com/stretchr/testify/require"
