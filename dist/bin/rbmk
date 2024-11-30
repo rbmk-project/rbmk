@@ -1,0 +1,50 @@
+#!/bin/bash
+set -euo pipefail
+
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+scriptdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+usage() {
+	cat <<\EOF
+
+usage: rbmk COMMAND [args...]
+
+RBMK (Really Basic Measurement Kit) is a command-line utility
+to facilitate network exploration and measurements.
+
+Measurement commands:
+
+    check-https  Checks domains accessibility using HTTPS.
+
+Exploration commands:
+
+    curl         Emulates a subset of the `curl(1)` command.
+    dig          Emulates a subset of the `dig(1)` command.
+
+Run `rbmk COMMAND --help` for more information about `COMMAND`.
+
+EOF
+}
+
+case "${1:-}" in
+"curl" | "dig")
+	exec "$scriptdir/../libexec/rbmk.real" "$@"
+	;;
+
+"check-https")
+    shift # remove the first argument because the script expects that
+	exec "$scriptdir/../libexec/rbmk-check-https" "$@"
+	;;
+
+"" | "-h" | "--help")
+	usage
+	exit 0
+	;;
+
+*)
+	echo "rbmk: unknown subcommand: $1" 1>&2
+	usage 1>&2
+	exit 1
+	;;
+esac
