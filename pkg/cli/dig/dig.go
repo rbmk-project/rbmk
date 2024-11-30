@@ -130,9 +130,10 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 				task.QueryWriter = os.Stdout
 				continue
 
-			case arg == "+short":
+			case arg == "+short" || arg == "+short=ip":
 				task.ResponseWriter = io.Discard
 				task.ShortWriter = os.Stdout
+				task.ShortIP = arg == "+short=ip"
 				continue
 
 			case arg == "+tcp":
