@@ -107,7 +107,8 @@ func (task *Task) newServerAddr(protocol dnscore.Protocol) string {
 // Run runs the task and returns an error.
 func (task *Task) Run(ctx context.Context) error {
 	// Setup the overal operation timeout using the context
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	const timeout = 5 * time.Second
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	// Set up the JSON logger for writing the measurements
@@ -133,6 +134,7 @@ func (task *Task) Run(ctx context.Context) error {
 	transport.DialContext = netx.DialContext
 	transport.DialTLSContext = netx.DialTLSContext
 	transport.HTTPClient = &http.Client{
+		Timeout: timeout, // ensure the overall operation is bounded
 		Transport: &http.Transport{
 			DialContext:       netx.DialContext,
 			DialTLSContext:    netx.DialTLSContext,

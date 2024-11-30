@@ -11,6 +11,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/internal/testable"
@@ -53,6 +54,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	// 2. create initial task with defaults
 	task := &Task{
 		LogsWriter:    io.Discard,
+		MaxTime:       30 * time.Second,
 		Method:        "GET",
 		Output:        os.Stdout,
 		ResolveMap:    make(map[string]string),
@@ -65,6 +67,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 4. add flags to the parser
 	logfile := clip.String("logs", "", "path where to write structured logs")
+	maxTime := clip.Int64("max-time", 30, "maximum time to wait for the operation to finish")
 	output := clip.StringP("output", "o", "", "write to file instead of stdout")
 	method := clip.StringP("request", "X", "GET", "HTTP request method")
 	resolve := clip.StringArray("resolve", nil, "use addr instead of DNS")
@@ -110,6 +113,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	}
 
 	// 9. process other flags
+	task.MaxTime = time.Duration(*maxTime) * time.Second
 	task.Method = *method
 	if *verbose {
 		task.VerboseOutput = os.Stderr
