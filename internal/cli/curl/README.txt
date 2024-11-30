@@ -14,6 +14,11 @@ We currently support the following command line flags:
         dash (`-`), we write to the stdout. If you specify `--logs` multiple
         times, we write to the last FILE specified.
 
+    --max-time DURATION
+        Sets the maximum time that the transfer operation is allowed to take
+        in seconds (e.g., `--max-time 5`). If this flag is not specified, the
+        default max time is 30 seconds.
+
     -o, --output FILE
         Write the response body to FILE instead of using the stdout.
 

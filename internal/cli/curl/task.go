@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/rbmk-project/common/dialonce"
 	"github.com/rbmk-project/dnscore"
@@ -21,6 +22,9 @@ import (
 type Task struct {
 	// LogsWriter is where we write structured logs
 	LogsWriter io.Writer
+
+	// MaxTime is the maximum time to wait for the operation to finish.
+	MaxTime time.Duration
 
 	// Method is the HTTP method to use
 	Method string
@@ -40,6 +44,10 @@ type Task struct {
 
 // Run executes the curl task
 func (task *Task) Run(ctx context.Context) error {
+	// Setup the overall operation timeout using the context
+	ctx, cancel := context.WithTimeout(ctx, task.MaxTime)
+	defer cancel()
+
 	// Set up the JSON logger for writing the measurements
 	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
 
@@ -68,11 +76,13 @@ func (task *Task) Run(ctx context.Context) error {
 		return nil, dnscore.ErrNoName
 	}
 
-	// Create the HTTP client to use
+	// Create the HTTP client to use and make sure we're using
+	// an overall operation timeout for the transfer
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
+		Timeout: task.MaxTime, // ensure the overall operation is bounded
 		Transport: &httpLogTransport{
 			Logger: logger,
 			RoundTripper: &http.Transport{
