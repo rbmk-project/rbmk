@@ -48,7 +48,11 @@ func (dcp *DialContextProvider) Set(fx DialContextFunc) {
 func (dcp *DialContextProvider) Get() DialContextFunc {
 	dcp.mu.Lock()
 	defer dcp.mu.Unlock()
-	return dcp.fx
+	fx := dcp.fx
+	if fx == nil {
+		fx = (&net.Dialer{}).DialContext
+	}
+	return fx
 }
 
 // RootCAsProvider provides a thread-safe way to override the root CAs.
