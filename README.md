@@ -3,9 +3,8 @@
 [![GoDoc](https://pkg.go.dev/badge/github.com/rbmk-project/rbmk)](https://pkg.go.dev/github.com/rbmk-project/rbmk)
 
 RBMK (Really Basic Measurement Kit) is a command-line utility
-to facilitate network exploration and measurements.
-
-It provides two atomic operations (`dig` and `curl`) that you can
+to facilitate network exploration and measurements. It provides
+two atomic operations (`dig` and `curl`) that you can
 compose together to perform modular network measurements where
 you can observe each operation in isolation.
 
