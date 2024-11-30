@@ -8,7 +8,7 @@ these to perform step-by-step measurements.
 Basic Examples:
 
 1. DNS resolution only:
-    $ rbmk dig +short example.com
+    $ rbmk dig +short=ip example.com
     93.184.215.14
 
 2. HTTP fetch:
@@ -18,7 +18,7 @@ Basic Examples:
     $ rbmk curl --resolve example.com:443:93.184.215.14 https://example.com/
 
 4. Combining commands to measure DNS and HTTP separately:
-    $ IP=$(rbmk dig +short example.com|head -n1)
+    $ IP=$(rbmk dig +short=ip example.com|head -n1)
     $ rbmk curl --resolve example.com:443:$IP https://example.com/
 
 5. Collecting measurement data:

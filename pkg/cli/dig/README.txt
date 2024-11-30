@@ -72,6 +72,9 @@ We currently support the following query options:
     +short
         Print a short response rather than the full response.
 
+    +short=ip
+        Like `+short`, but only prints the IP address.
+
     +tcp
         Uses DNS-over-TCP. The @server argument is the hostname or IP
         address to use. The implied port is `53/tcp`.
