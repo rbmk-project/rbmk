@@ -1,7 +1,8 @@
 
-usage: rbmk tar -czf archive.tar.gz files...
+usage: rbmk tar -czf ARCHIVE FILE|DIR...
 
-Create a tar archive containing the specified files and directories.
+Create a tar ARCHIVE containing the specified FILEs and DIRs. We
+only support archiving regular files and directories.
 
 We currently support the following command line flags:
 
@@ -17,9 +18,9 @@ We currently support the following command line flags:
     -z, --gzip
         Compress the archive with gzip.
 
-For example:
+For example, the following command creates a compressed archive named
+`results.tar.gz` containing the `measurements` directory contents:
 
-    $ rbmk tar -czf results.tar.gz var/rbmk/measurements/
-    Creates a compressed tar archive of the measurements directory.
+    $ rbmk tar -czf results.tar.gz ./measurements
 
 This command exits with `0` on success and `1` on failure.

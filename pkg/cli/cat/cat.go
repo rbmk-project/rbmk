@@ -37,7 +37,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 2. ensure we have at least one file to read
 	if len(argv) < 2 {
-		err := errors.New("missing file operands")
+		err := errors.New("expected one or more files to concatenate")
 		fmt.Fprintf(os.Stderr, "rbmk cat: %s\n", err.Error())
 		fmt.Fprintf(os.Stderr, "Run `rbmk cat --help` for usage.\n")
 		return err

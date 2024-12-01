@@ -35,7 +35,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		return cmd.Help(argv...)
 	}
 
-	// 2. parse command line flags
+	// 2. parse the command line flags
 	clip := pflag.NewFlagSet("rbmk mkdir", pflag.ContinueOnError)
 	parents := clip.BoolP("parents", "p", false, "create parent directories as needed")
 
@@ -48,7 +48,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	// 3. ensure we have at least one directory to create
 	args := clip.Args()
 	if len(args) < 1 {
-		err := errors.New("missing directory name")
+		err := errors.New("expected one or more directories to create")
 		fmt.Fprintf(os.Stderr, "rbmk mkdir: %s\n", err.Error())
 		fmt.Fprintf(os.Stderr, "Run `rbmk mkdir --help` for usage.\n")
 		return err
@@ -65,6 +65,5 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 			return err
 		}
 	}
-
 	return nil
 }

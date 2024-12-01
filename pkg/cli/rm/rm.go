@@ -38,7 +38,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	// 2. parse command line flags
 	clip := pflag.NewFlagSet("rbmk rm", pflag.ContinueOnError)
 	recursive := clip.BoolP("recursive", "r", false, "remove directories and their contents recursively")
-	force := clip.BoolP("force", "f", false, "ignore nonexistent files and never prompt")
+	force := clip.BoolP("force", "f", false, "ignore nonexistent-file errors")
 
 	if err := clip.Parse(argv[1:]); err != nil {
 		fmt.Fprintf(os.Stderr, "rbmk rm: %s\n", err.Error())
@@ -49,7 +49,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	// 3. ensure we have at least one path to remove
 	args := clip.Args()
 	if len(args) < 1 {
-		err := errors.New("missing operand")
+		err := errors.New("expected one or more paths to remove")
 		fmt.Fprintf(os.Stderr, "rbmk rm: %s\n", err.Error())
 		fmt.Fprintf(os.Stderr, "Run `rbmk rm --help` for usage.\n")
 		return err

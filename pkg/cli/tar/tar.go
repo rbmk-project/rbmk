@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 
 	"github.com/rbmk-project/common/cliutils"
-	"github.com/rbmk-project/x/closepool"
+	"github.com/rbmk-project/common/closepool"
 	"github.com/spf13/pflag"
 )
 
@@ -47,9 +47,9 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 2. parse command line flags
 	clip := pflag.NewFlagSet("rbmk tar", pflag.ContinueOnError)
-	compress := clip.BoolP("gzip", "z", false, "compress archive with gzip")
 	create := clip.BoolP("create", "c", false, "create a new archive")
 	file := clip.StringP("file", "f", "", "archive file name")
+	compress := clip.BoolP("gzip", "z", false, "compress archive with gzip")
 
 	if err := clip.Parse(argv[1:]); err != nil {
 		fmt.Fprintf(os.Stderr, "rbmk tar: %s\n", err.Error())
@@ -72,13 +72,15 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	// 4. ensure we have files to archive
 	args := clip.Args()
 	if len(args) < 1 {
-		err := errors.New("no files to archive")
+		err := errors.New("expected one or more file or dir paths to archive")
 		fmt.Fprintf(os.Stderr, "rbmk tar: %s\n", err.Error())
 		fmt.Fprintf(os.Stderr, "Run `rbmk tar --help` for usage.\n")
 		return err
 	}
 
-	// 5. Create a pool containing closers
+	// 5. Create a pool containing closers so that we can
+	// close the chained writers in reverse order and handle
+	// possible I/O errors while closing them.
 	pool := &closepool.Pool{}
 	defer pool.Close()
 
@@ -109,11 +111,11 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	}
 
 	// 9. make sure everything is written to disk
+	// correctly w/o any I/O errors
 	if err := pool.Close(); err != nil {
 		fmt.Fprintf(os.Stderr, "rbmk tar: %s\n", err.Error())
 		return err
 	}
-
 	return nil
 }
 
@@ -131,13 +133,21 @@ func appendToArchive(tw *tar.Writer, path string) error {
 			return err
 		}
 
-		// Create a tar header using the file info
+		// We only support directories and regular files.
+		if !info.IsDir() && !info.Mode().IsRegular() {
+			return fmt.Errorf("unsupported file type: %s", path)
+		}
+
+		// Create a tar header using the file info but avoid
+		// bothering with the name of the file since we're need
+		// to convert to slashes and handle dirs manually.
 		header, err := tar.FileInfoHeader(info, "")
 		if err != nil {
 			return err
 		}
 
-		// Ensure the name uses slashes
+		// Ensure the name uses slashes and append `/` at the
+		// end of directory names as required by the tar specification.
 		header.Name = filepath.ToSlash(path)
 		if info.IsDir() {
 			header.Name += "/"
@@ -148,16 +158,18 @@ func appendToArchive(tw *tar.Writer, path string) error {
 			return nil
 		}
 
+		// For directories, it suffices to write the header
+		if info.IsDir() {
+			return nil
+		}
+
 		// Attempt to copy the content of the file
-		return copyFile(tw, info, path)
+		return copyRegularFile(tw, path)
 	})
 }
 
-// copyFile copies the content of a file to a tar writer.
-func copyFile(tw *tar.Writer, info fs.FileInfo, filename string) error {
-	if !info.Mode().IsRegular() {
-		return nil
-	}
+// copyRegularFile copies the content of a regular file to a tar writer.
+func copyRegularFile(tw *tar.Writer, filename string) error {
 	filep, err := os.Open(filename)
 	if err != nil {
 		return err
