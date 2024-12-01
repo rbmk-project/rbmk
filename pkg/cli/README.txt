@@ -6,6 +6,7 @@ to facilitate network exploration and measurements.
 
 We support these commands:
 
+    cat       Concatenates files to standard output.
     curl      Emulates a subset of the `curl(1)` command.
     dig       Emulates a subset of the `dig(1)` command.
     intro     Shows a brief introduction with usage examples.
