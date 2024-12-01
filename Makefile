@@ -20,23 +20,15 @@ rbmk:
 	go build -v -ldflags '-s -w' -tags netgo ./cmd/rbmk
 
 #doc:
-#doc: - `stage`: prepare development environment in dist/
-.PHONY: stage
-stage: rbmk
-	install -d dist/bin dist/libexec
-	install -m755 rbmk dist/libexec/rbmk.real
-
-#doc:
 #doc: - `check`: run tests
 .PHONY: check
 check:
-	go test -v ./...
+	go test -race -count 1 -cover ./...
 
 #doc:
 #doc: - `clean`: remove build artifacts
 .PHONY: clean
 clean:
 	rm -f rbmk
-	rm -rf dist/libexec/rbmk.real
 
 #doc:
