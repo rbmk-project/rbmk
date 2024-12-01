@@ -11,6 +11,7 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/curl"
 	"github.com/rbmk-project/rbmk/pkg/cli/dig"
 	"github.com/rbmk-project/rbmk/pkg/cli/intro"
+	"github.com/rbmk-project/rbmk/pkg/cli/ipuniq"
 	"github.com/rbmk-project/rbmk/pkg/cli/mkdir"
 	"github.com/rbmk-project/rbmk/pkg/cli/rm"
 	"github.com/rbmk-project/rbmk/pkg/cli/sh"
@@ -29,6 +30,7 @@ func NewCommand() cliutils.Command {
 		"curl":      curl.NewCommand(),
 		"dig":       dig.NewCommand(),
 		"intro":     intro.NewCommand(),
+		"ipuniq":    ipuniq.NewCommand(),
 		"mkdir":     mkdir.NewCommand(),
 		"rm":        rm.NewCommand(),
 		"sh":        sh.NewCommand(),
