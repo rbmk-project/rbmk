@@ -93,11 +93,9 @@ func (desc *ScenarioDescriptor) Run(t Driver) io.Reader {
 	//
 	// Note that `nil` restores `os.Stdout` as the default.
 	rpipe, wpipe := io.Pipe()
-	testable.Stdout.Set(wpipe)
-	defer func() {
-		testable.Stdout.Set(nil)
-		wpipe.Close()
-	}()
+	env := testable.NewEnvironment()
+	env.SetStdout(wpipe)
+	defer wpipe.Close()
 
 	// Buffer to collect all logs and channel to
 	// signal when collection is complete
@@ -112,7 +110,7 @@ func (desc *ScenarioDescriptor) Run(t Driver) io.Reader {
 	cmd := cli.NewCommand()
 
 	// Execute the given argv.
-	err := cmd.Main(context.Background(), desc.Argv...)
+	err := cmd.Main(context.Background(), env, desc.Argv...)
 
 	// Check whether the return value is OK.
 	if desc.ExpectedErr != nil {

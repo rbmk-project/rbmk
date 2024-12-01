@@ -26,22 +26,22 @@ func NewCommand() cliutils.Command {
 
 type command struct{}
 
-func (cmd command) Help(argv ...string) error {
-	fmt.Fprintf(os.Stdout, "%s\n", readme)
+func (cmd command) Help(env cliutils.Environment, argv ...string) error {
+	fmt.Fprintf(env.Stdout(), "%s\n", readme)
 	return nil
 }
 
-func (cmd command) Main(ctx context.Context, argv ...string) error {
+func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	// 1. honour requests for printing the help
 	if cliutils.HelpRequested(argv...) {
-		return cmd.Help(argv...)
+		return cmd.Help(env, argv...)
 	}
 
 	// 2. ensure we have at least one file to read
 	if len(argv) < 2 {
 		err := errors.New("expected one or more files containing IP addresses")
-		fmt.Fprintf(os.Stderr, "rbmk ipuniq: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk ipuniq --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk ipuniq --help` for usage.\n")
 		return err
 	}
 
@@ -49,7 +49,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	ipAddrs := make(map[string]struct{})
 	for _, fname := range argv[1:] {
 		if err := readIPs(fname, ipAddrs); err != nil {
-			fmt.Fprintf(os.Stderr, "rbmk ipuniq: %s\n", err.Error())
+			fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
 			return err
 		}
 	}
@@ -63,7 +63,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
 	})
 	for _, s := range shuffled {
-		fmt.Println(s)
+		fmt.Fprintln(env.Stdout(), s)
 	}
 	return nil
 }

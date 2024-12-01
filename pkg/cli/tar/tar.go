@@ -34,15 +34,15 @@ func NewCommand() cliutils.Command {
 
 type command struct{}
 
-func (cmd command) Help(argv ...string) error {
-	fmt.Fprintf(os.Stdout, "%s\n", readme)
+func (cmd command) Help(env cliutils.Environment, argv ...string) error {
+	fmt.Fprintf(env.Stdout(), "%s\n", readme)
 	return nil
 }
 
-func (cmd command) Main(ctx context.Context, argv ...string) error {
+func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	// 1. honour requests for printing the help
 	if cliutils.HelpRequested(argv...) {
-		return cmd.Help(argv...)
+		return cmd.Help(env, argv...)
 	}
 
 	// 2. parse command line flags
@@ -52,20 +52,20 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	compress := clip.BoolP("gzip", "z", false, "compress archive with gzip")
 
 	if err := clip.Parse(argv[1:]); err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk tar: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk tar --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk tar: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk tar --help` for usage.\n")
 		return err
 	}
 
 	// 3. validate flags combination
 	if !*create {
 		err := errors.New("only archive creation is supported")
-		fmt.Fprintf(os.Stderr, "rbmk tar: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk tar: %s\n", err.Error())
 		return err
 	}
 	if *file == "" {
 		err := errors.New("archive file name required")
-		fmt.Fprintf(os.Stderr, "rbmk tar: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk tar: %s\n", err.Error())
 		return err
 	}
 
@@ -73,8 +73,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	args := clip.Args()
 	if len(args) < 1 {
 		err := errors.New("expected one or more file or dir paths to archive")
-		fmt.Fprintf(os.Stderr, "rbmk tar: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk tar --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk tar: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk tar --help` for usage.\n")
 		return err
 	}
 
@@ -87,7 +87,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	// 6. create archive file
 	filep, err := os.Create(*file)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk tar: cannot create archive: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk tar: cannot create archive: %s\n", err.Error())
 		return err
 	}
 	pool.Add(filep)
@@ -105,7 +105,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	// 8. add each file/directory to the archive
 	for _, path := range args {
 		if err := appendToArchive(tw, path); err != nil {
-			fmt.Fprintf(os.Stderr, "rbmk tar: %s\n", err.Error())
+			fmt.Fprintf(env.Stderr(), "rbmk tar: %s\n", err.Error())
 			return err
 		}
 	}
@@ -113,7 +113,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	// 9. make sure everything is written to disk
 	// correctly w/o any I/O errors
 	if err := pool.Close(); err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk tar: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk tar: %s\n", err.Error())
 		return err
 	}
 	return nil

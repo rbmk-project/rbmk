@@ -24,15 +24,15 @@ func NewCommand() cliutils.Command {
 
 type command struct{}
 
-func (cmd command) Help(argv ...string) error {
-	fmt.Fprintf(os.Stdout, "%s\n", readme)
+func (cmd command) Help(env cliutils.Environment, argv ...string) error {
+	fmt.Fprintf(env.Stdout(), "%s\n", readme)
 	return nil
 }
 
-func (cmd command) Main(ctx context.Context, argv ...string) error {
+func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	// 1. honour requests for printing the help
 	if cliutils.HelpRequested(argv...) {
-		return cmd.Help(argv...)
+		return cmd.Help(env, argv...)
 	}
 
 	// 2. parse the command line flags
@@ -40,8 +40,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	parents := clip.BoolP("parents", "p", false, "create parent directories as needed")
 
 	if err := clip.Parse(argv[1:]); err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk mkdir: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk mkdir --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk mkdir: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk mkdir --help` for usage.\n")
 		return err
 	}
 
@@ -49,8 +49,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	args := clip.Args()
 	if len(args) < 1 {
 		err := errors.New("expected one or more directories to create")
-		fmt.Fprintf(os.Stderr, "rbmk mkdir: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk mkdir --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk mkdir: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk mkdir --help` for usage.\n")
 		return err
 	}
 
@@ -61,7 +61,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 			mkdirfn = os.MkdirAll
 		}
 		if err := mkdirfn(dir, 0755); err != nil {
-			fmt.Fprintf(os.Stderr, "rbmk mkdir: %s\n", err.Error())
+			fmt.Fprintf(env.Stderr(), "rbmk mkdir: %s\n", err.Error())
 			return err
 		}
 	}
