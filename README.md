@@ -16,6 +16,16 @@ you can observe each operation in isolation.
 - Support for multiple DNS protocols (UDP, TCP, DoT, DoH)
 - HTTP(S) measurements with granular control
 
+- Core Measurement Commands:
+  - `dig`: DNS measurements with multiple protocols
+  - `curl`: HTTP(S) endpoint measurements
+
+- Scripting Support:
+  - Built-in POSIX shell interpreter
+  - Cross-platform Unix-like commands
+  - Script generation tools
+  - Consistent workspace organization
+
 The tool is designed to support both general use and measurement-specific
 features, with careful consideration of concurrent operations and
 extensive testing capabilities.
@@ -53,10 +63,22 @@ $ rbmk intro
 
 ## Commands
 
-- `dig`: Performs DNS measurements with a `dig(1)`-like interface
-- `curl`: Measures HTTP/HTTPS endpoints using a `curl(1)`-like interface
-- `intro`: Shows a brief introduction with usage examples
-- `tutorial`: Provides comprehensive usage documentation
+Core Measurement Commands:
+- `curl`: Measures HTTP/HTTPS endpoints with `curl(1)`-like syntax.
+- `dig`: Performs DNS measurements with `dig(1)`-like syntax.
+
+Unix-like Commands for Scripting:
+- `cat`: Concatenates files.
+- `ipuniq`: Filter out duplicate IP addresses.
+- `mkdir`: Creates directories.
+- `rm`: Removes files and directories.
+- `sh`: Runs POSIX shell scripts.
+- `tar`: Creates tar archives.
+- `timestamp`: Prints filesystem-friendly timestamps.
+
+Helper Commands:
+- `intro`: Shows a brief introduction with usage examples.
+- `tutorial`: Provides comprehensive usage documentation.
 
 Each command supports the `--help` flag for detailed usage information.
 
