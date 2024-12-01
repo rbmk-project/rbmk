@@ -27,22 +27,22 @@ func NewCommand() cliutils.Command {
 
 type command struct{}
 
-func (cmd command) Help(argv ...string) error {
-	fmt.Fprintf(os.Stdout, "%s\n", readme)
+func (cmd command) Help(env cliutils.Environment, argv ...string) error {
+	fmt.Fprintf(env.Stdout(), "%s\n", readme)
 	return nil
 }
 
-func (cmd command) Main(ctx context.Context, argv ...string) error {
+func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	// 1. Honour requests for printing the help.
 	if cliutils.HelpRequested(argv...) {
-		return cmd.Help(argv...)
+		return cmd.Help(env, argv...)
 	}
 
 	// 2. Ensure we have exactly one script to run.
 	if len(argv) != 2 {
 		err := errors.New("expected exactly one script argument")
-		fmt.Fprintf(os.Stderr, "rbmk sh: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk sh --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk sh: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk sh --help` for usage.\n")
 		return err
 	}
 
@@ -50,7 +50,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	scriptPath := argv[1]
 	filep, err := os.Open(scriptPath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk sh: cannot open script: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk sh: cannot open script: %s\n", err.Error())
 		return err
 	}
 	defer filep.Close()
@@ -58,7 +58,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	parser := syntax.NewParser()
 	prog, err := parser.Parse(filep, scriptPath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk sh: cannot parse script: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk sh: cannot parse script: %s\n", err.Error())
 		return err
 	}
 
@@ -75,18 +75,18 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 5. Create the shell interpreter.
 	runner, err := interp.New(
-		interp.StdIO(os.Stdin, os.Stdout, os.Stderr),
+		interp.StdIO(os.Stdin, env.Stdout(), env.Stderr()),
 		interp.Env(expand.FuncEnviron(os.Getenv)),
 	)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk sh: cannot create interpreter: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk sh: cannot create interpreter: %s\n", err.Error())
 		return err
 	}
 
 	// 6. Finally, run the shell script.
 	err = runner.Run(ctx, prog)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk sh: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk sh: %s\n", err.Error())
 		return err
 	}
 	return nil

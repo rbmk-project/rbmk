@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/rbmk-project/common/cliutils"
-	"github.com/rbmk-project/rbmk/internal/testable"
 	"github.com/spf13/pflag"
 )
 
@@ -31,27 +30,17 @@ var _ cliutils.Command = command{}
 var readme string
 
 // Help implements [cliutils.Command].
-func (cmd command) Help(argv ...string) error {
-	fmt.Fprintf(os.Stdout, "%s\n", readme)
+func (cmd command) Help(env cliutils.Environment, argv ...string) error {
+	fmt.Fprintf(env.Stdout(), "%s\n", readme)
 	return nil
 }
 
 // Main implements [cliutils.Command].
-func (cmd command) Main(ctx context.Context, argv ...string) error {
+func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	// 1. honour requests for printing the help
 	if cliutils.HelpRequested(argv...) {
-		return cmd.Help(argv...)
+		return cmd.Help(env, argv...)
 	}
-
-	// Implementation note: we care about testing whether we
-	// produce the correct logs in several simulated conditions,
-	// therefore, the `stdout` used by logs is overridable
-	// through the `testable` package.
-	//
-	// On the contrary, we care much less about testing logging
-	// the query and response, or other error and output messages,
-	// so we just use `os.Stdout` and `os.Stderr` directly.
-	testableStdout := testable.Stdout.Get()
 
 	// 2. create an initial task to be filled according to the command line arguments
 	task := &Task{
@@ -60,7 +49,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		Protocol:       "udp",
 		QueryType:      "A",
 		QueryWriter:    io.Discard,
-		ResponseWriter: os.Stdout,
+		ResponseWriter: env.Stdout(),
 		ShortWriter:    io.Discard,
 		ServerAddr:     "8.8.8.8",
 		ServerPort:     "53",
@@ -75,8 +64,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 5. parse command line arguments
 	if err := clip.Parse(argv[1:]); err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk dig --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk dig --help` for usage.\n")
 		return err
 	}
 
@@ -84,8 +73,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	positional := clip.Args()
 	if len(positional) < 1 {
 		err := errors.New("missing name to resolve")
-		fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk dig --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk dig --help` for usage.\n")
 		return err
 	}
 
@@ -100,7 +89,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		if strings.HasPrefix(arg, "@") {
 			countServers++
 			if countServers > 1 {
-				fmt.Fprintf(os.Stderr, "rbmk dig: warning: you specified more than one server to query\n")
+				fmt.Fprintf(env.Stderr(), "rbmk dig: warning: you specified more than one server to query\n")
 				// fallthrough
 			}
 			task.ServerAddr = arg[1:]
@@ -116,7 +105,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 				continue
 
 			case arg == "+logs":
-				task.LogsWriter = testableStdout
+				task.LogsWriter = env.Stdout()
 				continue
 
 			case arg == "+noall":
@@ -127,12 +116,12 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 				continue
 
 			case arg == "+qr":
-				task.QueryWriter = os.Stdout
+				task.QueryWriter = env.Stdout()
 				continue
 
 			case arg == "+short" || arg == "+short=ip":
 				task.ResponseWriter = io.Discard
-				task.ShortWriter = os.Stdout
+				task.ShortWriter = env.Stdout()
 				task.ShortIP = arg == "+short=ip"
 				continue
 
@@ -148,8 +137,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 			default:
 				err := fmt.Errorf("unknown positonal argument: %s", arg)
-				fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
-				fmt.Fprintf(os.Stderr, "Run `rbmk dig --help` for usage.\n")
+				fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
+				fmt.Fprintf(env.Stderr(), "Run `rbmk dig --help` for usage.\n")
 				return err
 			}
 		}
@@ -158,7 +147,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		if _, ok := queryTypeMap[arg]; ok {
 			countQueryTypes++
 			if countQueryTypes > 1 {
-				fmt.Fprintf(os.Stderr, "rbmk dig: warning: you specified more than one query type\n")
+				fmt.Fprintf(env.Stderr(), "rbmk dig: warning: you specified more than one query type\n")
 				// fallthrough
 			}
 			task.QueryType = arg
@@ -173,8 +162,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 		// 7.5. everything else is a command line error
 		err := fmt.Errorf("too many positional arguments: %s", arg)
-		fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk dig --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk dig --help` for usage.\n")
 		return err
 	}
 	if task.Name == "" {
@@ -187,13 +176,13 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	case "":
 		// nothing
 	case "-":
-		task.LogsWriter = testableStdout
+		task.LogsWriter = env.Stdout()
 	default:
 		var err error
 		filep, err = os.OpenFile(*logfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 		if err != nil {
 			err = fmt.Errorf("cannot open log file: %w", err)
-			fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
+			fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
 			return err
 		}
 		defer filep.Close() // ensure we always close
@@ -202,7 +191,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 9. run the task
 	if err := task.Run(ctx); err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
 		return err
 	}
 
@@ -210,7 +199,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	if filep != nil {
 		if err := filep.Close(); err != nil {
 			err = fmt.Errorf("cannot close log file: %w", err)
-			fmt.Fprintf(os.Stderr, "rbmk dig: %s\n", err.Error())
+			fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
 			return err
 		}
 	}
