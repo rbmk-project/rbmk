@@ -10,6 +10,10 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/curl"
 	"github.com/rbmk-project/rbmk/pkg/cli/dig"
 	"github.com/rbmk-project/rbmk/pkg/cli/intro"
+	"github.com/rbmk-project/rbmk/pkg/cli/mkdir"
+	"github.com/rbmk-project/rbmk/pkg/cli/sh"
+	"github.com/rbmk-project/rbmk/pkg/cli/tar"
+	"github.com/rbmk-project/rbmk/pkg/cli/timestamp"
 	"github.com/rbmk-project/rbmk/pkg/cli/tutorial"
 )
 
@@ -19,9 +23,13 @@ var readme string
 // NewCommand constructs a new [cliutils.Command] for the `rbmk` command.
 func NewCommand() cliutils.Command {
 	return cliutils.NewCommandWithSubCommands("rbmk", readme, map[string]cliutils.Command{
-		"curl":     curl.NewCommand(),
-		"dig":      dig.NewCommand(),
-		"intro":    intro.NewCommand(),
-		"tutorial": tutorial.NewCommand(),
+		"curl":      curl.NewCommand(),
+		"dig":       dig.NewCommand(),
+		"intro":     intro.NewCommand(),
+		"mkdir":     mkdir.NewCommand(),
+		"sh":        sh.NewCommand(),
+		"tar":       tar.NewCommand(),
+		"timestamp": timestamp.NewCommand(),
+		"tutorial":  tutorial.NewCommand(),
 	})
 }
