@@ -10,6 +10,7 @@ We support these commands:
     dig       Emulates a subset of the `dig(1)` command.
     intro     Shows a brief introduction with usage examples.
     mkdir     Creates directories.
+    rm        Removes files and directories.
     sh        Runs shell scripts.
     tar       Creates tar archives.
     timestamp Prints filesystem-friendly UTC timestamp.
