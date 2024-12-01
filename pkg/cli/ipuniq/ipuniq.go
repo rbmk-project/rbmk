@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// Package ipuniq provides the `rbmk ipuniq` Command.
+// Package ipuniq implements the `rbmk ipuniq` command.
 package ipuniq
 
 import (
@@ -9,9 +9,9 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"math/rand/v2"
 	"net"
 	"os"
-	"sort"
 
 	"github.com/rbmk-project/common/cliutils"
 )
@@ -39,37 +39,37 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 2. ensure we have at least one file to read
 	if len(argv) < 2 {
-		err := errors.New("missing file operands")
+		err := errors.New("expected one or more files containing IP addresses")
 		fmt.Fprintf(os.Stderr, "rbmk ipuniq: %s\n", err.Error())
 		fmt.Fprintf(os.Stderr, "Run `rbmk ipuniq --help` for usage.\n")
 		return err
 	}
 
 	// 3. read and parse IPs from all files
-	ips := make(map[string]struct{})
+	ipAddrs := make(map[string]struct{})
 	for _, fname := range argv[1:] {
-		if err := readIPs(fname, ips); err != nil {
+		if err := readIPs(fname, ipAddrs); err != nil {
 			fmt.Fprintf(os.Stderr, "rbmk ipuniq: %s\n", err.Error())
 			return err
 		}
 	}
 
-	// 4. sort and print unique IPs
-	var sorted []string
-	for s := range ips {
-		sorted = append(sorted, s)
+	// 4. randomly shuffle and print unique IPs
+	var shuffled []string
+	for s := range ipAddrs {
+		shuffled = append(shuffled, s)
 	}
-	sort.Strings(sorted)
-
-	for _, s := range sorted {
+	rand.Shuffle(len(shuffled), func(i, j int) {
+		shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
+	})
+	for _, s := range shuffled {
 		fmt.Println(s)
 	}
-
 	return nil
 }
 
-// readIPs reads IP addresses from a file into the provided map
-func readIPs(fname string, ips map[string]struct{}) error {
+// readIPs reads IP addresses from the given file into the given map.
+func readIPs(fname string, ipAddrs map[string]struct{}) error {
 	filep, err := os.Open(fname)
 	if err != nil {
 		return err
@@ -80,9 +80,9 @@ func readIPs(fname string, ips map[string]struct{}) error {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if ip := net.ParseIP(line); ip != nil {
-			// Note: using string representation as key to handle
-			// different textual representations of same IP
-			ips[ip.String()] = struct{}{}
+			// Implementation note: using string representation as the key to
+			// handle different textual representations of same addr.
+			ipAddrs[ip.String()] = struct{}{}
 		}
 	}
 	return scanner.Err()

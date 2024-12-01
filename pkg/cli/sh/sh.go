@@ -33,12 +33,12 @@ func (cmd command) Help(argv ...string) error {
 }
 
 func (cmd command) Main(ctx context.Context, argv ...string) error {
-	// 1. honour requests for printing the help
+	// 1. Honour requests for printing the help.
 	if cliutils.HelpRequested(argv...) {
 		return cmd.Help(argv...)
 	}
 
-	// 2. ensure we have exactly one script to run
+	// 2. Ensure we have exactly one script to run.
 	if len(argv) != 2 {
 		err := errors.New("expected exactly one script argument")
 		fmt.Fprintf(os.Stderr, "rbmk sh: %s\n", err.Error())
@@ -46,34 +46,34 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		return err
 	}
 
-	// 3. open and parse the script
+	// 3. Open and parse the shell script.
 	scriptPath := argv[1]
-	f, err := os.Open(scriptPath)
+	filep, err := os.Open(scriptPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "rbmk sh: cannot open script: %s\n", err.Error())
 		return err
 	}
-	defer f.Close()
+	defer filep.Close()
 
 	parser := syntax.NewParser()
-	prog, err := parser.Parse(f, scriptPath)
+	prog, err := parser.Parse(filep, scriptPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "rbmk sh: cannot parse script: %s\n", err.Error())
 		return err
 	}
 
-	// Ensure the RBMK_EXE environment variable is set
+	// 4. Ensure the RBMK_EXE environment variable is set.
 	exePath, err := os.Executable()
 	if err != nil {
-		return fmt.Errorf("cannot determine rbmk path: %w", err)
+		return fmt.Errorf("rbmk sh: cannot determine rbmk path: %w", err)
 	}
 	exePath, err = filepath.Abs(exePath)
 	if err != nil {
-		return fmt.Errorf("cannot determine absolute rbmk path: %w", err)
+		return fmt.Errorf("rbmk sh: cannot determine absolute rbmk path: %w", err)
 	}
 	os.Setenv("RBMK_EXE", exePath)
 
-	// 5. create shell runner
+	// 5. Create the shell interpreter.
 	runner, err := interp.New(
 		interp.StdIO(os.Stdin, os.Stdout, os.Stderr),
 		interp.Env(expand.FuncEnviron(os.Getenv)),
@@ -83,12 +83,11 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		return err
 	}
 
-	// 6. run the script
+	// 6. Finally, run the shell script.
 	err = runner.Run(ctx, prog)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "rbmk sh: %s\n", err.Error())
 		return err
 	}
-
 	return nil
 }

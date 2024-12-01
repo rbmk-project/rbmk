@@ -1,24 +1,29 @@
 
-usage: rbmk ipuniq file...
+usage: rbmk ipuniq FILE...
 
-Read IP addresses from files, sort them, and remove duplicates.
+Read IP addresses from files, sort them, and remove duplicates. We expect
+input files to contain one IP address per line.
 
-The command:
-- Reads IPv4 and IPv6 addresses from input files
-- Normalizes different textual representations
-- Removes duplicates
-- Sorts addresses (IPv4 addresses before IPv6)
+More specifically, `rbmk ipuniq`:
 
-For example:
+    - Reads IPv4 and IPv6 addresses from input files
 
-    $ cat dig_A.txt dig_AAAA.txt | rbmk ipuniq
-    192.0.2.1
-    2001:db8::1
+    - Normalizes different textual representations
 
-The output can be safely used in shell scripts:
+    - Removes duplicates
 
-    $ for ip in $(rbmk ipuniq ips.txt); do
-        rbmk curl --resolve "example.com:443:${ip}" https://example.com/
+    - Randomly shuffles the resulting addresses
+
+This command is useful to process the output of several
+`rbmk dig` invocations that return IP addresses to create
+a unique list of IP addresses to measure. For example:
+
+    $ rbmk dig +short=ip example.com A > dig_A.txt
+
+    $ rbmk dig + short=ip example.com AAAA > dig_AAAA.txt
+
+    $ for ipAddr in $(rbmk ipuniq dig_A.txt dig_AAAA.txt); do \
+        rbmk curl --resolve "example.com:443:${ipAddr}" https://example.com/ \
     done
 
 This command exits with `0` on success and `1` on failure.

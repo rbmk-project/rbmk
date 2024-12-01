@@ -6,6 +6,7 @@ package timestamp
 import (
 	"context"
 	_ "embed"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -36,12 +37,13 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 2. ensure no extra arguments
 	if len(argv) > 1 {
-		fmt.Fprintf(os.Stderr, "rbmk timestamp: unexpected arguments\n")
+		err := errors.New("expected no positional arguments")
+		fmt.Fprintf(os.Stderr, "rbmk timestamp: %s\n", err.Error())
 		fmt.Fprintf(os.Stderr, "Run `rbmk timestamp --help` for usage.\n")
-		return fmt.Errorf("unexpected arguments")
+		return err
 	}
 
-	// 3. print UTC timestamp in compact format
+	// 3. print ISO8601 UTC timestamp in compact format
 	fmt.Fprintf(os.Stdout, "%s\n", time.Now().UTC().Format("20060102T150405Z"))
 	return nil
 }
