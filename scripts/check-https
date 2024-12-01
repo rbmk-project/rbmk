@@ -1,0 +1,177 @@
+#!/usr/bin/env python3
+
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+import getopt
+import sys
+from typing import Iterator, List, TextIO
+
+
+HELP_TEXT = """
+usage: ./scripts/check-https [flags...]
+
+Writes to the standard output a shell script that checks
+the HTTPS availability for a list of domains.
+
+You can then execute the generated script using:
+
+./rbmk sh <script>
+
+For each domain, the generated script will:
+
+1. Resolve A and AAAA records.
+
+2. Attempt HTTPS connections to each resolved IP addrs.
+
+3. Save DNS queries and HTTPS attempts logs.
+
+The results will be saved as:
+
+./Workspace/check-https-YYYYMMDDTHHMMSSZ.tar.gz
+
+We currently support the following command line flags:
+
+-h, --help
+Print this help message.
+
+-i, --input DOMAIN
+Check the given DOMAIN. Specify this flag multiple times
+to check multiple domains. You can safely combine this flag
+with `-f` to specify domains inline and from file.
+
+-f, --input-file FILE
+Read domains from FILE. Specify this flag multiple times
+to read from multiple files. Each file line must either be
+a domain or a comment (starting with `#`). You can safely
+combine this flag with `-i` to specify extra domains inline.
+
+If no domain is specified either using `-i` or `-f`, this
+command does nothing and exits immediately.
+
+"""
+
+
+def usage(filep: TextIO):
+    """Prints the usage message."""
+    filep.write(HELP_TEXT)
+
+
+def _read_domains(fname: str) -> Iterator[str]:
+    """
+    Reads the domains to check from the given file.
+    """
+    with open(fname) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                yield line
+
+
+def _gen_measure_domain(domain: str, output: TextIO):
+    """Generates the code to measures a given domain."""
+    output.write(f'# Measure: {domain}\n')
+    output.write(f'domain="{domain}"\n')
+    output.write('domaindir="${outdir}/${domain}"\n')
+    output.write('"${RBMK_EXE}" mkdir -p "${domaindir}"\n')
+    output.write('echo "${domain}" > "${domaindir}/input.txt"\n')
+    output.write("\n")
+
+    for qtype in ["A", "AAAA"]:
+        output.write(f'# Resolve {qtype} records\n')
+        output.write('"${RBMK_EXE}" dig \\\n')
+        output.write('\t\t+short \\\n')
+        output.write(f'\t\t--logs "${{domaindir}}/dig_{qtype}.jsonl" \\\n')
+        output.write(f'\t\t{qtype} \\\n')
+        output.write(f'\t\t{domain} \\\n')
+        output.write(f'\t\t> "${{domaindir}}/dig_{qtype}.txt"\n')
+        output.write("\n")
+
+    output.write("# Combine unique IPs\n")
+    output.write('all_ips=$("${RBMK_EXE}" ipuniq "${domaindir}/dig_A.txt" "${domaindir}/dig_AAAA.txt")\n')
+    output.write("\n")
+
+    output.write("# Measure the HTTPS availability of each address.\n")
+    output.write('idx=0\n')
+    output.write('for addr in $all_ips; do\n')
+    output.write('\t"${RBMK_EXE}" curl \\\n')
+    output.write('\t\t\t--max-time 5 \\\n')
+    output.write('\t\t\t-X HEAD \\\n')
+    output.write('\t\t\t--logs "${domaindir}/curl_${idx}.jsonl" \\\n')
+    output.write('\t\t\t--resolve "${domain}:443:${addr}" \\\n')
+    output.write('\t\t\t"https://${domain}/"\n')
+    output.write('\tidx=$((idx + 1))\n')
+    output.write('done\n')
+    output.write("\n")
+
+
+def _gen_measure_inputs(inputs: List[str], input_files: List[str], output: TextIO):
+    """Generates the code to measure all inputs."""
+    output.write("#!/bin/bash\n")
+    output.write("\n")
+    output.write("# Be verbose and make sure RBMK_EXE is set\n")
+    output.write("set -x\n")
+    output.write('[[ -n "${RBMK_EXE}" ]] || exit 1\n')
+    output.write("\n")
+
+    output.write("# Create measurement directory\n")
+    output.write('"${RBMK_EXE}" mkdir -p ./Workspace\n')
+    output.write("cd ./Workspace\n")
+    output.write('timestamp=$("${RBMK_EXE}" timestamp)\n')
+    output.write('outdir="checkhttps-${timestamp}"\n')
+    output.write('"${RBMK_EXE}" mkdir -p "${outdir}"\n')
+    output.write("\n")
+
+    for domain in inputs:
+        _gen_measure_domain(domain, output)
+
+    for input_file in input_files:
+        for domain in _read_domains(input_file):
+            _gen_measure_domain(domain, output)
+
+    output.write("# Compress measurements results\n")
+    output.write('"${RBMK_EXE}" tar -czf "${outdir}.tar.gz" "${outdir}"\n')
+    output.write('"${RBMK_EXE}" rm -r "${outdir}"\n')
+
+
+def main():
+    """Main function."""
+    # TODO(bassosimone): allow to specify the resolver you want
+    # to use from the command line.
+
+    try:
+        opts, args = getopt.getopt(
+            sys.argv[1:],
+            "hf:i:",
+            ["help", "input=", "input-file="],
+        )
+    except getopt.GetoptError as err:
+        print(f"./scripts/check-https: {err}", file=sys.stderr)
+        usage(filep=sys.stderr)
+        sys.exit(1)
+
+    if args:
+        if args[0] == "help":
+            usage(filep=sys.stdout)
+            sys.exit(0)
+        print("./scripts/check-https: unexpected arguments", file=sys.stderr)
+        usage(filep=sys.stderr)
+        sys.exit(1)
+
+    inputs: List[str] = []
+    input_files: List[str] = []
+    for key, value in opts:
+        if key in ("-h", "--help"):
+            usage(filep=sys.stdout)
+            sys.exit(0)
+        elif key in ("-f", "--input-file"):
+            input_files.append(value)
+        elif key in ("-i", "--input"):
+            inputs.append(value)
+
+    # TODO(bassosimone): allow to specify the output file
+    output = sys.stdout
+    _gen_measure_inputs(inputs, input_files, output)
+
+
+if __name__ == "__main__":
+    main()
