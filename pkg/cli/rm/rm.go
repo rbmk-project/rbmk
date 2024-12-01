@@ -24,15 +24,15 @@ func NewCommand() cliutils.Command {
 
 type command struct{}
 
-func (cmd command) Help(argv ...string) error {
-	fmt.Fprintf(os.Stdout, "%s\n", readme)
+func (cmd command) Help(env cliutils.Environment, argv ...string) error {
+	fmt.Fprintf(env.Stdout(), "%s\n", readme)
 	return nil
 }
 
-func (cmd command) Main(ctx context.Context, argv ...string) error {
+func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	// 1. honour requests for printing the help
 	if cliutils.HelpRequested(argv...) {
-		return cmd.Help(argv...)
+		return cmd.Help(env, argv...)
 	}
 
 	// 2. parse command line flags
@@ -41,8 +41,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	force := clip.BoolP("force", "f", false, "ignore nonexistent-file errors")
 
 	if err := clip.Parse(argv[1:]); err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk rm: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk rm --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk rm: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk rm --help` for usage.\n")
 		return err
 	}
 
@@ -50,15 +50,15 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	args := clip.Args()
 	if len(args) < 1 {
 		err := errors.New("expected one or more paths to remove")
-		fmt.Fprintf(os.Stderr, "rbmk rm: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk rm --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk rm: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk rm --help` for usage.\n")
 		return err
 	}
 
 	// 4. remove each path
 	for _, path := range args {
 		if err := removePath(path, *recursive, *force); err != nil {
-			fmt.Fprintf(os.Stderr, "rbmk rm: %s\n", err.Error())
+			fmt.Fprintf(env.Stderr(), "rbmk rm: %s\n", err.Error())
 			return err
 		}
 	}

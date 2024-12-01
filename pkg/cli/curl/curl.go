@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/rbmk-project/common/cliutils"
-	"github.com/rbmk-project/rbmk/internal/testable"
 	"github.com/spf13/pflag"
 )
 
@@ -29,34 +28,24 @@ type command struct{}
 var readme string
 
 // Help implements cliutils.Command.
-func (cmd command) Help(argv ...string) error {
-	fmt.Fprintf(os.Stdout, "%s\n", readme)
+func (cmd command) Help(env cliutils.Environment, argv ...string) error {
+	fmt.Fprintf(env.Stdout(), "%s\n", readme)
 	return nil
 }
 
 // Main implements cliutils.Command.
-func (cmd command) Main(ctx context.Context, argv ...string) error {
+func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	// 1. honour requests for printing the help
 	if cliutils.HelpRequested(argv...) {
-		return cmd.Help(argv...)
+		return cmd.Help(env, argv...)
 	}
-
-	// Implementation note: we care about testing whether we
-	// produce the correct logs in several simulated conditions,
-	// therefore, the `stdout` used by logs is overridable
-	// through the `testable` package.
-	//
-	// On the contrary, we care much less about testing logging
-	// the request and response, or other error and output messages,
-	// so we just use `os.Stdout` and `os.Stderr` directly.
-	testableStdout := testable.Stdout.Get()
 
 	// 2. create initial task with defaults
 	task := &Task{
 		LogsWriter:    io.Discard,
 		MaxTime:       30 * time.Second,
 		Method:        "GET",
-		Output:        os.Stdout,
+		Output:        env.Stdout(),
 		ResolveMap:    make(map[string]string),
 		URL:           "",
 		VerboseOutput: io.Discard,
@@ -75,8 +64,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 5. parse command line arguments
 	if err := clip.Parse(argv[1:]); err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk curl: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk curl --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk curl --help` for usage.\n")
 		return err
 	}
 
@@ -84,8 +73,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	positional := clip.Args()
 	if len(positional) != 1 {
 		err := errors.New("expected exactly one URL argument")
-		fmt.Fprintf(os.Stderr, "rbmk curl: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk curl --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk curl --help` for usage.\n")
 		return err
 	}
 
@@ -93,8 +82,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	task.URL = positional[0]
 	if !strings.HasPrefix(task.URL, "http://") && !strings.HasPrefix(task.URL, "https://") {
 		err := errors.New("URL scheme must be http:// or https://")
-		fmt.Fprintf(os.Stderr, "rbmk curl: %s\n", err.Error())
-		fmt.Fprintf(os.Stderr, "Run `rbmk curl --help` for usage.\n")
+		fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk curl --help` for usage.\n")
 		return err
 	}
 
@@ -103,8 +92,8 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		parts := strings.SplitN(entry, ":", 3)
 		if len(parts) != 3 {
 			err := fmt.Errorf("invalid --resolve value: %s", entry)
-			fmt.Fprintf(os.Stderr, "rbmk curl: %s\n", err.Error())
-			fmt.Fprintf(os.Stderr, "Run `rbmk curl --help` for usage.\n")
+			fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
+			fmt.Fprintf(env.Stderr(), "Run `rbmk curl --help` for usage.\n")
 			return err
 		}
 		// Implementation note: we ignore the port since our
@@ -116,7 +105,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	task.MaxTime = time.Duration(*maxTime) * time.Second
 	task.Method = *method
 	if *verbose {
-		task.VerboseOutput = os.Stderr
+		task.VerboseOutput = env.Stderr()
 	}
 
 	// 10. handle --logs flag
@@ -124,12 +113,12 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 	case "":
 		// nothing
 	case "-":
-		task.LogsWriter = testableStdout
+		task.LogsWriter = env.Stdout()
 	default:
 		filep, err := os.OpenFile(*logfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 		if err != nil {
 			err = fmt.Errorf("cannot open log file: %w", err)
-			fmt.Fprintf(os.Stderr, "rbmk curl: %s\n", err.Error())
+			fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
 			return err
 		}
 		defer filep.Close()
@@ -141,7 +130,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 		filep, err := os.OpenFile(*output, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
 		if err != nil {
 			err = fmt.Errorf("cannot create output file: %w", err)
-			fmt.Fprintf(os.Stderr, "rbmk curl: %s\n", err.Error())
+			fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
 			return err
 		}
 		defer filep.Close()
@@ -150,7 +139,7 @@ func (cmd command) Main(ctx context.Context, argv ...string) error {
 
 	// 12. run the task
 	if err := task.Run(ctx); err != nil {
-		fmt.Fprintf(os.Stderr, "rbmk curl: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
 		return err
 	}
 

@@ -18,6 +18,8 @@ import (
 	"net"
 	"os"
 	"sync"
+
+	"github.com/rbmk-project/common/cliutils"
 )
 
 // DialContextFunc is the type of the low-level dial function.
@@ -82,34 +84,56 @@ func (rcp *RootCAsProvider) Get() *x509.CertPool {
 	return rcp.pool
 }
 
-// StdoutProvider provides a thread-safe way to override the stdout.
+// Environment implements a testable [cliutils.Environment].
 //
-// The zero value is ready to use and uses [os.Stdout].
-type StdoutProvider struct {
-	w  io.Writer
+// The zero value is not ready to use; construct using [NewEnvironment].
+type Environment struct {
+	// mu protects stderr and stdout.
 	mu sync.Mutex
+
+	// stderr is the standard error stream.
+	stderr io.Writer
+
+	// stdout is the standard output stream.
+	stdout io.Writer
 }
 
-// Stdout is the singleton allowing to override the stdout begin used.
-//
-// By default, we use the standard library [os.Stdout].
-var Stdout = &StdoutProvider{}
-
-// Set sets the stdout to use. Setting to `nil` implicitly restores
-// using [os.Stdout] as the default stdout implementation.
-func (sp *StdoutProvider) Set(w io.Writer) {
-	sp.mu.Lock()
-	defer sp.mu.Unlock()
-	sp.w = w
-}
-
-// Get returns the stdout to use.
-func (sp *StdoutProvider) Get() io.Writer {
-	sp.mu.Lock()
-	defer sp.mu.Unlock()
-	w := sp.w
-	if w == nil {
-		w = os.Stdout
+// NewEnvironment creates a new [*Environment] instance.
+func NewEnvironment() *Environment {
+	return &Environment{
+		mu:     sync.Mutex{},
+		stderr: os.Stderr,
+		stdout: os.Stdout,
 	}
-	return w
+}
+
+// SetStderr sets the standard error stream.
+func (env *Environment) SetStderr(w io.Writer) {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	env.stderr = w
+}
+
+// SetStdout sets the standard output stream.
+func (env *Environment) SetStdout(w io.Writer) {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	env.stdout = w
+}
+
+// Ensure that [*Environment] implements [cliutils.Environment].
+var _ cliutils.Environment = (*Environment)(nil)
+
+// Stderr implements [cliutils.Environment].
+func (env *Environment) Stderr() io.Writer {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	return env.stderr
+}
+
+// Stdout implements [cliutils.Environment].
+func (env *Environment) Stdout() io.Writer {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	return env.stdout
 }

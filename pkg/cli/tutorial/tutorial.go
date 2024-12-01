@@ -6,7 +6,6 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"os"
 
 	"github.com/rbmk-project/common/cliutils"
 )
@@ -21,11 +20,11 @@ func NewCommand() cliutils.Command {
 
 type command struct{}
 
-func (cmd command) Help(argv ...string) error {
-	return cmd.Main(context.Background(), argv...)
+func (cmd command) Help(env cliutils.Environment, argv ...string) error {
+	return cmd.Main(context.Background(), env, argv...)
 }
 
-func (cmd command) Main(ctx context.Context, argv ...string) error {
-	fmt.Fprintf(os.Stdout, "%s\n", readme)
+func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
+	fmt.Fprintf(env.Stdout(), "%s\n", readme)
 	return nil
 }

@@ -13,7 +13,7 @@ var Registry = []ScenarioDescriptor{
 		Name:    "dnsOverUdpSuccess",
 		Editors: []ScenarioEditor{},
 		Argv: []string{
-			"rbmk", "dig", "+logs", "@8.8.8.8", "A", "www.example.com",
+			"rbmk", "dig", "+noall", "+logs", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
 		ExpectedSeq: []ExpectedEvent{
@@ -32,7 +32,7 @@ var Registry = []ScenarioDescriptor{
 			CensorDNSLikeIran("www.example.com"),
 		},
 		Argv: []string{
-			"rbmk", "dig", "+logs", "@8.8.8.8", "A", "www.example.com",
+			"rbmk", "dig", "+noall", "+logs", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
 		ExpectedSeq: []ExpectedEvent{
@@ -53,7 +53,7 @@ var Registry = []ScenarioDescriptor{
 		Name:    "dnsOverTcpSuccess",
 		Editors: []ScenarioEditor{},
 		Argv: []string{
-			"rbmk", "dig", "+logs", "+tcp", "@8.8.8.8", "A", "www.example.com",
+			"rbmk", "dig", "+noall", "+logs", "+tcp", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
 		ExpectedSeq: []ExpectedEvent{
@@ -74,7 +74,7 @@ var Registry = []ScenarioDescriptor{
 		Name:    "dnsOverTlsSuccess",
 		Editors: []ScenarioEditor{},
 		Argv: []string{
-			"rbmk", "dig", "+logs", "+tls", "@8.8.8.8", "A", "www.example.com",
+			"rbmk", "dig", "+noall", "+logs", "+tls", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
 		ExpectedSeq: []ExpectedEvent{
@@ -99,7 +99,7 @@ var Registry = []ScenarioDescriptor{
 		Name:    "dnsOverHttpsSuccess",
 		Editors: []ScenarioEditor{},
 		Argv: []string{
-			"rbmk", "dig", "+logs", "+https", "@8.8.8.8", "A", "www.example.com",
+			"rbmk", "dig", "+noall", "+logs", "+https", "@8.8.8.8", "A", "www.example.com",
 		},
 		ExpectedErr: nil,
 		ExpectedSeq: []ExpectedEvent{
