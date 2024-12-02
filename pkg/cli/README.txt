@@ -12,6 +12,7 @@ Unix-like commands for scripting:
     cat       Concatenates files to standard output.
     ipuniq    Filters out duplicate IP addresses.
     mkdir     Creates directories.
+    mv        Moves (renames) files and directories.
     rm        Removes files and directories.
     sh        Runs POSIX shell scripts.
     tar       Creates tar archives.
