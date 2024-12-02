@@ -62,7 +62,11 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	if len(sources) > 1 {
 		// Check if destination is a directory
 		destInfo, err := os.Stat(dest)
-		if err != nil || !destInfo.IsDir() {
+		if err != nil {
+			fmt.Fprintf(env.Stderr(), "rbmk mv: %s\n", err.Error())
+			return err
+		}
+		if !destInfo.IsDir() {
 			err := errors.New("destination must be a directory when moving multiple sources")
 			fmt.Fprintf(env.Stderr(), "rbmk mv: %s\n", err.Error())
 			return err
