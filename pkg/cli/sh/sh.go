@@ -75,7 +75,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 5. Create the shell interpreter.
 	runner, err := interp.New(
-		interp.StdIO(os.Stdin, env.Stdout(), env.Stderr()),
+		interp.StdIO(env.Stdin(), env.Stdout(), env.Stderr()),
 		interp.Env(expand.FuncEnviron(os.Getenv)),
 	)
 	if err != nil {

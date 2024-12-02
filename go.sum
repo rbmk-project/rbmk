@@ -16,8 +16,8 @@ github.com/muesli/cancelreader v0.2.2 h1:3I4Kt4BQjOR54NavqnDogx/MIoWBFa0StPA8ELU
 github.com/muesli/cancelreader v0.2.2/go.mod h1:3XuTXfFS2VjM+HTLZY9Ak0l6eUKfijIfMUZ4EgX0QYo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/rbmk-project/common v0.10.0 h1:yac4Yt9/1p1eoMo/8dk0TJxmQ5XgnJfC7Qbx5gAbdqU=
-github.com/rbmk-project/common v0.10.0/go.mod h1:BsIum8cGFuNxktk3yWVGlr2B18wtyzn3evb3nhvGyig=
+github.com/rbmk-project/common v0.11.0 h1:ugWLxfqZebw0pZkaDd1ftz4OLsB18huD5SFSTWQ7zbQ=
+github.com/rbmk-project/common v0.11.0/go.mod h1:BsIum8cGFuNxktk3yWVGlr2B18wtyzn3evb3nhvGyig=
 github.com/rbmk-project/dnscore v0.8.0 h1:P5qyH1ZSwafdp4b2zbts2DwwuxZvj2BtnwOe9XhJ0bg=
 github.com/rbmk-project/dnscore v0.8.0/go.mod h1:m56W6xysS/Fru7v/6XaSEc6TNZxKxSO6YmnMIIeCP04=
 github.com/rbmk-project/x v0.0.0-20241130105031-0e28dad87694 h1:DvT/Ln2v6qBIW9zVpwhzXldEi+RcRT8qUZCyr3GWZwc=

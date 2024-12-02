@@ -91,6 +91,9 @@ type Environment struct {
 	// mu protects stderr and stdout.
 	mu sync.Mutex
 
+	// stdin is the standard input stream.
+	stdin io.Reader
+
 	// stderr is the standard error stream.
 	stderr io.Writer
 
@@ -102,9 +105,17 @@ type Environment struct {
 func NewEnvironment() *Environment {
 	return &Environment{
 		mu:     sync.Mutex{},
+		stdin:  os.Stdin,
 		stderr: os.Stderr,
 		stdout: os.Stdout,
 	}
+}
+
+// SetStdin sets the standard input stream.
+func (env *Environment) SetStdin(r io.Reader) {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	env.stdin = r
 }
 
 // SetStderr sets the standard error stream.
@@ -123,6 +134,13 @@ func (env *Environment) SetStdout(w io.Writer) {
 
 // Ensure that [*Environment] implements [cliutils.Environment].
 var _ cliutils.Environment = (*Environment)(nil)
+
+// Stdin implements [cliutils.Environment].
+func (env *Environment) Stdin() io.Reader {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	return env.stdin
+}
 
 // Stderr implements [cliutils.Environment].
 func (env *Environment) Stderr() io.Writer {
