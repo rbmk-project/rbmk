@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/common/closepool"
 	"github.com/rbmk-project/rbmk/internal/markdown"
 	"github.com/spf13/pflag"
 )
@@ -110,6 +111,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	}
 
 	// 10. handle --logs flag
+	var filepool closepool.Pool
 	switch *logfile {
 	case "":
 		// nothing
@@ -122,7 +124,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
 			return err
 		}
-		defer filep.Close()
+		filepool.Add(filep)
 		task.LogsWriter = io.MultiWriter(task.LogsWriter, filep)
 	}
 
@@ -134,15 +136,23 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
 			return err
 		}
-		defer filep.Close()
+		filepool.Add(filep)
 		task.Output = filep
 	}
 
 	// 12. run the task
-	if err := task.Run(ctx); err != nil {
+	err := task.Run(ctx)
+
+	// 13. ensure we close the opened files
+	if err2 := filepool.Close(); err2 != nil {
+		fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err2.Error())
+		return err2
+	}
+
+	// 14. handle error when running the task
+	if err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
 		return err
 	}
-
 	return nil
 }
