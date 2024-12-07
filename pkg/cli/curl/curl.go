@@ -59,6 +59,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	// 4. add flags to the parser
 	logfile := clip.String("logs", "", "path where to write structured logs")
 	maxTime := clip.Int64("max-time", 30, "maximum time to wait for the operation to finish")
+	measure := clip.Bool("measure", false, "do not exit 1 on measurement failure")
 	output := clip.StringP("output", "o", "", "write to file instead of stdout")
 	method := clip.StringP("request", "X", "GET", "HTTP request method")
 	resolve := clip.StringArray("resolve", nil, "use addr instead of DNS")
@@ -140,8 +141,13 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		task.Output = filep
 	}
 
-	// 12. run the task
+	// 12. run the task and honour the `--measure` flag
 	err := task.Run(ctx)
+	if err != nil && !*measure {
+		fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk curl: not failing because you specified --measure\n")
+		err = nil
+	}
 
 	// 13. ensure we close the opened files
 	if err2 := filepool.Close(); err2 != nil {

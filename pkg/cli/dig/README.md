@@ -10,15 +10,14 @@ rbmk dig [flags] [@SERVER] NAME [TYPE] [options]
 ## Description
 
 The `rbmk dig` command emulate a subset of the `dig(1)` command. By default, we
-print output on the standard output emulating what `dig(1)` would print.
+print output on the standard output emulating what `dig(1)` would print. All queries
+timeout after five seconds by default.
 
 Command line flags start with the `-` character, while query-specific
 options start with the `+` character, just like in `dig(1)`.
 
 Flags MUST come first. The relative order of `@SERVER`, `NAME`, `TYPE`, and
 `+options` is not significant, as long as they come after the flags.
-
-Note that, by default, the query will timeout after five seconds.
 
 ## Arguments
 
@@ -66,6 +65,14 @@ Writes structured logs to the given FILE. If FILE already exists, we
 append to it. If FILE does not exist, we create it. If FILE is a single
 dash (`-`), we write to the stdout. If you specify `--logs` multiple
 times, we write to the last FILE specified.
+
+### `--measure`
+
+Do not exit with `1` if communication with the server fails. Only exit
+with `1` in case of usage errors, or failure to process inputs. You should
+use this flag inside measurement scripts along with `set -e`. Errors are
+still printed to stderr along with a note indicating that the command is
+continuing due to this flag.
 
 ### Query Options
 
@@ -135,4 +142,10 @@ $ rbmk dig --logs LOGS.jsonl www.example.com MX
 
 ## Exit Status
 
-This command exits with `0` on success and `1` on failure.
+Returns `0` on success. Returns `1` on:
+
+- Usage errors (invalid flags, missing arguments, etc).
+
+- File operation errors (cannot open/close files).
+
+- Measurement failures (unless `--measure` is specified).
