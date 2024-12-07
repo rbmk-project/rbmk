@@ -26,7 +26,9 @@ to a command) and measurement errors (e.g., a network timeout).
 
 Resolve domain names and collect DNS measurement data:
 
-    $ rbmk dig +short=ip example.com
+```
+$ rbmk dig +short=ip example.com
+```
 
 Run `rbmk dig --help` for additional help.
 
@@ -34,7 +36,9 @@ Run `rbmk dig --help` for additional help.
 
 Measure HTTP/HTTPS endpoints:
 
-    $ rbmk curl https://example.com/
+```
+$ rbmk curl https://example.com/
+```
 
 Run `rbmk curl --help` for additional help.
 
@@ -42,7 +46,9 @@ Run `rbmk curl --help` for additional help.
 
 Discover your public IP address:
 
-   $ rbmk stun stun.l.google.com:19302
+```
+$ rbmk stun stun.l.google.com:19302
+```
 
 Run `rbmk stun --help` for additional help.
 
@@ -51,8 +57,10 @@ Run `rbmk stun --help` for additional help.
 
 Commands can be combined to perform detailed measurements:
 
-    $ ip=$(rbmk dig +short=ip example.com | head -n1)
-    $ rbmk curl --resolve "example.com:443:$ip" https://example.com/
+```
+$ ip=$(rbmk dig +short=ip example.com | head -n1)
+$ rbmk curl --resolve "example.com:443:$ip" https://example.com/
+```
 
 Combining measurements allows to isolate network operations and
 analyze their failure in isolation. Additionally, by combining
@@ -63,28 +71,30 @@ addresses for a domain name are reachable and working as intended.
 
 ## Structured Logging
 
-Use --logs to collect detailed measurement data:
+Use `--logs` to collect detailed measurement data:
 
-    $ rbmk dig --logs dns.jsonl example.com
-    $ rbmk curl --logs http.jsonl https://example.com/
+```
+$ rbmk dig --logs dns.jsonl example.com
+$ rbmk curl --logs http.jsonl https://example.com/
+```
 
 The measurement data consists of a sequence of lines in JSON format
 (also known as JSONL format). The data format emitted by commands
-is documented at the following URL:
+is documented in the [RBMK data format specification].
 
-    https://github.com/rbmk-project/rbmk-project.github.io/tree/main/docs/spec/data-format
+[RBMK data format specification]: https://github.com/rbmk-project/rbmk-project.github.io/tree/main/docs/spec/data-format
 
 Using `--logs -` causes the command to emit logs to the standard output.
 
 
 ## Next Steps
 
-- Try 'rbmk tutorial dns' for DNS measurement patterns.
+- Try `rbmk tutorial dns` for DNS measurement patterns.
 
 - Run `rbmk dig --logs - +noall example.com | jq` to see the structured logs.
 
-- Try 'rbmk tutorial http' for HTTP measurement patterns.
+- Try `rbmk tutorial http` for HTTP measurement patterns.
 
 - Run `rbmk curl --logs - https://example.com/ | jq` to see the structured logs.
 
-- Use 'rbmk COMMAND --help' for detailed command documentation.
+- Use `rbmk COMMAND --help` for detailed command documentation.
