@@ -205,7 +205,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 9. run the task and honour the `--measure` flag
 	err := task.Run(ctx)
-	if err != nil && !*measure {
+	if err != nil && *measure {
 		fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
 		fmt.Fprintf(env.Stderr(), "rbmk dig: not failing because you specified --measure\n")
 		err = nil
