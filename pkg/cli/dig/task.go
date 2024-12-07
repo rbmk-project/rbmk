@@ -190,8 +190,6 @@ func (task *Task) Run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("query round-trip failed: %w", err)
 	}
-	fmt.Fprintf(task.ResponseWriter, "\n;; Response:\n%s\n\n", response.String())
-	fmt.Fprintf(task.ShortWriter, "%s", task.formatShort(response))
 
 	// Explicitly close the connections in the pool
 	pool.Close()
@@ -224,7 +222,7 @@ func (task *Task) query(
 ) (*dns.Msg, error) {
 	// If we're not waiting for duplicates, our job is easy
 	if !task.WaitDuplicates {
-		return txp.Query(ctx, addr, query)
+		return task.streamResponse(txp.Query(ctx, addr, query))
 	}
 
 	// Otherwise, we need to reading duplicate responses
@@ -237,7 +235,7 @@ func (task *Task) query(
 	)
 	respch := txp.QueryWithDuplicates(ctx, addr, query)
 	for entry := range respch {
-		resp, err := entry.Msg, entry.Err
+		resp, err := task.streamResponse(entry.Msg, entry.Err)
 		once.Do(func() {
 			resp0, err0 = resp, err
 		})
@@ -246,6 +244,15 @@ func (task *Task) query(
 		return nil, errors.New("received nil response and nil error")
 	}
 	return resp0, err0
+}
+
+// streamResponse contains common code to immediately stream a response.
+func (task *Task) streamResponse(resp *dns.Msg, err error) (*dns.Msg, error) {
+	if resp != nil && err == nil {
+		fmt.Fprintf(task.ResponseWriter, "\n;; Response:\n%s\n\n", resp.String())
+		fmt.Fprintf(task.ShortWriter, "%s", task.formatShort(resp))
+	}
+	return resp, err
 }
 
 // formatShort returns a short string representation of the DNS response.
