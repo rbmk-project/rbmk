@@ -47,7 +47,7 @@ go build -v ./cmd/rbmk
 
 We support the following build-time feature flags:
 
-* `-tags rbmk_disable_markdown` disables markdown rendering when
+* `rbmk_disable_markdown` disables markdown rendering when
 producing help text and makes the binary much smaller.
 
 You need to pass these feature flags to the `go build` command.
@@ -55,7 +55,7 @@ You need to pass these feature flags to the `go build` command.
 For example,
 
 ```sh
-go build -v -tags rbmk_disable_markdown ./cmd/rbmk
+go build -v -tags rbmk_disable_markdown,netgo ./cmd/rbmk
 ```
 
 the previous command builds with disabled markdown rendering.
