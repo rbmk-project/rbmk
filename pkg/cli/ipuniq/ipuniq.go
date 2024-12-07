@@ -12,8 +12,10 @@ import (
 	"math/rand/v2"
 	"net"
 	"os"
+	"strconv"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/spf13/pflag"
 )
 
 //go:embed README.txt
@@ -37,24 +39,46 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		return cmd.Help(env, argv...)
 	}
 
-	// 2. ensure we have at least one file to read
-	if len(argv) < 2 {
+	// 2. parse command line flags
+	clip := pflag.NewFlagSet("rbmk ipuniq", pflag.ContinueOnError)
+	fports := clip.StringSliceP("port", "p", nil, "format output as HOST:PORT endpoints")
+
+	if err := clip.Parse(argv[1:]); err != nil {
+		fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk ipuniq --help` for usage.\n")
+		return err
+	}
+
+	// 3. ensures all the ports are valid
+	var ports []uint16
+	for _, port := range *fports {
+		value, err := strconv.ParseUint(port, 10, 16)
+		if err != nil {
+			fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
+			return err
+		}
+		ports = append(ports, uint16(value))
+	}
+
+	// 4. ensure we have at least one file to read
+	args := clip.Args()
+	if len(args) < 1 {
 		err := errors.New("expected one or more files containing IP addresses")
 		fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
 		fmt.Fprintf(env.Stderr(), "Run `rbmk ipuniq --help` for usage.\n")
 		return err
 	}
 
-	// 3. read and parse IPs from all files
+	// 5. read and parse IPs from all files
 	ipAddrs := make(map[string]struct{})
-	for _, fname := range argv[1:] {
+	for _, fname := range args {
 		if err := readIPs(fname, ipAddrs); err != nil {
 			fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
 			return err
 		}
 	}
 
-	// 4. randomly shuffle and print unique IPs
+	// 6. randomly shuffle and print unique IPs w/ optional port
 	var shuffled []string
 	for s := range ipAddrs {
 		shuffled = append(shuffled, s)
@@ -63,7 +87,14 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
 	})
 	for _, s := range shuffled {
-		fmt.Fprintln(env.Stdout(), s)
+		if len(ports) <= 0 {
+			fmt.Fprintln(env.Stdout(), s)
+			continue
+		}
+		for _, port := range ports {
+			epnt := net.JoinHostPort(s, strconv.FormatUint(uint64(port), 10))
+			fmt.Fprintln(env.Stdout(), epnt)
+		}
 	}
 	return nil
 }
