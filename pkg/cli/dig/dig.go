@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/rbmk/internal/markdown"
 	"github.com/spf13/pflag"
 )
 
@@ -26,12 +27,12 @@ type command struct{}
 
 var _ cliutils.Command = command{}
 
-//go:embed README.txt
+//go:embed README.md
 var readme string
 
 // Help implements [cliutils.Command].
 func (cmd command) Help(env cliutils.Environment, argv ...string) error {
-	fmt.Fprintf(env.Stdout(), "%s\n", readme)
+	fmt.Fprintf(env.Stdout(), "%s\n", markdown.TryRender(readme))
 	return nil
 }
 

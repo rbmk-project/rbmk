@@ -8,9 +8,10 @@ import (
 	"fmt"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/rbmk/internal/markdown"
 )
 
-//go:embed README.txt
+//go:embed README.md
 var readme string
 
 // NewCommand creates the `rbmk intro` Command.
@@ -25,6 +26,6 @@ func (cmd command) Help(env cliutils.Environment, argv ...string) error {
 }
 
 func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
-	fmt.Fprintf(env.Stdout(), "%s\n", readme)
+	fmt.Fprintf(env.Stdout(), "%s\n", markdown.TryRender(readme))
 	return nil
 }
