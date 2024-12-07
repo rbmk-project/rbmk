@@ -9,7 +9,7 @@ help:
 	@cat Makefile | grep -E '^#doc:' | sed -e 's/^#doc: //g' -e 's/^#doc://'
 
 #doc:
-#doc: - `all`: alias for `rbmk` and rbmk-small
+#doc: - `all`: builds `rbmk` and `rbmk-small`
 .PHONY: all
 all: rbmk rbmk-small
 
