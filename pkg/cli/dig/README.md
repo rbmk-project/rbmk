@@ -119,6 +119,18 @@ address to use. The implied port is `53/tcp`.
 Uses DNS-over-TLS. The @server argument is the hostname or IP
 address to use. The implied port is `853/tcp`.
 
+### `+udp`
+
+Use DNS-over-UDP (default behavior).
+
+### `+udp=wait-duplicates`
+
+Use DNS-over-UDP and wait for the full query timeout to collect
+duplicate responses. Only the first (i.e., non-duplicate) response
+is printed to the stdout. All responses (including duplicates)
+are included in the structured logs. This option is useful
+for detecting DNS-based censorship in China and Iran.
+
 ## Examples
 
 The following invocation resolves `www.example.com` IPv6 address

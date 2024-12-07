@@ -56,6 +56,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		ServerAddr:     "8.8.8.8",
 		ServerPort:     "53",
 		URLPath:        "/dns-query",
+		WaitDuplicates: false,
 	}
 
 	// 3. create command line parser
@@ -105,6 +106,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			case arg == "+https":
 				task.Protocol = "doh"
 				task.ServerPort = "443"
+				task.WaitDuplicates = false
 				continue
 
 			case arg == "+logs":
@@ -131,11 +133,19 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			case arg == "+tcp":
 				task.Protocol = "tcp"
 				task.ServerPort = "53"
+				task.WaitDuplicates = false
 				continue
 
 			case arg == "+tls":
 				task.Protocol = "dot"
 				task.ServerPort = "853"
+				task.WaitDuplicates = false
+				continue
+
+			case arg == "+udp" || arg == "+udp=wait-duplicates":
+				task.Protocol = "udp"
+				task.ServerPort = "53"
+				task.WaitDuplicates = arg == "+udp=wait-duplicates"
 				continue
 
 			default:
