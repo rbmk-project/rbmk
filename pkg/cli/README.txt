@@ -7,6 +7,7 @@ to facilitate network exploration and measurements.
 Core measurement commands:
     curl      Measures HTTP/HTTPS endpoints with `curl(1)`-like syntax.
     dig       Performs DNS measurements with `dig(1)`-like syntax.
+    stun      Performs STUN binding requests to discover public IP address.
 
 Unix-like commands for scripting:
     cat       Concatenates files to standard output.
