@@ -39,6 +39,14 @@ Writes structured logs to the given FILE. If FILE already exists, we
 append to it. If FILE does not exist, we create it. If FILE is a single
 dash (`-`), we write to the stdout.
 
+### `--measure`
+
+Do not exit with `1` if communication with the endpoint fails. Only exit
+with `1` in case of usage errors, or failure to process inputs. You should
+use this flag inside measurement scripts along with `set -e`. Errors are
+still printed to stderr along with a note indicating that the command is
+continuing due to this flag.
+
 ## Examples
 
 Basic usage:
@@ -56,4 +64,10 @@ $ rbmk stun --logs stun.jsonl 74.125.250.129:19302
 
 ## Exit Status
 
-This command exits with `0` on success and `1` on failure.
+Returns `0` on success. Returns `1` on:
+
+- Usage errors (invalid flags, missing arguments, etc).
+
+- File operation errors (cannot open/close files).
+
+- Measurement failures (unless `--measure` is specified).

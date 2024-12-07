@@ -31,6 +31,14 @@ Sets the maximum time that the transfer operation is allowed to take
 in seconds (e.g., `--max-time 5`). If this flag is not specified, the
 default max time is 30 seconds.
 
+### `--measure`
+
+Do not exit with `1` if communication with the server fails. Only exit
+with `1` in case of usage errors, or failure to process inputs. You should
+use this flag inside measurement scripts along with `set -e`. Errors are
+still printed to stderr along with a note indicating that the command is
+continuing due to this flag.
+
 ### `-o, --output FILE`
 
 Write the response body to FILE instead of using the stdout.
@@ -76,4 +84,10 @@ To use a previously resolved IP address, use `--resolve`:
 
 ## Exit Status
 
-This command exits with `0` on success and `1` on failure.
+Returns `0` on success. Returns `1` on:
+
+- Usage errors (invalid flags, missing arguments, etc).
+
+- File operation errors (cannot open/close files).
+
+- Measurement failures (unless `--measure` is specified).

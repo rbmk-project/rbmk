@@ -63,6 +63,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 4. add flags to the parser
 	logfile := clip.String("logs", "", "path where to write structured logs")
+	measure := clip.Bool("measure", false, "do not exit 1 on measurement failure")
 
 	// 5. parse command line arguments
 	if err := clip.Parse(argv[1:]); err != nil {
@@ -192,8 +193,13 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		task.LogsWriter = io.MultiWriter(task.LogsWriter, filep)
 	}
 
-	// 9. run the task
+	// 9. run the task and honour the `--measure` flag
 	err := task.Run(ctx)
+	if err != nil && !*measure {
+		fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "rbmk dig: not failing because you specified --measure\n")
+		err = nil
+	}
 
 	// 10. ensure we close the opened files
 	if err2 := filepool.Close(); err2 != nil {
