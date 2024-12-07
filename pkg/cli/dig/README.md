@@ -131,6 +131,24 @@ is printed to the stdout. All responses (including duplicates)
 are included in the structured logs. This option is useful
 for detecting DNS-based censorship in China and Iran.
 
+Since v0.4.0, each response (including duplicates) is emitted to the
+stdout as soon as it is received. This behaviour is particularly useful
+when coupling `+short` with writing to an `rbmk pipe`:
+
+```bash
+# Waits for duplicates but immediately print addrs when available
+(rbmk dig +short +udp=wait-duplicates example.com | rbmk pipe write addrs) &
+
+# Print each unique address as soon as it is available
+rbmk pipe read --writers 1 addrs | rbmk ipuniq
+
+# Wait for writer to terminate
+wait
+```
+
+This pattern ensures that we can process each address as soon as it
+is available, even if we are waiting for duplicates.
+
 ## Examples
 
 The following invocation resolves `www.example.com` IPv6 address
