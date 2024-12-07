@@ -6,9 +6,9 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"sort"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/rbmk/internal/markdown"
 )
 
 // NewCommand creates the `rbmk tutorial` Command.
@@ -24,14 +24,17 @@ func (cmd command) Help(env cliutils.Environment, argv ...string) error {
 
 // Collect all the tutorial topics.
 var (
-	//go:embed basics.txt
+	//go:embed basics.md
 	basicsContent string
 
-	//go:embed dns.txt
+	//go:embed dns.md
 	dnsContent string
 
-	//go:embed http.txt
+	//go:embed http.md
 	httpContent string
+
+	//go:embed README.md
+	readme string
 )
 
 // topicInfo contains the brief description and
@@ -63,7 +66,8 @@ var topics = map[string]topicInfo{
 func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	switch {
 	case len(argv) <= 1 || cliutils.HelpRequested(argv...):
-		return cmd.showDirectory(env)
+		fmt.Fprintln(env.Stdout(), markdown.TryRender(readme))
+		return nil
 
 	case len(argv) > 2:
 		err := fmt.Errorf("expected single tutorial topic, found: %v", argv[1:])
@@ -79,29 +83,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			fmt.Fprintf(env.Stderr(), "Run 'rbmk tutorial' to see available topics.\n")
 			return err
 		}
-		fmt.Fprintln(env.Stdout(), topic.content)
+		fmt.Fprintln(env.Stdout(), markdown.TryRender(topic.content))
 		return nil
 	}
-}
-
-// showDirectory prints the list of available tutorials.
-func (cmd command) showDirectory(env cliutils.Environment) error {
-	fmt.Fprintf(env.Stdout(), "\nusage: rbmk tutorial TOPIC:\n\n")
-	fmt.Fprintf(env.Stdout(), "This command provides access to RBMK tutorials.\n\n")
-	fmt.Fprintf(env.Stdout(), "Available tutorials:\n\n")
-
-	// Sort topics for consistent output
-	var names []string
-	for name := range topics {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-
-	// Print each topic
-	for _, name := range names {
-		fmt.Fprintf(env.Stdout(), "    %-8s %s.\n", name, topics[name].brief)
-	}
-
-	fmt.Fprintf(env.Stdout(), "\nRun `rbmk tutorial TOPIC` to read a specific tutorial.\n\n")
-	return nil
 }

@@ -15,6 +15,7 @@ you can observe each operation in isolation.
 - Extensive structured logging for detailed analysis
 - Support for multiple DNS protocols (UDP, TCP, DoT, DoH)
 - HTTP(S) measurements with granular control
+- Integrated online help with optional markdown rendering
 
 - Core Measurement Commands:
   - `dig`: DNS measurements with multiple protocols
@@ -35,6 +36,29 @@ extensive testing capabilities.
 ```sh
 go install github.com/rbmk-project/rbmk/cmd/rbmk@latest
 ```
+
+## Building
+
+```sh
+go build -v ./cmd/rbmk
+```
+
+## Feature Flags
+
+We support the following build-time feature flags:
+
+* `-tags rbmk_disable_markdown` disables markdown rendering when
+producing help text and makes the binary much smaller.
+
+You need to pass these feature flags to the `go build` command.
+
+For example,
+
+```sh
+go build -v -tags rbmk_disable_markdown ./cmd/rbmk
+```
+
+the previous command builds with disabled markdown rendering.
 
 ## Quick Start
 
