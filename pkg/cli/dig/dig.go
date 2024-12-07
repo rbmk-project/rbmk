@@ -56,6 +56,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		ServerAddr:     "8.8.8.8",
 		ServerPort:     "53",
 		URLPath:        "/dns-query",
+		WaitDuplicates: false,
 	}
 
 	// 3. create command line parser
