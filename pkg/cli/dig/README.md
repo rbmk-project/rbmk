@@ -141,6 +141,9 @@ when coupling `+short` with writing to an `rbmk pipe`:
 
 # Print each unique address as soon as it is available
 rbmk pipe read --writers 1 addrs | rbmk ipuniq
+
+# Wait for writer to terminate
+wait
 ```
 
 This pattern ensures that we can process each address as soon as it
