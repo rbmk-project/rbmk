@@ -16,6 +16,7 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/mv"
 	"github.com/rbmk-project/rbmk/pkg/cli/rm"
 	"github.com/rbmk-project/rbmk/pkg/cli/sh"
+	"github.com/rbmk-project/rbmk/pkg/cli/stun"
 	"github.com/rbmk-project/rbmk/pkg/cli/tar"
 	"github.com/rbmk-project/rbmk/pkg/cli/timestamp"
 	"github.com/rbmk-project/rbmk/pkg/cli/tutorial"
@@ -36,6 +37,7 @@ func NewCommand() cliutils.Command {
 		"mv":        mv.NewCommand(),
 		"rm":        rm.NewCommand(),
 		"sh":        sh.NewCommand(),
+		"stun":      stun.NewCommand(),
 		"tar":       tar.NewCommand(),
 		"timestamp": timestamp.NewCommand(),
 		"tutorial":  tutorial.NewCommand(),
