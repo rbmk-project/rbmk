@@ -22,6 +22,7 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/tar"
 	"github.com/rbmk-project/rbmk/pkg/cli/timestamp"
 	"github.com/rbmk-project/rbmk/pkg/cli/tutorial"
+	"github.com/rbmk-project/rbmk/pkg/cli/version"
 )
 
 //go:embed README.md
@@ -46,5 +47,6 @@ func NewCommand() cliutils.Command {
 			"tar":       tar.NewCommand(),
 			"timestamp": timestamp.NewCommand(),
 			"tutorial":  tutorial.NewCommand(),
+			"version":   version.NewCommand(),
 		})
 }
