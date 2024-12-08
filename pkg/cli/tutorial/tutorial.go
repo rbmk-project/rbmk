@@ -66,7 +66,7 @@ var topics = map[string]topicInfo{
 func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	switch {
 	case len(argv) <= 1 || cliutils.HelpRequested(argv...):
-		fmt.Fprintln(env.Stdout(), markdown.TryRender(readme))
+		fmt.Fprintln(env.Stdout(), markdown.MaybeRender(readme))
 		return nil
 
 	case len(argv) > 2:
@@ -83,7 +83,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			fmt.Fprintf(env.Stderr(), "Run 'rbmk tutorial' to see available topics.\n")
 			return err
 		}
-		fmt.Fprintln(env.Stdout(), markdown.TryRender(topic.content))
+		fmt.Fprintln(env.Stdout(), markdown.MaybeRender(topic.content))
 		return nil
 	}
 }

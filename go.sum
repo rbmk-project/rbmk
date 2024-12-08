@@ -63,8 +63,8 @@ github.com/pion/transport/v3 v3.0.7 h1:iRbMH05BzSNwhILHoBoAPxoB9xQgOaJk+591KC9P1
 github.com/pion/transport/v3 v3.0.7/go.mod h1:YleKiTZ4vqNxVwh77Z0zytYi7rXHl7j6uPLGhhz9rwo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/rbmk-project/common v0.11.0 h1:ugWLxfqZebw0pZkaDd1ftz4OLsB18huD5SFSTWQ7zbQ=
-github.com/rbmk-project/common v0.11.0/go.mod h1:BsIum8cGFuNxktk3yWVGlr2B18wtyzn3evb3nhvGyig=
+github.com/rbmk-project/common v0.12.0 h1:SxznKYj+HHDSTQLZYjVw/S+rQx+NzNUnATttoWQLiKw=
+github.com/rbmk-project/common v0.12.0/go.mod h1:BsIum8cGFuNxktk3yWVGlr2B18wtyzn3evb3nhvGyig=
 github.com/rbmk-project/dnscore v0.8.0 h1:P5qyH1ZSwafdp4b2zbts2DwwuxZvj2BtnwOe9XhJ0bg=
 github.com/rbmk-project/dnscore v0.8.0/go.mod h1:m56W6xysS/Fru7v/6XaSEc6TNZxKxSO6YmnMIIeCP04=
 github.com/rbmk-project/x v0.0.0-20241130105031-0e28dad87694 h1:DvT/Ln2v6qBIW9zVpwhzXldEi+RcRT8qUZCyr3GWZwc=

@@ -16,7 +16,7 @@ var readme string
 // NewCommand creates the `rbmk pipe` Command.
 func NewCommand() cliutils.Command {
 	return cliutils.NewCommandWithSubCommands(
-		"pipe", markdown.TryRender(readme),
+		"pipe", markdown.LazyMaybeRender(readme),
 		map[string]cliutils.Command{
 			"read":  newReadCommand(),
 			"write": newWriteCommand(),

@@ -4,8 +4,8 @@
 
 package markdown
 
-// TryRender tries to render the given markdown content. On error,
+// MaybeRender tries to render the given markdown content. On error,
 // it returns the original unmodified content.
-func TryRender(content string) string {
+func MaybeRender(content string) string {
 	return content
 }

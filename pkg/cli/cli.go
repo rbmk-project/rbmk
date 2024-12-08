@@ -30,7 +30,7 @@ var readme string
 // NewCommand constructs a new [cliutils.Command] for the `rbmk` command.
 func NewCommand() cliutils.Command {
 	return cliutils.NewCommandWithSubCommands(
-		"rbmk", markdown.TryRender(readme),
+		"rbmk", markdown.LazyMaybeRender(readme),
 		map[string]cliutils.Command{
 			"cat":       cat.NewCommand(),
 			"curl":      curl.NewCommand(),
