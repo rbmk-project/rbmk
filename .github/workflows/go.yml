@@ -32,3 +32,6 @@ jobs:
 
       - name: Test
         run: make check
+
+      - name: Release
+        run: make release
