@@ -45,6 +45,27 @@ var Registry = []ScenarioDescriptor{
 		},
 	},
 
+	{
+		Name: "dnsOverUdpCensorshipWithDuplicates",
+		Editors: []ScenarioEditor{
+			CensorDNSLikeIran("www.example.com"),
+		},
+		Argv: []string{
+			"rbmk", "dig", "+udp=wait-duplicates", "+noall", "+logs", "@8.8.8.8", "A", "www.example.com",
+		},
+		ExpectedErr: nil,
+		ExpectedSeq: []ExpectedEvent{
+			{Msg: "connectStart"},
+			{Msg: "connectDone"},
+			{Msg: "dnsQuery"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "dnsResponse"},
+			{Pattern: MatchAnyRead | MatchAnyWrite},
+			{Msg: "dnsResponse"},
+			{Pattern: MatchAnyClose},
+		},
+	},
+
 	//
 	// DNS over TCP
 	//

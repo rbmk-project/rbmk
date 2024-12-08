@@ -13,6 +13,8 @@ import (
 	"strings"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/common/closepool"
+	"github.com/rbmk-project/rbmk/internal/markdown"
 	"github.com/spf13/pflag"
 )
 
@@ -26,12 +28,12 @@ type command struct{}
 
 var _ cliutils.Command = command{}
 
-//go:embed README.txt
+//go:embed README.md
 var readme string
 
 // Help implements [cliutils.Command].
 func (cmd command) Help(env cliutils.Environment, argv ...string) error {
-	fmt.Fprintf(env.Stdout(), "%s\n", readme)
+	fmt.Fprintf(env.Stdout(), "%s\n", markdown.MaybeRender(readme))
 	return nil
 }
 
@@ -54,6 +56,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		ServerAddr:     "8.8.8.8",
 		ServerPort:     "53",
 		URLPath:        "/dns-query",
+		WaitDuplicates: false,
 	}
 
 	// 3. create command line parser
@@ -61,6 +64,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 4. add flags to the parser
 	logfile := clip.String("logs", "", "path where to write structured logs")
+	measure := clip.Bool("measure", false, "do not exit 1 on measurement failure")
 
 	// 5. parse command line arguments
 	if err := clip.Parse(argv[1:]); err != nil {
@@ -102,6 +106,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			case arg == "+https":
 				task.Protocol = "doh"
 				task.ServerPort = "443"
+				task.WaitDuplicates = false
 				continue
 
 			case arg == "+logs":
@@ -128,11 +133,19 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			case arg == "+tcp":
 				task.Protocol = "tcp"
 				task.ServerPort = "53"
+				task.WaitDuplicates = false
 				continue
 
 			case arg == "+tls":
 				task.Protocol = "dot"
 				task.ServerPort = "853"
+				task.WaitDuplicates = false
+				continue
+
+			case arg == "+udp" || arg == "+udp=wait-duplicates":
+				task.Protocol = "udp"
+				task.ServerPort = "53"
+				task.WaitDuplicates = arg == "+udp=wait-duplicates"
 				continue
 
 			default:
@@ -171,6 +184,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	}
 
 	// 8. possibly open the log file
+	var filepool closepool.Pool
 	var filep *os.File
 	switch *logfile {
 	case "":
@@ -185,23 +199,28 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
 			return err
 		}
-		defer filep.Close() // ensure we always close
+		filepool.Add(filep)
 		task.LogsWriter = io.MultiWriter(task.LogsWriter, filep)
 	}
 
-	// 9. run the task
-	if err := task.Run(ctx); err != nil {
+	// 9. run the task and honour the `--measure` flag
+	err := task.Run(ctx)
+	if err != nil && *measure {
 		fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
-		return err
+		fmt.Fprintf(env.Stderr(), "rbmk dig: not failing because you specified --measure\n")
+		err = nil
 	}
 
-	// 10. ensure we close the logfile
-	if filep != nil {
-		if err := filep.Close(); err != nil {
-			err = fmt.Errorf("cannot close log file: %w", err)
-			fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
-			return err
-		}
+	// 10. ensure we close the opened files
+	if err2 := filepool.Close(); err2 != nil {
+		fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err2.Error())
+		return err2
+	}
+
+	// 11. handle error when running the task
+	if err != nil {
+		fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())
+		return err
 	}
 	return nil
 }

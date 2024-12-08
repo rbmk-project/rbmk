@@ -4,6 +4,7 @@ package dig
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -11,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/miekg/dns"
@@ -68,6 +70,11 @@ type Task struct {
 
 	// URLPath is the MANDATORY URL path when using DoH.
 	URLPath string
+
+	// WaitDuplicates is the OPTIONAL flag indicating
+	// whether we should wait for duplicate DNS-over-UDP
+	// responses (for detecting censorship).
+	WaitDuplicates bool
 }
 
 // queryTypeMap maps query types strings to DNS query types.
@@ -179,12 +186,10 @@ func (task *Task) Run(ctx context.Context) error {
 	fmt.Fprintf(task.QueryWriter, ";; Query:\n%s\n", query.String())
 
 	// Perform the DNS query
-	response, err := transport.Query(ctx, server, query)
+	response, err := task.query(ctx, transport, server, query)
 	if err != nil {
 		return fmt.Errorf("query round-trip failed: %w", err)
 	}
-	fmt.Fprintf(task.ResponseWriter, "\n;; Response:\n%s\n\n", response.String())
-	fmt.Fprintf(task.ShortWriter, "%s", task.formatShort(response))
 
 	// Explicitly close the connections in the pool
 	pool.Close()
@@ -199,6 +204,55 @@ func (task *Task) Run(ctx context.Context) error {
 		return fmt.Errorf("response code indicates error: %w", err)
 	}
 	return nil
+}
+
+// query performs the query and returns response or error.
+//
+// If the WaitDuplicates flag is set, this function will wait
+// for duplicate responses, emit all the related structured logs,
+// and return the first response received. This function blocks
+// until the timeout configured in the context expires. Note that
+// all responses (including duplicates) are automatically
+// logged through the transport's logger.
+func (task *Task) query(
+	ctx context.Context,
+	txp *dnscore.Transport,
+	addr *dnscore.ServerAddr,
+	query *dns.Msg,
+) (*dns.Msg, error) {
+	// If we're not waiting for duplicates, our job is easy
+	if !task.WaitDuplicates {
+		return task.streamResponse(txp.Query(ctx, addr, query))
+	}
+
+	// Otherwise, we need to reading duplicate responses
+	// until the overall timeout says we should bail, which
+	// happens through context expiration.
+	var (
+		resp0 *dns.Msg
+		err0  error
+		once  sync.Once
+	)
+	respch := txp.QueryWithDuplicates(ctx, addr, query)
+	for entry := range respch {
+		resp, err := task.streamResponse(entry.Msg, entry.Err)
+		once.Do(func() {
+			resp0, err0 = resp, err
+		})
+	}
+	if resp0 == nil && err0 == nil {
+		return nil, errors.New("received nil response and nil error")
+	}
+	return resp0, err0
+}
+
+// streamResponse contains common code to immediately stream a response.
+func (task *Task) streamResponse(resp *dns.Msg, err error) (*dns.Msg, error) {
+	if resp != nil && err == nil {
+		fmt.Fprintf(task.ResponseWriter, "\n;; Response:\n%s\n\n", resp.String())
+		fmt.Fprintf(task.ShortWriter, "%s", task.formatShort(resp))
+	}
+	return resp, err
 }
 
 // formatShort returns a short string representation of the DNS response.

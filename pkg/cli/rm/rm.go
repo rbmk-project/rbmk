@@ -11,10 +11,11 @@ import (
 	"os"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/rbmk/internal/markdown"
 	"github.com/spf13/pflag"
 )
 
-//go:embed README.txt
+//go:embed README.md
 var readme string
 
 // NewCommand creates the `rbmk rm` Command.
@@ -25,7 +26,7 @@ func NewCommand() cliutils.Command {
 type command struct{}
 
 func (cmd command) Help(env cliutils.Environment, argv ...string) error {
-	fmt.Fprintf(env.Stdout(), "%s\n", readme)
+	fmt.Fprintf(env.Stdout(), "%s\n", markdown.MaybeRender(readme))
 	return nil
 }
 
