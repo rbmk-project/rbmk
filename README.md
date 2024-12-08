@@ -30,6 +30,10 @@ The tool is designed to support both general use and measurement-specific
 features, with support for scripting concurrent operations and
 extensive integration testing capabilities.
 
+## Minimum Go version
+
+Go 1.23
+
 ## Installation
 
 ```sh
@@ -41,6 +45,14 @@ go install github.com/rbmk-project/rbmk/cmd/rbmk@latest
 ```sh
 go build -v ./cmd/rbmk
 ```
+
+If you have GNU make installed, you can also run:
+
+```sh
+make
+```
+
+to see all the available build/install options.
 
 ## Feature Flags
 
