@@ -21,7 +21,7 @@ to facilitate network exploration and measurements.
 ### Unix-like Commands for Scripting
 
 * `cat` - Concatenates files to standard output.
-* `ipuniq` - Filters out duplicate IP addresses.
+* `ipuniq` - Sort, deduplicate, and format IP addresses.
 * `mkdir` - Creates directories.
 * `mv` - Moves (renames) files and directories.
 * `pipe` - Creates named pipes for inter-process communication.

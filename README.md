@@ -4,32 +4,31 @@
 
 RBMK (Really Basic Measurement Kit) is a command-line utility
 to facilitate network exploration and measurements. It provides
-two atomic operations (`dig` and `curl`) that you can
+fundamental network operations (`dig`, `curl`, and `stun`) that you can
 compose together to perform modular network measurements where
 you can observe each operation in isolation.
 
 ## Features
 
-- Modular design with separate DNS and HTTP(S) measurements
-- CLI-first approach with composable commands
+- Modular design with DNS, HTTP(S), and STUN measurement operations
+- CLI-first approach with composable subcommands
 - Extensive structured logging for detailed analysis
-- Support for multiple DNS protocols (UDP, TCP, DoT, DoH)
-- HTTP(S) measurements with granular control
+- Support for multiple DNS protocols (UDP, TCP, DoT, and DoH)
 - Integrated online help with optional markdown rendering
 
 - Core Measurement Commands:
   - `dig`: DNS measurements with multiple protocols
   - `curl`: HTTP(S) endpoint measurements
+  - `stun`: Resolve the public IP addresses
 
 - Scripting Support:
   - Built-in POSIX shell interpreter
-  - Cross-platform Unix-like commands
+  - Cross-platform Unix-like subcommands (e.g., `cat`, `tar`, `mv`)
   - Script generation tools
-  - Consistent workspace organization
 
 The tool is designed to support both general use and measurement-specific
-features, with careful consideration of concurrent operations and
-extensive testing capabilities.
+features, with support for scripting concurrent operations and
+extensive integration testing capabilities.
 
 ## Installation
 
@@ -48,17 +47,19 @@ go build -v ./cmd/rbmk
 We support the following build-time feature flags:
 
 * `rbmk_disable_markdown` disables markdown rendering when
-producing help text and makes the binary much smaller.
+producing help text thus making the binary much smaller.
 
-You need to pass these feature flags to the `go build` command.
+You need to pass these feature flags to the `go build` command
+or the `go install` command using the `-tags` flag.
 
-For example,
+For example, this command:
 
 ```sh
 go build -v -tags rbmk_disable_markdown,netgo ./cmd/rbmk
 ```
 
-the previous command builds with disabled markdown rendering.
+builds with disabled markdown rendering (`rbmk_disable_markdown`) and
+using the pure-Go DNS lookup engine (`netgo`).
 
 ## Quick Start
 
@@ -69,6 +70,7 @@ $ rbmk dig +short=ip example.com
 
 # Make an HTTP request
 $ rbmk curl https://example.com/
+...
 
 # Combine dig and curl for step-by-step measurement
 $ IP=$(rbmk dig +short=ip example.com|head -n1)
@@ -79,10 +81,16 @@ $ rbmk dig --logs dns.jsonl example.com
 $ rbmk curl --logs http.jsonl https://example.com/
 ```
 
-For a quick introduction with more examples:
+For a quick introduction with more examples, run:
 
 ```sh
 $ rbmk intro
+```
+
+For comprehensive usage documentation, run:
+
+```sh
+$ rbmk tutorial
 ```
 
 ## Commands
@@ -90,10 +98,11 @@ $ rbmk intro
 Core Measurement Commands:
 - `curl`: Measures HTTP/HTTPS endpoints with `curl(1)`-like syntax.
 - `dig`: Performs DNS measurements with `dig(1)`-like syntax.
+- `stun`: Resolves the public IP addresses using STUN.
 
 Unix-like Commands for Scripting:
 - `cat`: Concatenates files.
-- `ipuniq`: Filter out duplicate IP addresses.
+- `ipuniq`: Sort, deduplicate, and format IP addresses.
 - `mkdir`: Creates directories.
 - `mv`: Moves (renames) files and directories.
 - `rm`: Removes files and directories.
