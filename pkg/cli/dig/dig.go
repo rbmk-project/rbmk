@@ -33,7 +33,7 @@ var readme string
 
 // Help implements [cliutils.Command].
 func (cmd command) Help(env cliutils.Environment, argv ...string) error {
-	fmt.Fprintf(env.Stdout(), "%s\n", markdown.TryRender(readme))
+	fmt.Fprintf(env.Stdout(), "%s\n", markdown.MaybeRender(readme))
 	return nil
 }
 

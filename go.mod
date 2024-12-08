@@ -6,7 +6,7 @@ require (
 	github.com/charmbracelet/glamour v0.8.0
 	github.com/miekg/dns v1.1.62
 	github.com/pion/stun/v3 v3.0.0
-	github.com/rbmk-project/common v0.11.0
+	github.com/rbmk-project/common v0.12.0
 	github.com/rbmk-project/dnscore v0.8.0
 	github.com/rbmk-project/x v0.0.0-20241130105031-0e28dad87694
 	github.com/spf13/pflag v1.0.5

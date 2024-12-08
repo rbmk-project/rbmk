@@ -26,6 +26,6 @@ func (cmd command) Help(env cliutils.Environment, argv ...string) error {
 }
 
 func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
-	fmt.Fprintf(env.Stdout(), "%s\n", markdown.TryRender(readme))
+	fmt.Fprintf(env.Stdout(), "%s\n", markdown.MaybeRender(readme))
 	return nil
 }

@@ -30,7 +30,7 @@ var writeDocs string
 
 // Help implements [cliutils.Command].
 func (cmd writeCommand) Help(env cliutils.Environment, argv ...string) error {
-	fmt.Fprintf(env.Stdout(), "%s\n", markdown.TryRender(writeDocs))
+	fmt.Fprintf(env.Stdout(), "%s\n", markdown.MaybeRender(writeDocs))
 	return nil
 }
 
