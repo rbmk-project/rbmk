@@ -23,7 +23,7 @@ rbmk:
 #doc: - `rbmk-lite`: build rbmk without optional features in the current dir
 .PHONY: rbmk-lite
 rbmk-lite:
-	go build -v -o rbmk-lite -ldflags '-s -w' -tags rbmk_disable_markdown,netgo ./cmd/rbmk
+	go build -v -o rbmk-lite -ldflags '-s -w' -tags netgo,rbmk_disable_markdown,rbmk_disable_plugin ./cmd/rbmk
 
 #doc:
 #doc: - `check`: run tests

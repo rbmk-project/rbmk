@@ -49,6 +49,9 @@ We support the following build-time feature flags:
 * `rbmk_disable_markdown` disables markdown rendering when
 producing help text thus making the binary much smaller.
 
+* `rbmk_disable_plugin` disables support for extending the
+RBMK command-line interface using plugins.
+
 You need to pass these feature flags to the `go build` command
 or the `go install` command using the `-tags` flag.
 

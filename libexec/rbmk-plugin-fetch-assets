@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+
+rbmk_prefix=$(dirname $(dirname "$(realpath "${0}")"))
+rbmk_var="${rbmk_prefix}/var/rbmk"
+assets_dir="${rbmk_var}/assets"
+country_db_url="https://download.db-ip.com/free/dbip-country-lite-2024-12.mmdb.gz"
+asn_db_url="https://download.db-ip.com/free/dbip-asn-lite-2024-12.mmdb.gz"
+cacert_pem_url="https://curl.se/ca/cacert-2024-11-26.pem"
+
+set -x
+cd $assets_dir
+curl -fsSLO $country_db_url
+gunzip -f $(basename $country_db_url)
+ln -sf $(basename $country_db_url .gz) dbip-country.mmdb
+curl -fsSLO $asn_db_url
+gunzip -f $(basename $asn_db_url)
+ln -sf $(basename $asn_db_url .gz) dbip-asn.mmdb
+curl -fsSLO $cacert_pem_url
+ln -sf $(basename $cacert_pem_url) cacert.pem

@@ -9,7 +9,7 @@ import sys
 
 
 HELP_TEXT = """
-usage: ./scripts/check-https [flags...]
+usage: rbmk plugin run generate-check-https [flags...]
 
 Writes to the standard output a shell script that checks
 the HTTPS availability for a list of domains.

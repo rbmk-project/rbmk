@@ -30,6 +30,10 @@ to facilitate network exploration and measurements.
 * `tar` - Creates tar archives.
 * `timestamp` - Prints filesystem-friendly UTC timestamp.
 
+### Plugins
+
+* `plugin` - Manages RBMK plugins.
+
 ### Help Commands
 
 * `intro` - Shows a brief introduction with usage examples.
