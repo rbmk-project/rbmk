@@ -102,7 +102,7 @@ Core Measurement Commands:
 
 Unix-like Commands for Scripting:
 - `cat`: Concatenates files.
-- `ipuniq`: Sort, deduplicate, and format IP addresses.
+- `ipuniq`: Shuffle, deduplicate, and format IP addresses.
 - `mkdir`: Creates directories.
 - `mv`: Moves (renames) files and directories.
 - `rm`: Removes files and directories.
