@@ -57,6 +57,7 @@ type Task struct {
 	WaitTimeout time.Duration
 }
 
+// Run runs the task and returns an error.
 func (task *Task) Run(ctx context.Context) error {
 	// 1. Setup logging
 	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
