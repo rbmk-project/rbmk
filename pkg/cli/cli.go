@@ -15,6 +15,7 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/ipuniq"
 	"github.com/rbmk-project/rbmk/pkg/cli/mkdir"
 	"github.com/rbmk-project/rbmk/pkg/cli/mv"
+	"github.com/rbmk-project/rbmk/pkg/cli/nc"
 	"github.com/rbmk-project/rbmk/pkg/cli/pipe"
 	"github.com/rbmk-project/rbmk/pkg/cli/rm"
 	"github.com/rbmk-project/rbmk/pkg/cli/sh"
@@ -40,6 +41,7 @@ func NewCommand() cliutils.Command {
 			"ipuniq":    ipuniq.NewCommand(),
 			"mkdir":     mkdir.NewCommand(),
 			"mv":        mv.NewCommand(),
+			"nc":        nc.NewCommand(),
 			"pipe":      pipe.NewCommand(),
 			"rm":        rm.NewCommand(),
 			"sh":        sh.NewCommand(),
