@@ -4,7 +4,7 @@
 
 RBMK (Really Basic Measurement Kit) is a command-line utility
 to facilitate network exploration and measurements. It provides
-fundamental network operations (`dig`, `curl`, and `stun`) that you can
+fundamental network operations (`dig`, `curl`, `nc`, and `stun`) that you can
 compose together to perform modular network measurements where
 you can observe each operation in isolation.
 
