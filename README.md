@@ -19,6 +19,7 @@ you can observe each operation in isolation.
 - Core Measurement Commands:
   - `dig`: DNS measurements with multiple protocols
   - `curl`: HTTP(S) endpoint measurements
+  - `nc`: TCP/TLS endpoint measurements
   - `stun`: Resolve the public IP addresses
 
 - Scripting Support:
@@ -110,6 +111,7 @@ $ rbmk tutorial
 Core Measurement Commands:
 - `curl`: Measures HTTP/HTTPS endpoints with `curl(1)`-like syntax.
 - `dig`: Performs DNS measurements with `dig(1)`-like syntax.
+- `nc` - Measures TCP and TLS endpoints with an OpenBSD `nc(1)`-like syntax.
 - `stun`: Resolves the public IP addresses using STUN.
 
 Unix-like Commands for Scripting:

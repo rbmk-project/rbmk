@@ -16,6 +16,7 @@ to facilitate network exploration and measurements.
 
 * `curl` - Measures HTTP/HTTPS endpoints with `curl(1)`-like syntax.
 * `dig` - Performs DNS measurements with `dig(1)`-like syntax.
+* `nc` - Measures TCP and TLS endpoints with an OpenBSD `nc(1)`-like syntax.
 * `stun` - Performs STUN binding requests to discover public IP address.
 
 ### Unix-like Commands for Scripting
