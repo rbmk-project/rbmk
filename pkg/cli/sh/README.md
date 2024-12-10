@@ -89,4 +89,5 @@ Before RBMK v0.7.0, `rbmk sh` used to set the `$RBMK_EXE` environment
 variable to its path, to allow a script to execute `rbmk` commands.
 
 Since v0.7.0. `rbmk` is an internal shell command, `rbmk sh` is not capable
-of executing external commands, and `$RBMK_EXE` is set to `rbmk`.
+of executing external commands, and `$RBMK_EXE` is set to `rbmk`, thus
+supporting previously existing scripts without modification.
