@@ -24,6 +24,17 @@ across operating systems and supports:
 
 - Environment variables
 
+
+## Available Commands
+
+Apart from built-in commands (e.g., `cd`, `test`), the shell will
+only allow running the `rbmk` command, which will behave as when you
+normaly execute `rbmk`, except that `rbmk sh` won't be available.
+
+We do this to restrict the set of commands that `rbmk sh` could run
+and ensure scripts are portable. If you have more complex measurement
+needs, we recommend using GNU bash instead.
+
 ## Environment
 
 The `rbmk sh` command inherits the parent environment and includes the
@@ -31,8 +42,10 @@ following environment variables:
 
 ### `RBMK_EXE`
 
-Automatically set to the absolute path of the `rbmk` executable to
-help the script invoke `rbmk` commands.
+Automatically set to `rbmk` to allow scripts written before RBMK
+v0.7.0 to continue running without modification. Since v0.7.0, `rbmk sh`
+cannot execute external commands and is only allowed to run shell
+built-in commands and the `rbmk` command.
 
 ## Example
 
@@ -51,17 +64,14 @@ First, let's see the content of the the `script.bash` file:
 ```sh
 #!/bin/bash
 set -x
-timestamp=$("${RBMK_EXE}" timestamp)
+timestamp=$(rbmk timestamp)
 outdir="$timestamp"
-"${RBMK_EXE}" mkdir -p "$outdir"
-"${RBMK_EXE}" dig +short=ip A "dns.google" > "$outdir/dig1.txt"
-"${RBMK_EXE}" dig +short=ip AAAA "dns.google" > "$outdir/dig2.txt"
-"${RBMK_EXE}" tar -czf "results_$timestamp.tar.gz" "$outdir"
-"${RBMK_EXE}" rm -rf "$outdir"
+rbmk mkdir -p "$outdir"
+rbmk dig +short=ip A "dns.google" > "$outdir/dig1.txt"
+rbmk dig +short=ip AAAA "dns.google" > "$outdir/dig2.txt"
+rbmk tar -czf "results_$timestamp.tar.gz" "$outdir"
+rbmk rm -rf "$outdir"
 ```
-
-Note that we use the `${RBMK_EXE}` environment variable to invoke `rbmk`
-indirectly, which is useful when `rbmk` is not in the `PATH`.
 
 To execute the script using `rbmk sh` run:
 
@@ -72,3 +82,12 @@ $ rbmk sh script.bash
 ## Exit Status
 
 This command exits with `0` on success and `1` on failure.
+
+## History
+
+Before RBMK v0.7.0, `rbmk sh` used to set the `$RBMK_EXE` environment
+variable to its path, to allow a script to execute `rbmk` commands.
+
+Since v0.7.0. `rbmk` is an internal shell command, `rbmk sh` is not capable
+of executing external commands, and `$RBMK_EXE` is set to `rbmk`, thus
+supporting previously existing scripts without modification.

@@ -22,14 +22,30 @@ you can observe each operation in isolation.
   - `nc`: TCP/TLS endpoint measurements
   - `stun`: Resolve the public IP addresses
 
-- Scripting Support:
-  - Built-in POSIX shell interpreter
-  - Cross-platform Unix-like subcommands (e.g., `cat`, `tar`, `mv`)
-  - Script generation tools
-
 The tool is designed to support both general use and measurement-specific
-features, with support for scripting concurrent operations and
-extensive integration testing capabilities.
+features, with support for scripting and extensive integration testing
+capabilities through the [internal/qa](internal/qa) package.
+
+### Portable Scripting Support
+
+RBMK provides a POSIX-compliant shell environment through `rbmk sh` that
+guarantees script portability:
+
+```bash
+$ rbmk sh measurement.sh
+```
+
+Key features:
+
+- Scripts only use `rbmk` commands as built-in commands
+- Executing external commands is not possible
+- Cross-platform Unix-like built-in subcommands (e.g., `rbmk tar`, `rbmk mv`)
+- Identical behavior across Unix-like systems and Windows
+- Develop locally, deploy anywhere without modification
+- No surprises caused by missing or different external tools
+
+This design ensures that measurement scripts work consistently across
+different environments, eliminating common portability issues.
 
 ## Minimum Go version
 
