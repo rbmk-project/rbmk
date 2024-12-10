@@ -67,7 +67,7 @@ type builtInEnvironment struct {
 //
 // Uses:
 //
-// 1. [fsx.NewChdirFS] to simulate chdidr into the current directory.
+// 1. [fsx.NewChdirFS] to simulate chdir into the current directory.
 //
 // 2. the shells's current stdin, stdout, and stderr.
 //
