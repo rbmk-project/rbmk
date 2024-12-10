@@ -11,7 +11,6 @@ import (
 	"io"
 	"math/rand/v2"
 	"net"
-	"os"
 	"strconv"
 
 	"github.com/rbmk-project/common/cliutils"
@@ -108,14 +107,14 @@ func readIPs(
 ) error {
 	var reader io.Reader
 	if fname != "-" {
-		filep, err := os.Open(fname)
+		filep, err := env.FS().Open(fname)
 		if err != nil {
 			return err
 		}
 		defer filep.Close()
 		reader = filep
 	} else {
-		reader = os.Stdin
+		reader = env.Stdin()
 	}
 
 	scanner := bufio.NewScanner(reader)

@@ -20,6 +20,7 @@ import (
 	"sync"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/common/fsx"
 )
 
 // DialContextFunc is the type of the low-level dial function.
@@ -88,6 +89,9 @@ func (rcp *RootCAsProvider) Get() *x509.CertPool {
 //
 // The zero value is not ready to use; construct using [NewEnvironment].
 type Environment struct {
+	// fsp is the file system provider.
+	fsp fsx.FS
+
 	// mu protects stderr and stdout.
 	mu sync.Mutex
 
@@ -104,11 +108,19 @@ type Environment struct {
 // NewEnvironment creates a new [*Environment] instance.
 func NewEnvironment() *Environment {
 	return &Environment{
+		fsp:    fsx.OsFS{},
 		mu:     sync.Mutex{},
 		stdin:  os.Stdin,
 		stderr: os.Stderr,
 		stdout: os.Stdout,
 	}
+}
+
+// SetFS sets the file system provider.
+func (env *Environment) SetFS(fsp fsx.FS) {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	env.fsp = fsp
 }
 
 // SetStdin sets the standard input stream.
@@ -134,6 +146,13 @@ func (env *Environment) SetStdout(w io.Writer) {
 
 // Ensure that [*Environment] implements [cliutils.Environment].
 var _ cliutils.Environment = (*Environment)(nil)
+
+// FS implements [cliutils.Environment].
+func (env *Environment) FS() fsx.FS {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	return env.fsp
+}
 
 // Stdin implements [cliutils.Environment].
 func (env *Environment) Stdin() io.Reader {

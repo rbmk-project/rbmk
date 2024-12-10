@@ -9,12 +9,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/common/closepool"
+	"github.com/rbmk-project/common/fsx"
 	"github.com/rbmk-project/rbmk/internal/markdown"
 	"github.com/spf13/pflag"
 )
@@ -119,7 +119,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	case "-":
 		task.LogsWriter = env.Stdout()
 	default:
-		filep, err := os.OpenFile(*logfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+		filep, err := env.FS().OpenFile(*logfile, fsx.O_CREATE|fsx.O_WRONLY|fsx.O_APPEND, 0600)
 		if err != nil {
 			err = fmt.Errorf("cannot open log file: %w", err)
 			fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())
@@ -131,7 +131,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 11. handle -o/--output flag
 	if *output != "" {
-		filep, err := os.OpenFile(*output, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+		filep, err := env.FS().OpenFile(*output, fsx.O_CREATE|fsx.O_WRONLY|fsx.O_TRUNC, 0600)
 		if err != nil {
 			err = fmt.Errorf("cannot create output file: %w", err)
 			fmt.Fprintf(env.Stderr(), "rbmk curl: %s\n", err.Error())

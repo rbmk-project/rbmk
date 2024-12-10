@@ -9,11 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/common/closepool"
+	"github.com/rbmk-project/common/fsx"
 	"github.com/rbmk-project/rbmk/internal/markdown"
 	"github.com/spf13/pflag"
 )
@@ -185,7 +185,6 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 8. possibly open the log file
 	var filepool closepool.Pool
-	var filep *os.File
 	switch *logfile {
 	case "":
 		// nothing
@@ -193,7 +192,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		task.LogsWriter = env.Stdout()
 	default:
 		var err error
-		filep, err = os.OpenFile(*logfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+		filep, err := env.FS().OpenFile(*logfile, fsx.O_CREATE|fsx.O_WRONLY|fsx.O_APPEND, 0600)
 		if err != nil {
 			err = fmt.Errorf("cannot open log file: %w", err)
 			fmt.Fprintf(env.Stderr(), "rbmk dig: %s\n", err.Error())

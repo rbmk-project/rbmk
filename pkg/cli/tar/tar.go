@@ -16,7 +16,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"os"
 	"path/filepath"
 
 	"github.com/rbmk-project/common/cliutils"
@@ -86,7 +85,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	defer pool.Close()
 
 	// 6. create archive file
-	filep, err := os.Create(*file)
+	filep, err := env.FS().Create(*file)
 	if err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk tar: cannot create archive: %s\n", err.Error())
 		return err
@@ -105,7 +104,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 8. add each file/directory to the archive
 	for _, path := range args {
-		if err := appendToArchive(tw, path); err != nil {
+		if err := appendToArchive(env, tw, path); err != nil {
 			fmt.Fprintf(env.Stderr(), "rbmk tar: %s\n", err.Error())
 			return err
 		}
@@ -121,7 +120,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 }
 
 // appendToArchive adds a file or directory to the archive.
-func appendToArchive(tw *tar.Writer, path string) error {
+func appendToArchive(env cliutils.Environment, tw *tar.Writer, path string) error {
 	return filepath.WalkDir(path, func(path string, dentry fs.DirEntry, err error) error {
 		// Return early in case there's a walk error
 		if err != nil {
@@ -165,13 +164,13 @@ func appendToArchive(tw *tar.Writer, path string) error {
 		}
 
 		// Attempt to copy the content of the file
-		return copyRegularFile(tw, path)
+		return copyRegularFile(env, tw, path)
 	})
 }
 
 // copyRegularFile copies the content of a regular file to a tar writer.
-func copyRegularFile(tw *tar.Writer, filename string) error {
-	filep, err := os.Open(filename)
+func copyRegularFile(env cliutils.Environment, tw *tar.Writer, filename string) error {
+	filep, err := env.FS().Open(filename)
 	if err != nil {
 		return err
 	}
