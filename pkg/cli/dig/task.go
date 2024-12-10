@@ -194,6 +194,9 @@ func (task *Task) Run(ctx context.Context) error {
 	// Explicitly close the connections in the pool
 	pool.Close()
 
+	// TODO(bassosimone): we should probably not print the resulting IP addresses
+	// or entries if the response is invalid or the Rcode indicates failure.
+
 	// Validate the DNS response
 	if err = dnscore.ValidateResponse(query, response); err != nil {
 		return fmt.Errorf("cannot validate response: %w", err)
