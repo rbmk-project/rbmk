@@ -9,8 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
-	"os"
 	"sync"
 
 	"github.com/rbmk-project/common/cliutils"
@@ -71,15 +69,14 @@ func (cmd readCommand) Main(ctx context.Context, env cliutils.Environment, argv 
 	pipeName := args[0]
 
 	// 4. create and setup listener
-	addr := &net.UnixAddr{Name: pipeName, Net: "unix"}
-	listener, err := net.ListenUnix("unix", addr)
+	listener, err := env.FS().ListenUnix(pipeName)
 	if err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk pipe read: cannot create pipe: %s\n", err.Error())
 		return err
 	}
 	defer func() {
 		listener.Close()
-		os.Remove(pipeName)
+		env.FS().Remove(pipeName)
 	}()
 
 	// 5. protect stdout writes and handle completion

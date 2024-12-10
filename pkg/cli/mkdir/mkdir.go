@@ -8,7 +8,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/internal/markdown"
@@ -57,9 +56,9 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 4. create each directory
 	for _, dir := range args {
-		mkdirfn := os.Mkdir
+		mkdirfn := env.FS().Mkdir
 		if *parents {
-			mkdirfn = os.MkdirAll
+			mkdirfn = env.FS().MkdirAll
 		}
 		if err := mkdirfn(dir, 0755); err != nil {
 			fmt.Fprintf(env.Stderr(), "rbmk mkdir: %s\n", err.Error())

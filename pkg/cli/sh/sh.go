@@ -49,7 +49,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 3. Open and parse the shell script.
 	scriptPath := argv[1]
-	filep, err := os.Open(scriptPath)
+	filep, err := env.FS().Open(scriptPath)
 	if err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk sh: cannot open script: %s\n", err.Error())
 		return err

@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/internal/markdown"
@@ -55,7 +54,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 }
 
 func catFile(env cliutils.Environment, path string) error {
-	filep, err := os.Open(path)
+	filep, err := env.FS().Open(path)
 	if err != nil {
 		return err
 	}
