@@ -118,9 +118,16 @@ $ rbmk ipuniq --port 80 --port 443 ips.txt
 Filter a list the endpoints and just keep IP addresses:
 
 ```
-$ echo -e '10.0.0.1:80\n10.0.0.1:443\n127.0.0.1:111'| rbmk ipuniq -E
+$ echo -e '10.0.0.1:80\n10.0.0.1:443\n127.0.0.1:111' | rbmk ipuniq -E
 10.0.0.1
 127.0.0.1
+```
+
+Same but using IPv6 endpoints:
+
+```
+$ echo -e '[::1]:80\n[::1]:443' | rbmk ipuniq -E
+::1
 ```
 
 ### Exit Status
