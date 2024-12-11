@@ -44,7 +44,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	ffail := clip.BoolP("fail", "f", false, "fail on input paesing error")
 	fports := clip.StringSliceP("port", "p", nil, "format output as HOST:PORT endpoints")
 	frand := clip.BoolP("random", "r", false, "randomly shuffle the output")
-	fromendpoints := clip.BoolP("from-endpoints", "E", false, "assume inputs contains endpoints")
+	fromendpoints := clip.BoolP("from-endpoints", "E", false, "assume input contains endpoints")
 
 	if err := clip.Parse(argv[1:]); err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
