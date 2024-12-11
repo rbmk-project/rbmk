@@ -41,8 +41,10 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 2. parse command line flags
 	clip := pflag.NewFlagSet("rbmk ipuniq", pflag.ContinueOnError)
+	ffail := clip.BoolP("fail", "f", false, "fail on input paesing error")
 	fports := clip.StringSliceP("port", "p", nil, "format output as HOST:PORT endpoints")
 	frand := clip.BoolP("random", "r", false, "randomly shuffle the output")
+	fromendpoints := clip.BoolP("from-endpoints", "E", false, "assume inputs contains endpoints")
 
 	if err := clip.Parse(argv[1:]); err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
@@ -71,7 +73,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	// 5. read and parse IPs from all files
 	ipAddrs := make(map[string]struct{})
 	for _, fname := range args {
-		if err := readIPs(env, fname, *frand, ipAddrs, ports); err != nil {
+		if err := readIPs(env, fname, *ffail, *frand, *fromendpoints, ipAddrs, ports); err != nil {
 			fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
 			return err
 		}
@@ -101,7 +103,9 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 func readIPs(
 	env cliutils.Environment,
 	fname string,
+	ffail bool,
 	frand bool,
+	fromendpoints bool,
 	ipAddrs map[string]struct{},
 	ports []uint16,
 ) error {
@@ -120,6 +124,17 @@ func readIPs(
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		line := scanner.Text()
+		if fromendpoints {
+			host, _, err := net.SplitHostPort(line)
+			if err != nil {
+				if ffail {
+					return err
+				}
+				fmt.Fprintf(env.Stderr(), "rbmk ipuniq: warning: invalid endpoint: %s\n", line)
+				continue
+			}
+			line = host
+		}
 		if ip := net.ParseIP(line); ip != nil {
 			// Implementation note: using string representation as the key to
 			// handle different textual representations of same addr.
@@ -132,6 +147,10 @@ func readIPs(
 				continue
 			}
 			printAddr(env, normalized, ports)
+		} else if ffail {
+			return fmt.Errorf("invalid IP address: %s", line)
+		} else {
+			fmt.Fprintf(env.Stderr(), "rbmk ipuniq: warning: invalid IP address: %s\n", line)
 		}
 	}
 	return scanner.Err()
