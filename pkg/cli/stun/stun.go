@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/common/closepool"
@@ -51,6 +52,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 4. add flags to the parser
 	logfile := clip.String("logs", "", "path where to write structured logs")
+	maxtime := clip.Int("maxtime", 30, "maximum time for transaction to complete (in seconds)")
 	measure := clip.Bool("measure", false, "do not exit 1 on measurement failure")
 
 	// 5. parse command line arguments
@@ -71,6 +73,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 7. finish filling up the task
 	task.Endpoint = args[0]
+	task.MaxTime = time.Duration(*maxtime) * time.Second
 
 	// 8. handle --logs flag
 	var filepool closepool.Pool
