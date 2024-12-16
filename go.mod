@@ -7,8 +7,8 @@ require (
 	github.com/miekg/dns v1.1.62
 	github.com/pion/stun/v3 v3.0.0
 	github.com/rbmk-project/common v0.14.0
-	github.com/rbmk-project/dnscore v0.8.0
-	github.com/rbmk-project/x v0.0.0-20241130105031-0e28dad87694
+	github.com/rbmk-project/dnscore v0.9.0
+	github.com/rbmk-project/x v0.0.0-20241216150034-7354fea9d339
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.10.0
 	mvdan.cc/sh/v3 v3.10.0
@@ -19,7 +19,7 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
-	github.com/charmbracelet/x/ansi v0.5.2 // indirect
+	github.com/charmbracelet/x/ansi v0.6.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.4 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
@@ -39,7 +39,7 @@ require (
 	github.com/wlynxg/anet v0.0.5 // indirect
 	github.com/yuin/goldmark v1.7.8 // indirect
 	github.com/yuin/goldmark-emoji v1.0.4 // indirect
-	golang.org/x/crypto v0.30.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/net v0.32.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
