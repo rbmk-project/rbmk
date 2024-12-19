@@ -8,7 +8,7 @@ require (
 	github.com/pion/stun/v3 v3.0.0
 	github.com/rbmk-project/common v0.14.0
 	github.com/rbmk-project/dnscore v0.9.0
-	github.com/rbmk-project/x v0.0.0-20241216150034-7354fea9d339
+	github.com/rbmk-project/x v0.0.0-20241219092627-3a240441ca60
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.10.0
 	mvdan.cc/sh/v3 v3.10.0
@@ -41,7 +41,7 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.4 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/term v0.27.0 // indirect
