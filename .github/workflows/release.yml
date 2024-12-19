@@ -1,0 +1,40 @@
+# This workflow cross-compile rbmk and (aspirationally for now)
+# publishes the binaries to the GitHub release page.
+#
+# TODO(bassosimone): implement publishing release artifacts. A key
+# aspect here is whether we want to sign them (which is a bit of
+# a burden both for macOS and Windows).
+name: Release
+
+on:
+  push:
+    # We generally run this workflow for tags but, for testing, it is
+    # possible to use branch bames starting with `fullbuild` or `release/`.
+    #
+    # Before a release, it is recommended to use either name to
+    # ensure that the release process is working as intended.
+    branches:
+      - "fullbuild*" # For quick release testing
+      - "release/*" # For proper release preparation
+    tags: ["v*"]
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        goversion:
+          # We should most likely only use the latest version of Go
+          # but I'm keeping the matrix for flexibility
+          - "1.23"
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "${{ matrix.goversion }}"
+
+      - name: Release
+        run: make release
