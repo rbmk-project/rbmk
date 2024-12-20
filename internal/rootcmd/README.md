@@ -35,6 +35,7 @@ to facilitate network exploration and measurements.
 
 * `intro` - Shows a brief introduction with usage examples.
 * `tutorial` - Provides comprehensive usage documentation.
+* `version` - Prints the version of the `rbmk` utility to the stdout.
 
 ## Getting Started
 

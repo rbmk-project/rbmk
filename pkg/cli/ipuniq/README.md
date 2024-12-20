@@ -53,11 +53,11 @@ Print this help message.
 
 ### `-p, --port PORT`
 
-Format output as HOST:PORT endpoints, adding [] brackets for IPv6
+Format output as `ADDRESS:PORT` endpoints, adding [] brackets for IPv6
 addresses as needed. This flag can be specified multiple times
 to generate endpoints for multiple ports (e.g., `-p 80 -p 443 -p 22`
 generates HTTP, HTTPS, and SSH endpoints). When no ports are
-specified, we output IP addresses without ports. Each PORT must
+specified, we output IP addresses without ports. Each `PORT` must
 be a valid port number (0-65535).
 
 ### `-r, --random`

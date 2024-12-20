@@ -10,7 +10,7 @@ rbmk version
 ## Description
 
 Prints on the stdout version information. We add version information
-when compiling `rbmk` using the `GNUMakefile`.
+when compiling `rbmk` using the `GNUmakefile` makefile.
 
 Possible values for the version information are:
 
@@ -20,3 +20,7 @@ Possible values for the version information are:
 
 - `vX.Y.Z-<N>-g<SHA>` if using `GNUMakefile` to build
 a commit not associated with a tag.
+
+## History
+
+The `rbmk version` command was introduced in RBMK v0.5.0.

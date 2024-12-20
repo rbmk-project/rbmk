@@ -9,9 +9,9 @@ rbmk pipe read --writers N PIPE
 
 ## Description
 
-Read from a named pipe in the current directory. Accepts exactly N writers
+Read from a named pipe in the current directory. Accepts exactly `N` writers
 and multiplexes their output to stdout line by line. The command terminates
-after all N writers have disconnected. If `N` is not specified
+after all `N` writers have disconnected. If `N` is not specified
 or is zero, this command will `exit 1` and print an error.
 
 Each line from each writer is written atomically to stdout to prevent garbled
@@ -43,7 +43,7 @@ done
 
 ## Notes
 
-- Blocks until exactly N writers have connected and completed
+- Blocks until exactly `N` writers have connected and completed
 
 - Each writer's output is handled line by line
 
@@ -51,7 +51,7 @@ done
 
 - Writers may disconnect early
 
-- No new connections are accepted after N writers
+- No new connections are accepted after `N` writers
 
 ## Exit Status
 
@@ -62,3 +62,7 @@ Returns `0` on success. Returns `1` on:
 - Connection errors
 
 - I/O errors
+
+## History
+
+The `rbmk pipe read` command was introduced in RBMK v0.4.0.

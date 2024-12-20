@@ -96,4 +96,4 @@ Since v0.7.0. `rbmk` is an internal shell command, `rbmk sh` is not capable
 of executing external commands, and `$RBMK_EXE` is set to `rbmk`, thus
 supporting previously existing scripts without modification.
 
-The `rbmk sh` command appeared in RBMK v0.2.0.
+The `rbmk sh` command was introduced in RBMK v0.2.0.
