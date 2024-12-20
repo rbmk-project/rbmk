@@ -61,10 +61,10 @@ Print this help message.
 
 ### `--logs FILE`
 
-Writes structured logs to the given FILE. If FILE already exists, we
-append to it. If FILE does not exist, we create it. If FILE is a single
+Writes structured logs to the given `FILE`. If `FILE` already exists, we
+append to it. If `FILE` does not exist, we create it. If `FILE` is a single
 dash (`-`), we write to the stdout. If you specify `--logs` multiple
-times, we write to the last FILE specified.
+times, we write to the last `FILE` specified.
 
 ### `--measure`
 
@@ -179,3 +179,7 @@ Returns `0` on success. Returns `1` on:
 - File operation errors (cannot open/close files).
 
 - Measurement failures (unless `--measure` is specified).
+
+## History
+
+The `rbmk dig` command was introduced in RBMK v0.1.0.

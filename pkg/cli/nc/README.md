@@ -24,7 +24,9 @@ it is recommended to specify an IP address directly.
 Specify ALPN protocol(s) for TLS connections. Can be specified
 multiple times to support protocol negotiation. For example:
 
-    --alpn h2 --alpn http/1.1
+```
+--alpn h2 --alpn http/1.1
+```
 
 Must be used alongside the `--tls` flag.
 
@@ -38,10 +40,10 @@ Print this help message.
 
 ### `--logs FILE`
 
-Writes structured logs to the given FILE. If FILE already exists, we
-append to it. If FILE does not exist, we create it. If FILE is a single
+Writes structured logs to the given `FILE`. If `FILE` already exists, we
+append to it. If `FILE` does not exist, we create it. If `FILE` is a single
 dash (`-`), we write to the stdout. If you specify `--logs` multiple
-times, we write to the last FILE specified.
+times, we write to the last `FILE` specified.
 
 ### `--measure`
 
@@ -56,7 +58,9 @@ continuing due to this flag.
 Specify the server name for the SNI extension in the TLS
 handshake. For example:
 
-    --sni www.example.com
+```
+--sni www.example.com
+```
 
 Must be used alongside the `--tls` flag.
 
@@ -110,3 +114,7 @@ $ rbmk nc --logs conn.jsonl example.com 80
 ## Exit Status
 
 The nc utility exits with `0` on success and `1` on error.
+
+## History
+
+The `rbmk nc` command was introduced in RBMK v0.6.0.

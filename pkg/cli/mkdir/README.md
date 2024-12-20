@@ -7,7 +7,7 @@
 rbmk mkdir [-p] DIRECTORY...
 ```
 
-Create the DIRECTORY(ies), if they do not already exist. We use the
+Create the `DIRECTORY`(ies), if they do not already exist. We use the
 `0755` file mode to create new directories.
 
 ## Flags
@@ -37,3 +37,7 @@ $ rbmk mkdir -p a/long/path/of/dirs
 ## Exit Status
 
 This command exits with `0` on success and `1` on failure.
+
+## History
+
+The `rbmk mkdir` command was introduced in RBMK v0.2.0.

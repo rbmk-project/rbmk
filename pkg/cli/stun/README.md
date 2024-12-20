@@ -9,14 +9,14 @@ rbmk stun [flags] ENDPOINT
 
 ## Description
 
-Send a STUN Binding Request to the given ENDPOINT and print the reflexive
+Send a STUN Binding Request to the given `ENDPOINT` and print the reflexive
 transport address (public IP address and port) to standard output.
 
 ## Arguments
 
 ### `ENDPOINT`
 
-The ENDPOINT argument should be in the form HOST:PORT. For example:
+The ENDPOINT argument should be in the form `HOST:PORT`. For example:
 
 - `stun.l.google.com:19302`
 
@@ -35,8 +35,8 @@ Print this help message.
 
 ### `--logs FILE`
 
-Writes structured logs to the given FILE. If FILE already exists, we
-append to it. If FILE does not exist, we create it. If FILE is a single
+Writes structured logs to the given `FILE`. If `FILE` already exists, we
+append to it. If `FILE` does not exist, we create it. If `FILE` is a single
 dash (`-`), we write to the stdout.
 
 ### `--max-time DURATION`
@@ -77,3 +77,7 @@ Returns `0` on success. Returns `1` on:
 - File operation errors (cannot open/close files).
 
 - Measurement failures (unless `--measure` is specified).
+
+## History
+
+The `rbmk stun` command was introduced in RBMK v0.3.0.

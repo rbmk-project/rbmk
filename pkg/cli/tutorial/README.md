@@ -31,3 +31,7 @@ Read the basics tutorial:
 ```
 $ rbmk tutorial basics
 ```
+
+## History
+
+The `rbmk tutorial` command was introduced in RBMK v0.1.0.
