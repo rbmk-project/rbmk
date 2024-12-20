@@ -20,6 +20,7 @@ VERSION ?= $(shell git describe --tags 2>/dev/null || echo "dev")
 LDFLAGS := -s -w -X github.com/rbmk-project/rbmk/pkg/cli/version.Version=$(VERSION)
 TAGS := netgo
 GOENV := CGO_ENABLED=0
+EXE ?=
 
 #doc:
 #doc: - `rbmk`: build rbmk in the current directory
@@ -32,7 +33,7 @@ GOENV := CGO_ENABLED=0
 #doc: The resulting binary will be named `rbmk-linux-arm64-full`.
 .PHONY: rbmk
 rbmk:
-	$(GOENV) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -v -o rbmk-$(GOOS)-$(GOARCH)-full -ldflags '$(LDFLAGS)' -tags $(TAGS) ./cmd/rbmk
+	$(GOENV) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -v -o rbmk-$(GOOS)-$(GOARCH)-full${EXE} -ldflags '$(LDFLAGS)' -tags $(TAGS) ./cmd/rbmk
 
 #doc:
 #doc: - `rbmk-lite`: same as `rbmk`, but with markdown rendering disabled
@@ -46,7 +47,7 @@ rbmk:
 #doc: The resulting binary will be named `rbmk-linux-arm64-lite`.
 .PHONY: rbmk-lite
 rbmk-lite:
-	$(GOENV) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -v -o rbmk-$(GOOS)-$(GOARCH)-lite -ldflags '$(LDFLAGS)' -tags $(TAGS),rbmk_disable_markdown ./cmd/rbmk
+	$(GOENV) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -v -o rbmk-$(GOOS)-$(GOARCH)-lite${EXE} -ldflags '$(LDFLAGS)' -tags $(TAGS),rbmk_disable_markdown ./cmd/rbmk
 
 #doc:
 #doc: - `release`: cross compile all platform/variant combinations
@@ -54,7 +55,7 @@ rbmk-lite:
 release:
 	GOOS=linux GOARCH=amd64 $(MAKE) rbmk rbmk-lite
 	GOOS=linux GOARCH=arm64 $(MAKE) rbmk rbmk-lite
-	GOOS=windows GOARCH=amd64 $(MAKE) rbmk rbmk-lite
+	GOOS=windows GOARCH=amd64 EXE=.exe $(MAKE) rbmk rbmk-lite
 	GOOS=darwin GOARCH=arm64 $(MAKE) rbmk rbmk-lite
 
 #doc:
