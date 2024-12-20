@@ -41,3 +41,14 @@ to facilitate network exploration and measurements.
 New to RBMK? Try `rbmk intro` to get started!
 
 Run `rbmk COMMAND --help` for more information about `COMMAND`.
+
+## License
+
+```
+SPDX-License-Identifier: GPL-3.0-or-later
+```
+
+## Reporting Bugs
+
+Please, use the [rbmk-project/issues](https://github.com/rbmk-project/issues)
+repository to report bugs or suggest improvements.

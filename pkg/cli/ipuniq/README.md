@@ -138,3 +138,5 @@ This command exits with `0` on success and `1` on failure.
 
 Before RBMK v0.4.0, this command always randomly shuffled the
 addresses. Afterwards, one must use `--random` explicitly.
+
+This command was introduced in RBMK v0.2.0.

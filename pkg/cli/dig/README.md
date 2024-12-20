@@ -179,3 +179,7 @@ Returns `0` on success. Returns `1` on:
 - File operation errors (cannot open/close files).
 
 - Measurement failures (unless `--measure` is specified).
+
+## History
+
+The `rbmk dig` command was introduced in RBMK v0.1.0.

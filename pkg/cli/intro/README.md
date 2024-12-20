@@ -64,3 +64,7 @@ and makes it easier to understand where issues occur.
 * Run `rbmk curl --help` for detailed HTTP measurement options
 
 * Try `rbmk tutorial` for a comprehensive guide
+
+## History
+
+The `rbmk intro` command was introduced in RBMK v0.1.0.
