@@ -25,6 +25,9 @@ type Task struct {
 	// LogsWriter is where we write structured logs
 	LogsWriter io.Writer
 
+	// MaxTime is the maximum time to wait for the operation to finish.
+	MaxTime time.Duration
+
 	// Output is where we write the results
 	Output io.Writer
 }
@@ -32,7 +35,7 @@ type Task struct {
 // Run executes the STUN binding request task
 func (task *Task) Run(ctx context.Context) error {
 	// 1. Set up the overall operation timeout
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, task.MaxTime)
 	defer cancel()
 
 	// 2. Set up the JSON logger for writing measurements
@@ -52,11 +55,20 @@ func (task *Task) Run(ctx context.Context) error {
 		return conn
 	}
 
-	// 5. Establish UDP connection to STUN server
+	// 5. Establish UDP connection to STUN server and make sure
+	// we have proper context deadline propagation. Also, make sure
+	// that we bail immediately if the context is done.
 	conn, err := netx.DialContext(ctx, "udp", task.Endpoint)
 	if err != nil {
 		return fmt.Errorf("cannot connect to STUN server: %w", err)
 	}
+	if d, ok := ctx.Deadline(); ok {
+		conn.SetDeadline(d)
+	}
+	go func() {
+		<-ctx.Done()
+		conn.Close()
+	}()
 
 	// 6. Build STUN binding request message
 	message := stun.MustBuild(stun.TransactionID, stun.BindingRequest)

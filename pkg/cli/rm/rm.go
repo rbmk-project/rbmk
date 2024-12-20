@@ -8,9 +8,9 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/common/fsx"
 	"github.com/rbmk-project/rbmk/internal/markdown"
 	"github.com/spf13/pflag"
 )
@@ -58,7 +58,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 4. remove each path
 	for _, path := range args {
-		if err := removePath(path, *recursive, *force); err != nil {
+		if err := removePath(env, path, *recursive, *force); err != nil {
 			fmt.Fprintf(env.Stderr(), "rbmk rm: %s\n", err.Error())
 			return err
 		}
@@ -67,18 +67,18 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 }
 
 // removePath removes a file or directory at the given path.
-func removePath(path string, recursive bool, force bool) error {
-	info, err := os.Lstat(path)
+func removePath(env cliutils.Environment, path string, recursive bool, force bool) error {
+	info, err := env.FS().Lstat(path)
 	switch {
-	case err != nil && os.IsNotExist(err) && force:
+	case err != nil && fsx.IsNotExist(err) && force:
 		return nil
 	case err != nil:
 		return err
 	case info.IsDir() && !recursive:
 		return fmt.Errorf("cannot remove %s: is a directory", path)
 	case info.IsDir():
-		return os.RemoveAll(path)
+		return env.FS().RemoveAll(path)
 	default:
-		return os.Remove(path)
+		return env.FS().Remove(path)
 	}
 }

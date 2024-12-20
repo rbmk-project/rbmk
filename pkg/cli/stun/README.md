@@ -39,6 +39,12 @@ Writes structured logs to the given FILE. If FILE already exists, we
 append to it. If FILE does not exist, we create it. If FILE is a single
 dash (`-`), we write to the stdout.
 
+### `--max-time DURATION`
+
+Sets the maximum time that the STUN transaction operation is allowed to take
+in seconds (e.g., `--max-time 5`). If this flag is not specified, the
+default max time is 30 seconds.
+
 ### `--measure`
 
 Do not exit with `1` if communication with the endpoint fails. Only exit

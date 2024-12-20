@@ -8,7 +8,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/rbmk-project/common/cliutils"
@@ -62,7 +61,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	// 5. handle multiple sources case
 	if len(sources) > 1 {
 		// Check if destination is a directory
-		finfo, err := os.Stat(dest)
+		finfo, err := env.FS().Stat(dest)
 		if err != nil {
 			fmt.Fprintf(env.Stderr(), "rbmk mv: %s\n", err.Error())
 			return err
@@ -78,12 +77,12 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	for _, src := range sources {
 		// ensure we move inside directory if last element is a directory
 		target := dest
-		if findo, err := os.Stat(dest); err == nil && findo.IsDir() {
+		if findo, err := env.FS().Stat(dest); err == nil && findo.IsDir() {
 			target = filepath.Join(dest, filepath.Base(src))
 		}
 
 		// actually rename the file
-		if err := os.Rename(src, target); err != nil {
+		if err := env.FS().Rename(src, target); err != nil {
 			fmt.Fprintf(env.Stderr(), "rbmk mv: %s\n", err.Error())
 			return err
 		}

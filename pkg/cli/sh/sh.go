@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/internal/markdown"
@@ -49,7 +48,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 3. Open and parse the shell script.
 	scriptPath := argv[1]
-	filep, err := os.Open(scriptPath)
+	filep, err := env.FS().Open(scriptPath)
 	if err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk sh: cannot open script: %s\n", err.Error())
 		return err
@@ -63,21 +62,15 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		return err
 	}
 
-	// 4. Ensure the RBMK_EXE environment variable is set.
-	exePath, err := os.Executable()
-	if err != nil {
-		return fmt.Errorf("rbmk sh: cannot determine rbmk path: %w", err)
-	}
-	exePath, err = filepath.Abs(exePath)
-	if err != nil {
-		return fmt.Errorf("rbmk sh: cannot determine absolute rbmk path: %w", err)
-	}
-	os.Setenv("RBMK_EXE", exePath)
+	// 4. Ensure the RBMK_EXE environment variable is set to support
+	// scripts written before the release of RBMK v0.7.0.
+	os.Setenv("RBMK_EXE", "rbmk")
 
 	// 5. Create the shell interpreter.
 	runner, err := interp.New(
 		interp.StdIO(env.Stdin(), env.Stdout(), env.Stderr()),
 		interp.Env(expand.FuncEnviron(os.Getenv)),
+		interp.ExecHandlers(newBuiltInMiddleware()),
 	)
 	if err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk sh: cannot create interpreter: %s\n", err.Error())

@@ -4,7 +4,7 @@
 
 RBMK (Really Basic Measurement Kit) is a command-line utility
 to facilitate network exploration and measurements. It provides
-fundamental network operations (`dig`, `curl`, and `stun`) that you can
+fundamental network operations (`dig`, `curl`, `nc`, and `stun`) that you can
 compose together to perform modular network measurements where
 you can observe each operation in isolation.
 
@@ -19,16 +19,37 @@ you can observe each operation in isolation.
 - Core Measurement Commands:
   - `dig`: DNS measurements with multiple protocols
   - `curl`: HTTP(S) endpoint measurements
+  - `nc`: TCP/TLS endpoint measurements
   - `stun`: Resolve the public IP addresses
 
-- Scripting Support:
-  - Built-in POSIX shell interpreter
-  - Cross-platform Unix-like subcommands (e.g., `cat`, `tar`, `mv`)
-  - Script generation tools
-
 The tool is designed to support both general use and measurement-specific
-features, with support for scripting concurrent operations and
-extensive integration testing capabilities.
+features, with support for scripting and extensive integration testing
+capabilities through the [internal/qa](internal/qa) package.
+
+### Portable Scripting Support
+
+RBMK provides a POSIX-compliant shell environment through `rbmk sh` that
+guarantees script portability:
+
+```bash
+$ rbmk sh measurement.sh
+```
+
+Key features:
+
+- Scripts only use `rbmk` commands as built-in commands
+- Executing external commands is not possible
+- Cross-platform Unix-like built-in subcommands (e.g., `rbmk tar`, `rbmk mv`)
+- Identical behavior across Unix-like systems and Windows
+- Develop locally, deploy anywhere without modification
+- No surprises caused by missing or different external tools
+
+This design ensures that measurement scripts work consistently across
+different environments, eliminating common portability issues.
+
+## Minimum Go version
+
+Go 1.23
 
 ## Installation
 
@@ -41,6 +62,14 @@ go install github.com/rbmk-project/rbmk/cmd/rbmk@latest
 ```sh
 go build -v ./cmd/rbmk
 ```
+
+If you have GNU make installed, you can also run:
+
+```sh
+make
+```
+
+to see all the available build/install options.
 
 ## Feature Flags
 
@@ -101,6 +130,7 @@ $ rbmk tutorial
 Core Measurement Commands:
 - `curl`: Measures HTTP/HTTPS endpoints with `curl(1)`-like syntax.
 - `dig`: Performs DNS measurements with `dig(1)`-like syntax.
+- `nc` - Measures TCP and TLS endpoints with an OpenBSD `nc(1)`-like syntax.
 - `stun`: Resolves the public IP addresses using STUN.
 
 Unix-like Commands for Scripting:

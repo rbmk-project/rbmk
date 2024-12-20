@@ -55,10 +55,9 @@ func (cmd writeCommand) Main(ctx context.Context, env cliutils.Environment, argv
 		conn net.Conn
 		err  error
 	)
-	addr := &net.UnixAddr{Name: pipeName, Net: "unix"}
 	delays := []time.Duration{5, 10, 20, 40, 80, 160, 320, 355} // ~1s total
 	for _, delay := range delays {
-		if conn, err = net.DialUnix("unix", nil, addr); err == nil {
+		if conn, err = env.FS().DialUnix(pipeName); err == nil {
 			break
 		}
 		time.Sleep(delay * time.Millisecond)

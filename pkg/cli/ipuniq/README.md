@@ -27,7 +27,25 @@ You enable random shuffling with `--random`. When not using `--random`, we
 stream unique addresses as soon as they are read. The streaming functionality
 was implemented in RBMK v0.4.0.
 
+The `-E, --from-endpoints` flag modifies the command behaviour to assume the
+input contains endpoints rather than just IP addresses (see below).
+
+Note that any input line that does not contain a valid IP address or
+endpoint is skipped and a warning is emitted.
+
 ## Flags
+
+### `-E, --from-endpoints`
+
+Assume that input already contains endpoints, that is `addr:port`, where
+the `addr` is an IP address, and there is `[` and `]` around IPv6
+addresses. Strip the port, and just retain the IP address for processing
+and emitting according to other `rbmk ipuniq` flags.
+
+### `-f, --fail`
+
+Cause the tool to fail (rather than emitting a warning) if an input
+line does not contain a valid IP address or endpoint (if `-E`).
 
 ### `-h, --help`
 
@@ -95,6 +113,23 @@ Create multiple endpoints for each IP addr:
 $ rbmk ipuniq --port 80 --port 443 ips.txt
 ```
 
+### Filtering a list of endpoints
+
+Filter a list the endpoints and just keep IP addresses:
+
+```
+$ echo -e '10.0.0.1:80\n10.0.0.1:443\n127.0.0.1:111' | rbmk ipuniq -E
+10.0.0.1
+127.0.0.1
+```
+
+Same but using IPv6 endpoints:
+
+```
+$ echo -e '[::1]:80\n[::1]:443' | rbmk ipuniq -E
+::1
+```
+
 ### Exit Status
 
 This command exits with `0` on success and `1` on failure.
@@ -103,3 +138,5 @@ This command exits with `0` on success and `1` on failure.
 
 Before RBMK v0.4.0, this command always randomly shuffled the
 addresses. Afterwards, one must use `--random` explicitly.
+
+This command was introduced in RBMK v0.2.0.
