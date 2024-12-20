@@ -14,8 +14,8 @@ on:
     # Before a release, it is recommended to use either name to
     # ensure that the release process is working as intended.
     branches:
-      - "fullbuild*" # For quick release testing
-      - "release/*" # For proper release preparation
+      - "fullbuild**" # For quick release testing
+      - "release/**" # For proper release preparation
     tags: ["v*"]
 
 jobs:
