@@ -11,7 +11,7 @@ rbmk pipe COMMAND [args...]
 
 Create and use named pipes for inter-process communication within
 measurement scripts. Uses Unix domain sockets on both Unix systems
-and modern Windows (10.0.17063+).
+and modern Windows systems (10.0.17063+).
 
 ## Commands
 
@@ -69,3 +69,7 @@ Returns `0` on success. Returns `1` on:
 - Connection timeouts
 
 - I/O errors
+
+## History
+
+The `rbmk pipe` command was introduced in RBMK v0.4.0.

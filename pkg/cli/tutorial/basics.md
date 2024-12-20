@@ -17,7 +17,9 @@ text associated with the `rbmk dig` subcommand.
 
 All commands exit with `0` on success and with `1` on failure. Note
 that failure includes both usage errors (e.g., passing an invalid flag
-to a command) and measurement errors (e.g., a network timeout).
+to a command) and measurement errors (e.g., a network timeout). The
+`--measure` flag disables the exit-on-failure behavior for measurement
+errors, thus allowing shell scripts to use `set -e`.
 
 
 ## Basic Commands
@@ -51,6 +53,20 @@ $ rbmk stun stun.l.google.com:19302
 ```
 
 Run `rbmk stun --help` for additional help.
+
+4. Netcat (`rbmk nc`)
+
+Check whether a port is open:
+
+```
+$ rbmk nc -zv example.com 80
+```
+
+Same as above, but also checking for TLS reachability:
+
+```
+$ rbmk nc --alpn h2 --alpn http/1.1 -zvc example.com 443
+```
 
 
 ## Combining Commands

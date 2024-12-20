@@ -37,3 +37,7 @@ Returns `0` on success. Returns `1` on:
 - Connection timeout
 
 - I/O errors
+
+## History
+
+The `rbmk pipe write` command was introduced in RBMK v0.4.0.

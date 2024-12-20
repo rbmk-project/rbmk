@@ -11,9 +11,11 @@ rbmk timestamp
 
 Print a filesystem-friendly ISO8601 UTC timestamp.
 
-The timestamp format is YYYYMMDDTHHmmssZ, for example:
+The timestamp format is `YYYYMMDDTHHmmssZ`, for example:
 
-    20241201T114117Z
+```
+20241201T114117Z
+```
 
 ## Features
 
@@ -41,3 +43,7 @@ $ rbmk mkdir -p "$outdir"
 ## Exit Status
 
 This command exits with `0` on success and `1` on failure.
+
+## History
+
+The `rbmk timestamp` command was introduced in RBMK v0.2.0.

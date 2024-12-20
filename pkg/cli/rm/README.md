@@ -42,3 +42,7 @@ $ rbmk rm -rf directory
 ## Exit Status
 
 This command exits with `0` on success and `1` on failure.
+
+## History
+
+The `rbmk rm` command was introduced in RBMK v0.2.0.

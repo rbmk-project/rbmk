@@ -10,7 +10,8 @@ rbmk sh SCRIPT [ARGUMENTS...]
 ## Description
 
 Run `SCRIPT` using a POSIX-compliant shell interpreter providing
-to the script the given `ARGUMENTS`.
+to the script the given `ARGUMENTS`, which will be available to
+the script as `$1`, `$2`, etc.
 
 This shell implementation (based on `mvdan.cc/sh/v3`) is consistent
 across operating systems and supports:
@@ -85,9 +86,14 @@ This command exits with `0` on success and `1` on failure.
 
 ## History
 
+Since RBMK v0.10.0, it is possible to pass arguments to the script
+executed by `rbmk sh` using the command line.
+
 Before RBMK v0.7.0, `rbmk sh` used to set the `$RBMK_EXE` environment
 variable to the `rbmk` path, to allow a script to execute `rbmk` commands.
 
 Since v0.7.0. `rbmk` is an internal shell command, `rbmk sh` is not capable
 of executing external commands, and `$RBMK_EXE` is set to `rbmk`, thus
 supporting previously existing scripts without modification.
+
+The `rbmk sh` command was introduced in RBMK v0.2.0.
