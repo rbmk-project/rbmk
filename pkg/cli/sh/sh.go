@@ -39,8 +39,8 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	}
 
 	// 2. Ensure we have exactly one script to run.
-	if len(argv) != 2 {
-		err := errors.New("expected exactly one script argument")
+	if len(argv) < 2 {
+		err := errors.New("expected a script with optional arguments")
 		fmt.Fprintf(env.Stderr(), "rbmk sh: %s\n", err.Error())
 		fmt.Fprintf(env.Stderr(), "Run `rbmk sh --help` for usage.\n")
 		return err
@@ -71,6 +71,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		interp.StdIO(env.Stdin(), env.Stdout(), env.Stderr()),
 		interp.Env(expand.FuncEnviron(os.Getenv)),
 		interp.ExecHandlers(newBuiltInMiddleware()),
+		interp.Params(argv[2:]...),
 	)
 	if err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk sh: cannot create interpreter: %s\n", err.Error())
