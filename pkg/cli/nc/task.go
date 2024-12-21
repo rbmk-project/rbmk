@@ -50,6 +50,9 @@ type Task struct {
 	// Stdout is the MANDATORY [io.Writer] for the stdout.
 	Stdout io.Writer
 
+	// TLSNoVerify is a flag that disables TLS verification.
+	TLSNoVerify bool
+
 	// UseTLS is a flag that ensures that we use TLS.
 	UseTLS bool
 
@@ -70,9 +73,10 @@ func (task *Task) Run(ctx context.Context) error {
 	netx := &netcore.Network{}
 	netx.DialContextFunc = testable.DialContext.Get()
 	netx.TLSConfig = &tls.Config{
-		NextProtos: task.ALPNProtocols,
-		RootCAs:    testable.RootCAs.Get(),
-		ServerName: task.ServerName,
+		InsecureSkipVerify: task.TLSNoVerify,
+		NextProtos:         task.ALPNProtocols,
+		RootCAs:            testable.RootCAs.Get(),
+		ServerName:         task.ServerName,
 	}
 	netx.Logger = logger
 	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {

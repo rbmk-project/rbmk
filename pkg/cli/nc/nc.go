@@ -51,6 +51,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// Additional TLS features
 	alpn := clip.StringSlice("alpn", nil, "TLS ALPN protocol(s)")
+	options := clip.StringSliceP("option", "T", []string{}, "TLS options")
 	sni := clip.String("sni", "", "TLS SNI server name")
 
 	// RBMK specific flags
@@ -84,6 +85,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		Stderr:        io.Discard,
 		Stdin:         env.Stdin(),
 		Stdout:        env.Stdout(),
+		TLSNoVerify:   false,
 		UseTLS:        *useTLS,
 		WaitTimeout:   0,
 	}
@@ -97,6 +99,12 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	}
 	if *verbose {
 		task.Stderr = env.Stderr()
+	}
+	for _, opt := range *options {
+		switch opt {
+		case "noverify":
+			task.TLSNoVerify = true
+		}
 	}
 
 	// 6. handle logs flag
