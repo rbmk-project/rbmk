@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+// Package intro implements the `rbmk intro` Command.
 package intro
 
 import (
@@ -21,10 +22,12 @@ func NewCommand() cliutils.Command {
 
 type command struct{}
 
+// Help implements [cliutils.Command].
 func (cmd command) Help(env cliutils.Environment, argv ...string) error {
 	return cmd.Main(context.Background(), env, argv...)
 }
 
+// Main implements [cliutils.Command].
 func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	fmt.Fprintf(env.Stdout(), "%s\n", markdown.MaybeRender(readme))
 	return nil

@@ -64,6 +64,18 @@ handshake. For example:
 
 Must be used alongside the `--tls` flag.
 
+### `-T, --option OPTION`
+
+Set a specific `OPTION`. Can be specified multiple times to provide
+multiple options. We currently accept the following options:
+
+- `noverify` (added in RBMK v0.11.0): Do not verify the server's
+certificate, which is useful for measuring SNI-based blocking using
+arbitrary TLS endpoints as test helpers. This option only takes
+effect when combined with the `-c, --tls` flag.
+
+The `-T` flag was introduced in RBMK v0.11.0.
+
 ### `-v`
 
 Print more verbose output.
@@ -103,6 +115,13 @@ Same as above but also perform a TLS handshake:
 
 ```
 $ rbmk nc --alpn h2 --alpn http/1.1 -z -c -w5 example.com 443
+```
+
+Checking for SNI based blocking:
+
+```
+$ rbmk nc -zcw5 --alpn h2 --alpn http/1.1 -T noverify \
+    --sni x.com example.com 443
 ```
 
 Saving structured logs:
