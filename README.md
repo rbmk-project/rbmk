@@ -102,7 +102,7 @@ $ rbmk curl https://example.com/
 ...
 
 # Combine dig and curl for step-by-step measurement
-$ IP=$(rbmk dig +short=ip example.com|head -n1)
+$ IP=$(rbmk dig +short=ip example.com | rbmk head -n 1)
 $ rbmk curl --resolve example.com:443:$IP https://example.com/
 
 # Collect measurement data in flat JSONL format
@@ -132,6 +132,7 @@ Core Measurement Commands:
 
 Unix-like Commands for Scripting:
 - `cat`: Concatenates files.
+- `head`: Print first lines of files.
 - `ipuniq`: Shuffle, deduplicate, and format IP addresses.
 - `mkdir`: Creates directories.
 - `mv`: Moves (renames) files and directories.

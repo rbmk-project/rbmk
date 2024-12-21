@@ -74,7 +74,7 @@ $ rbmk nc --alpn h2 --alpn http/1.1 -zvc example.com 443
 Commands can be combined to perform detailed measurements:
 
 ```
-$ ip=$(rbmk dig +short=ip example.com | head -n1)
+$ ip=$(rbmk dig +short=ip example.com | rbmk head -n1)
 $ rbmk curl --resolve "example.com:443:$ip" https://example.com/
 ```
 

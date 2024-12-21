@@ -39,7 +39,7 @@ $ rbmk curl --resolve example.com:443:93.184.215.14 https://example.com/
 Separate DNS and HTTP measurements:
 
 ```
-$ IP=$(rbmk dig +short=ip example.com|head -n1)
+$ IP=$(rbmk dig +short=ip example.com | rbmk head -n1)
 $ rbmk curl --resolve example.com:443:$IP https://example.com/
 ```
 
