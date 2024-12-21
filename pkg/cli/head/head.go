@@ -48,14 +48,14 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		return err
 	}
 
-	// 4. collect the files to read from, if any. Otherwise,
+	// 3. collect the files to read from, if any. Otherwise,
 	// we will read from the standard input.
 	args := clip.Args()
 	if len(args) <= 0 {
 		args = append(args, "-")
 	}
 
-	// 5. read from each file
+	// 4. read from each file
 	for _, fname := range args {
 		if err := readHead(env, fname, *lines); err != nil {
 			fmt.Fprintf(env.Stderr(), "rbmk head: %s\n", err.Error())
