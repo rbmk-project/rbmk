@@ -94,32 +94,31 @@ using the pure-Go DNS lookup engine (`netgo`).
 
 ```sh
 # Resolve a domain name
-$ rbmk dig +short=ip example.com
+rbmk dig +short=ip example.com
 93.184.215.14
 
 # Make an HTTP request
-$ rbmk curl https://example.com/
-...
+rbmk curl https://example.com/
 
 # Combine dig and curl for step-by-step measurement
-$ IP=$(rbmk dig +short=ip example.com | rbmk head -n 1)
-$ rbmk curl --resolve example.com:443:$IP https://example.com/
+addr=$(rbmk dig +short=ip example.com | rbmk head -n 1)
+rbmk curl --resolve example.com:443:$addr https://example.com/
 
 # Collect measurement data in flat JSONL format
-$ rbmk dig --logs dns.jsonl example.com
-$ rbmk curl --logs http.jsonl https://example.com/
+rbmk dig --logs dns.jsonl example.com
+rbmk curl --logs http.jsonl https://example.com/
 ```
 
 For a quick introduction with more examples, run:
 
 ```sh
-$ rbmk intro
+rbmk intro
 ```
 
 For comprehensive usage documentation, run:
 
 ```sh
-$ rbmk tutorial
+rbmk tutorial
 ```
 
 ## Commands
