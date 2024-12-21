@@ -68,14 +68,24 @@ Same as above, but also checking for TLS reachability:
 $ rbmk nc --alpn h2 --alpn http/1.1 -zvc example.com 443
 ```
 
+Run `rbmk nc --help` for additional help.
+
 
 ## Combining Commands
 
 Commands can be combined to perform detailed measurements:
 
+```bash
+addr=$(rbmk dig +short=ip example.com | rbmk head -n1)
+rbmk curl --resolve "example.com:443:$addr" https://example.com/
 ```
-$ ip=$(rbmk dig +short=ip example.com | head -n1)
-$ rbmk curl --resolve "example.com:443:$ip" https://example.com/
+
+And:
+
+```bash
+for addr in $(rbmk dig +short=ip example.com); do
+    rbmk curl --resolve example.com:443:$addr https://example.com/
+done
 ```
 
 Combining measurements allows to isolate network operations and
@@ -89,9 +99,12 @@ addresses for a domain name are reachable and working as intended.
 
 Use `--logs` to collect detailed measurement data:
 
-```
-$ rbmk dig --logs dns.jsonl example.com
-$ rbmk curl --logs http.jsonl https://example.com/
+```sh
+# Saves structured logs to the dns.jsonl file
+rbmk dig --logs dns.jsonl example.com
+
+# Saves structured logs to the http.jsonl file
+rbmk curl --logs http.jsonl https://example.com/
 ```
 
 The measurement data consists of a sequence of lines in JSON format
@@ -113,4 +126,4 @@ Using `--logs -` causes the command to emit logs to the standard output.
 
 - Run `rbmk curl --logs - https://example.com/ | jq` to see the structured logs.
 
-- Use `rbmk COMMAND --help` for detailed command documentation.
+- Use `rbmk COMMAND --help` for detailed documentation on a `COMMAND`.

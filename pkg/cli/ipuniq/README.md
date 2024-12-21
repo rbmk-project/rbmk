@@ -60,6 +60,12 @@ generates HTTP, HTTPS, and SSH endpoints). When no ports are
 specified, we output IP addresses without ports. Each `PORT` must
 be a valid port number (0-65535).
 
+### `--only ipv4|ipv6`
+
+Only output addresses belonging to the specific IP version.
+
+This flag has been introduced in RBMK v0.11.0.
+
 ### `-r, --random`
 
 Buffers and randomly shuffles the addresses before output. This
@@ -134,7 +140,31 @@ $ echo -e '[::1]:80\n[::1]:443' | rbmk ipuniq -E
 
 This command exits with `0` on success and `1` on failure.
 
+## Bugs
+
+When running a command such as:
+
+```
+$ rbmk ipuniq
+```
+
+we keep the `stdin` in line-oriented mode, which means that you
+can edit the input before pressing enter. However, this also implies
+that `^C` does not interrupt reading from the `stdin`, because
+the terminal driver is blocked reading until the EOL. The symptom
+of this would be:
+
+```
+$ rbmk ipuniq
+^C
+```
+
+where the program does not exit. To exit, insert an explicit
+EOL character (e.g., `^D` on Unix and `^Z` + `Return` on Windows).
+
 ### History
+
+The `--only` flag was introduced in RBMK v0.11.0.
 
 Before RBMK v0.4.0, this command always randomly shuffled the
 addresses. Afterwards, one must use `--random` explicitly.
