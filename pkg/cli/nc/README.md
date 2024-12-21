@@ -130,6 +130,14 @@ Saving structured logs:
 $ rbmk nc --logs conn.jsonl example.com 80
 ```
 
+## Bugs
+
+When running a command such as:
+
+```
+$ rbmk nc example.com 80
+```
+
 ## Exit Status
 
 The nc utility exits with `0` on success and `1` on error.
