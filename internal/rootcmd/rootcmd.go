@@ -25,6 +25,7 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/cat"
 	"github.com/rbmk-project/rbmk/pkg/cli/curl"
 	"github.com/rbmk-project/rbmk/pkg/cli/dig"
+	"github.com/rbmk-project/rbmk/pkg/cli/head"
 	"github.com/rbmk-project/rbmk/pkg/cli/intro"
 	"github.com/rbmk-project/rbmk/pkg/cli/ipuniq"
 	"github.com/rbmk-project/rbmk/pkg/cli/mkdir"
@@ -61,6 +62,7 @@ func CommandsWithoutSh() map[string]cliutils.Command {
 		"cat":       cat.NewCommand(),
 		"curl":      curl.NewCommand(),
 		"dig":       dig.NewCommand(),
+		"head":      head.NewCommand(),
 		"intro":     intro.NewCommand(),
 		"ipuniq":    ipuniq.NewCommand(),
 		"mkdir":     mkdir.NewCommand(),

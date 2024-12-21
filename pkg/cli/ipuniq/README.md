@@ -134,6 +134,28 @@ $ echo -e '[::1]:80\n[::1]:443' | rbmk ipuniq -E
 
 This command exits with `0` on success and `1` on failure.
 
+## Bugs
+
+When running a command such as:
+
+```
+$ rbmk ipuniq
+```
+
+we keep the `stdin` in line-oriented mode, which means that you
+can edit the input before pressing enter. However, this also implies
+that `^C` does not interrupt reading from the `stdin`, because
+the terminal driver is blocked reading until the EOL. The symptom
+of this would be:
+
+```
+$ rbmk ipuniq
+^C
+```
+
+where the program does not exit. To exit, insert an explicit
+EOL character (e.g., `^D` on Unix and `^Z` + `Return` on Windows).
+
 ### History
 
 Before RBMK v0.4.0, this command always randomly shuffled the

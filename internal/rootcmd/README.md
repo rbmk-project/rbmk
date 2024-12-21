@@ -22,6 +22,7 @@ to facilitate network exploration and measurements.
 ### Unix-like Commands for Scripting
 
 * `cat` - Concatenates files to standard output.
+* `head` - Print first lines of files.
 * `ipuniq` - Shuffle, deduplicate, and format IP addresses.
 * `mkdir` - Creates directories.
 * `mv` - Moves (renames) files and directories.
