@@ -70,6 +70,10 @@ rbmk_measure_sni_blocking() {
 #doc:
 #doc: Prints a progress bar to the standard output.
 rbmk_ui_print_progress() {
+    if [[ "${RBMK_TRACE:-0}" = "1" ]]; then
+        return
+    fi
+
 	local current=$1
 	shift
 

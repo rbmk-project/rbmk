@@ -16,6 +16,10 @@ import (
 // The zero value IS NOT ready to use and you must explicitly
 // call [newGenerator] to obtain a ready-to-use generator.
 type generator struct {
+	// stunDomain is the domain name of the STUN server or
+	// empty if the STUN functionality is disabled.
+	stunDomain string
+
 	// stunIPv4 is the IPv4 address of the STUN server or empty
 	// if the STUN functionality is disabled for IPv4.
 	stunIPv4 string
@@ -31,17 +35,26 @@ type generator struct {
 	writer io.Writer
 }
 
-// newGenerator creates a new [*generator] using the given [io.Writer]
-// as well as the given configuration. Note that stunIPv4 and/or stunIPv6
-// may be empty if the STUN functionality is disabled.
+// newGenerator creates a new [*generator] using the given [io.Writer].
 func newGenerator(
-	w io.Writer, stunIPv4, stunIPv6, stunPort string) *generator {
+	w io.Writer) *generator {
 	return &generator{
-		stunIPv4: stunIPv4,
-		stunIPv6: stunIPv6,
-		stunPort: stunPort,
-		writer:   w,
+		stunDomain: "",
+		stunIPv4:   "",
+		stunIPv6:   "",
+		stunPort:   "",
+		writer:     w,
 	}
+}
+
+// ConfigureSTUN configures the STUN server to use.
+//
+// This method IS NOT safe to call concurrently with other methods.
+func (g *generator) ConfigureSTUN(stunDomain, stunIPv4, stunIPv6, stunPort string) {
+	g.stunDomain = stunDomain
+	g.stunIPv4 = stunIPv4
+	g.stunIPv6 = stunIPv6
+	g.stunPort = stunPort
 }
 
 /*
@@ -100,7 +113,7 @@ occur multiple times during a given measurement.
 2. STUN lookups run in the backgroun and the caller must
 eventually invoke `wait` to synchronise on their completion.
 */
-func (g *generator) MaybeStartSTUN(index int, stunDomain string) {
+func (g *generator) MaybeStartSTUN(index int) {
 	// 1. Do nothing if the index is not zero or a multiple of 8
 	if index%8 != 0 {
 		return
@@ -113,7 +126,7 @@ func (g *generator) MaybeStartSTUN(index int, stunDomain string) {
 		fmt.Fprintf(
 			g.writer,
 			"\t\"$WORKDIR/$(rbmk_output_format_dir_prefix $COUNT)-stun-v4-%s\" \\\n",
-			stunDomain,
+			g.stunDomain,
 		)
 		fmt.Fprintf(g.writer, "\t\"%s\" \"%s\" &\n", g.stunIPv4, g.stunPort)
 		fmt.Fprintf(g.writer, "\n")
@@ -126,7 +139,7 @@ func (g *generator) MaybeStartSTUN(index int, stunDomain string) {
 		fmt.Fprintf(
 			g.writer,
 			"\t\"$WORKDIR/$(rbmk_output_format_dir_prefix $COUNT)-stun-v6-%s\" \\\n",
-			stunDomain,
+			g.stunDomain,
 		)
 		fmt.Fprintf(g.writer, "\t\"%s\" \"%s\" &\n", g.stunIPv6, g.stunPort)
 		fmt.Fprintf(g.writer, "\n")

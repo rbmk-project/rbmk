@@ -26,7 +26,8 @@ func NewCommand() cliutils.Command {
 		"generate",
 		markdown.LazyMaybeRender(readme),
 		map[string]cliutils.Command{
-			"sni_blocking": newSNIBlockingCommand(),
+			"sni_blocking":      newSNIBlockingCommand(),
+			"stun_reachability": newSTUNReachabilityCommand(),
 		},
 	)
 }

@@ -4,6 +4,7 @@ go 1.23.3
 
 require (
 	github.com/charmbracelet/glamour v0.8.0
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/miekg/dns v1.1.62
 	github.com/pion/stun/v3 v3.0.0
 	github.com/rbmk-project/common v0.14.0

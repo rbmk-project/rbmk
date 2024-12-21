@@ -89,12 +89,8 @@ func (cmd sniBlockingCommand) Main(ctx context.Context, env cliutils.Environment
 	}
 
 	// 5. create the generator context
-	generate := newGenerator(
-		env.Stdout(),
-		stunAddrV4,
-		stunAddrV6,
-		*stunPort,
-	)
+	generate := newGenerator(env.Stdout())
+	generate.ConfigureSTUN(*stunDomain, stunAddrV4, stunAddrV6, *stunPort)
 
 	// 6. write the script prefix
 	generate.ScriptPrefix()
@@ -109,7 +105,7 @@ func (cmd sniBlockingCommand) Main(ctx context.Context, env cliutils.Environment
 	// 9. generate code to measure each valid input domain
 	for index, domain := range allinputs {
 		// 9.1. periodically refresh STUN information
-		generate.MaybeStartSTUN(index, *stunDomain)
+		generate.MaybeStartSTUN(index)
 
 		// 9.2. possibly measure the domain using IPv4
 		generate.MaybeStartSNIBlocking(domain, "v4", thAddrV4)

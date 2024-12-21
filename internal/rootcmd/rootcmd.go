@@ -19,8 +19,12 @@ commands as well as to the text printed on `--help`.
 package rootcmd
 
 import (
+	"context"
 	_ "embed"
+	"fmt"
+	"os"
 
+	"github.com/kballard/go-shellquote"
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/pkg/cli/cat"
 	"github.com/rbmk-project/rbmk/pkg/cli/curl"
@@ -59,21 +63,38 @@ func HelpText() string {
 // implement it is not this function's concern anyway).
 func CommandsWithoutSh() map[string]cliutils.Command {
 	return map[string]cliutils.Command{
-		"cat":       cat.NewCommand(),
-		"curl":      curl.NewCommand(),
-		"dig":       dig.NewCommand(),
-		"generate":  generate.NewCommand(),
-		"intro":     intro.NewCommand(),
-		"ipuniq":    ipuniq.NewCommand(),
-		"mkdir":     mkdir.NewCommand(),
-		"mv":        mv.NewCommand(),
-		"nc":        nc.NewCommand(),
-		"pipe":      pipe.NewCommand(),
-		"rm":        rm.NewCommand(),
-		"stun":      stun.NewCommand(),
-		"tar":       tar.NewCommand(),
-		"timestamp": timestamp.NewCommand(),
-		"tutorial":  tutorial.NewCommand(),
-		"version":   version.NewCommand(),
+		"cat":       &cmdwrapper{cat.NewCommand()},
+		"curl":      &cmdwrapper{curl.NewCommand()},
+		"dig":       &cmdwrapper{dig.NewCommand()},
+		"generate":  &cmdwrapper{generate.NewCommand()},
+		"intro":     &cmdwrapper{intro.NewCommand()},
+		"ipuniq":    &cmdwrapper{ipuniq.NewCommand()},
+		"mkdir":     &cmdwrapper{mkdir.NewCommand()},
+		"mv":        &cmdwrapper{mv.NewCommand()},
+		"nc":        &cmdwrapper{nc.NewCommand()},
+		"pipe":      &cmdwrapper{pipe.NewCommand()},
+		"rm":        &cmdwrapper{rm.NewCommand()},
+		"stun":      &cmdwrapper{stun.NewCommand()},
+		"tar":       &cmdwrapper{tar.NewCommand()},
+		"timestamp": &cmdwrapper{timestamp.NewCommand()},
+		"tutorial":  &cmdwrapper{tutorial.NewCommand()},
+		"version":   &cmdwrapper{version.NewCommand()},
 	}
+}
+
+type cmdwrapper struct {
+	cmd cliutils.Command
+}
+
+// Help implements [cliutils.Command].
+func (cw cmdwrapper) Help(env cliutils.Environment, argv ...string) error {
+	return cw.cmd.Help(env, argv...)
+}
+
+// Main implements [cliutils.Command].
+func (cw cmdwrapper) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
+	if os.Getenv("RBMK_TRACE") == "1" {
+		fmt.Fprintf(os.Stderr, "+ %s\n", shellquote.Join(argv...))
+	}
+	return cw.cmd.Main(ctx, env, argv...)
 }
