@@ -11,6 +11,7 @@ import (
 	"io"
 	"math/rand/v2"
 	"net"
+	"net/netip"
 	"strconv"
 
 	"github.com/rbmk-project/common/cliutils"
@@ -42,6 +43,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	// 2. parse command line flags
 	clip := pflag.NewFlagSet("rbmk ipuniq", pflag.ContinueOnError)
 	ffail := clip.BoolP("fail", "f", false, "fail on input paesing error")
+	ffamily := clip.String("only", "", "only print the given address family")
 	fports := clip.StringSliceP("port", "p", nil, "format output as HOST:PORT endpoints")
 	frand := clip.BoolP("random", "r", false, "randomly shuffle the output")
 	fromendpoints := clip.BoolP("from-endpoints", "E", false, "assume input contains endpoints")
@@ -57,34 +59,43 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	for _, port := range *fports {
 		value, err := strconv.ParseUint(port, 10, 16)
 		if err != nil {
+			err := fmt.Errorf("invalid port number: %s", port)
 			fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
 			return err
 		}
 		ports = append(ports, uint16(value))
 	}
 
-	// 4. collect the files to read IPs from, if any. Otherwise,
+	// 4. ensure the `--only` flag is valid
+	if *ffamily != "" && *ffamily != "ipv4" && *ffamily != "ipv6" {
+		err := fmt.Errorf("invalid address family: %s", *ffamily)
+		fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run `rbmk ipuniq --help` for usage.\n")
+		return err
+	}
+
+	// 5. collect the files to read IPs from, if any. Otherwise,
 	// we will read the addresses from the standard input.
 	args := clip.Args()
 	if len(args) <= 0 {
 		args = append(args, "-")
 	}
 
-	// 5. read and parse IPs from all files
+	// 6. read and parse IPs from all files
 	ipAddrs := make(map[string]struct{})
 	for _, fname := range args {
-		if err := readIPs(env, fname, *ffail, *frand, *fromendpoints, ipAddrs, ports); err != nil {
+		if err := readIPs(env, fname, *ffail, *ffamily, *frand, *fromendpoints, ipAddrs, ports); err != nil {
 			fmt.Fprintf(env.Stderr(), "rbmk ipuniq: %s\n", err.Error())
 			return err
 		}
 	}
 
-	// 6. if streaming, stop now
+	// 7. if streaming, stop now
 	if !*frand {
 		return nil
 	}
 
-	// 7. otherwise randomly shuffle and print unique IPs w/ optional port
+	// 8. otherwise randomly shuffle and print unique IPs w/ optional port
 	var shuffled []string
 	for s := range ipAddrs {
 		shuffled = append(shuffled, s)
@@ -104,6 +115,7 @@ func readIPs(
 	env cliutils.Environment,
 	fname string,
 	ffail bool,
+	ffamily string,
 	frand bool,
 	fromendpoints bool,
 	ipAddrs map[string]struct{},
@@ -136,9 +148,18 @@ func readIPs(
 			line = host
 		}
 		if ip := net.ParseIP(line); ip != nil {
+			// Avoid including undesired address families in output
+			parsed := netip.MustParseAddr(ip.String())
+			switch {
+			case ffamily == "ipv4" && !parsed.Is4():
+				continue
+			case ffamily == "ipv6" && !parsed.Is6():
+				continue
+			}
+
 			// Implementation note: using string representation as the key to
 			// handle different textual representations of same addr.
-			normalized := ip.String()
+			normalized := parsed.String()
 			if _, ok := ipAddrs[normalized]; ok {
 				continue
 			}
@@ -147,6 +168,7 @@ func readIPs(
 				continue
 			}
 			printAddr(env, normalized, ports)
+
 		} else if ffail {
 			return fmt.Errorf("invalid IP address: %s", line)
 		} else {
