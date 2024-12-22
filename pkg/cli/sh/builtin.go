@@ -77,7 +77,7 @@ func newBuiltInEnvironment(shCtx interp.HandlerContext) *builtInEnvironment {
 	// Implementation note: we ASSUME that no `rbmk COMMAND` where `COMMAND != sh`
 	// will ever change its current working directory and use relative paths, which
 	// improves the UX and DX with respect to the maximum "name" length for Unix
-	// domain sockets (see https://github.com/rbmk-project/common/releases/tag/v0.15.0).
+	// domain sockets (see https://github.com/rbmk-project/common/releases/tag/v0.16.0).
 	//
 	// We attempt to use a relative to CWD path mapper. This should not fail
 	// but, in case it fails, we emit a warning and use a relative path mapper.
