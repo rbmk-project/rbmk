@@ -84,6 +84,32 @@ $ rbmk sh script.bash
 
 This command exits with `0` on success and `1` on failure.
 
+## Bugs
+
+The `rbmk sh` command executes other `rbmk COMMAND` commands in the same
+process without changing the current working directory. Because `rbmk pipe`
+uses Unix domain sockets, and because such sockets are restricted in the
+maximum path length, `rbmk sh` attempts to minimise path lengths by using
+paths relative to the current working directory.
+
+If `rbmk sh` cannot determine the current working directory when executing
+a command, or it cannot map the subcommand own working directory to the
+current working directory, it emits this warning message:
+
+```
+<date> rmbk sh: cannot create relative-to-cwd dir-path mapper: <error>
+```
+
+and then uses the absolute path instead.
+
+Regardless, using long paths could lead to errors when using `rbmk pipe`
+as documented in `rbmk pipe --help`. See `rbmk pipe --help` for advices
+regarding mitigating this issue in shell scripts.
+
+Note that, because `bash` changes the current working directory, it is
+possible for scripts that work using `bash $script` to instead fail when
+using `rbmk sh $script` precisely because of this issue.
+
 ## History
 
 Since RBMK v0.10.0, it is possible to pass arguments to the script

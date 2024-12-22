@@ -12,6 +12,7 @@ import (
 
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/internal/markdown"
+	"github.com/spf13/pflag"
 )
 
 //go:embed README.md
@@ -35,15 +36,31 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		return cmd.Help(env, argv...)
 	}
 
-	// 2. ensure no extra arguments
-	if len(argv) > 1 {
+	// 2. parse command line
+	clip := pflag.NewFlagSet("rbmk timestamp", pflag.ContinueOnError)
+	ffull := clip.Bool("full", false, "whether to emit timestamp with nanosecond precision")
+
+	if err := clip.Parse(argv[1:]); err != nil {
+		fmt.Fprintf(env.Stderr(), "rbmk timestamp: %s\n", err.Error())
+		fmt.Fprintf(env.Stderr(), "Run 'rbmk timestamp --help' for usage.\n")
+		return err
+	}
+
+	// 3. ensure no extra arguments
+	if len(clip.Args()) > 1 {
 		err := errors.New("expected no positional arguments")
 		fmt.Fprintf(env.Stderr(), "rbmk timestamp: %s\n", err.Error())
 		fmt.Fprintf(env.Stderr(), "Run `rbmk timestamp --help` for usage.\n")
 		return err
 	}
 
-	// 3. print ISO8601 UTC timestamp in compact format
-	fmt.Fprintf(env.Stdout(), "%s\n", time.Now().UTC().Format("20060102T150405Z"))
+	// 4. select the timestamp format
+	format := "20060102T150405Z"
+	if *ffull {
+		format = "20060102T150405.999999999Z"
+	}
+
+	// 5. print ISO8601 UTC timestamp in compact format
+	fmt.Fprintf(env.Stdout(), "%s\n", time.Now().UTC().Format(format))
 	return nil
 }
