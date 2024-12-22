@@ -1,4 +1,6 @@
 .DS_Store
 /*.exe
+/*.tar.gz
+/202*
 /rbmk
 /rbmk-*

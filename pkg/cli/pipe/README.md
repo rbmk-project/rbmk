@@ -90,7 +90,8 @@ To mitigate this issue, use paths relative to the current working
 directory in your scripts and attemp to keep them short. Specifically,
 you can create a unique directory for measuring with a short name,
 using `rbmk timestamp --full` to generate a timestamp-based name with
-nanosecond precision. Then, once the measurement is complete, you
+nanosecond precision and possibly combining it with `rbmk random` to
+add additional entropy. Then, once the measurement is complete, you
 can move the results to a longer, more logical path name.
 
 ## History
