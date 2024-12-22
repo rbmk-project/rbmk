@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/common/fsx"
@@ -73,8 +74,22 @@ type builtInEnvironment struct {
 //
 // We ignore the shell environment since we don't actually use it.
 func newBuiltInEnvironment(shCtx interp.HandlerContext) *builtInEnvironment {
+	// Implementation note: we ASSUME that no `rbmk COMMAND` where `COMMAND != sh`
+	// will ever change its current working directory and use relative paths, which
+	// improves the UX and DX with respect to the maximum "name" length for Unix
+	// domain sockets (see https://github.com/rbmk-project/common/releases/tag/v0.16.0).
+	//
+	// We attempt to use a relative to CWD path mapper. This should not fail
+	// but, in case it fails, we emit a warning and use a relative path mapper.
+	var mapper fsx.RealPathMapper
+	mapper, err := fsx.NewRelativeToCwdPrefixDirPathMapper(shCtx.Dir)
+	if err != nil {
+		log.Printf("rmbk sh: cannot create relative-to-cwd dir-path mapper: %s", err)
+		mapper = fsx.NewRelativePrefixDirPathMapper(shCtx.Dir)
+	}
+
 	return &builtInEnvironment{
-		fs:     fsx.NewChdirFS(fsx.OsFS{}, shCtx.Dir),
+		fs:     fsx.NewOverlayFS(fsx.OsFS{}, mapper),
 		stdin:  shCtx.Stdin,
 		stdout: shCtx.Stdout,
 		stderr: shCtx.Stderr,

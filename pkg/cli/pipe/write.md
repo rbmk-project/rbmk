@@ -14,6 +14,9 @@ connects or until the connection timeout expires (1s).
 
 Data is read from stdin and written to the pipe.
 
+We implement the named pipe using Unix domain sockets as documented in
+the `rbmk pipe --help` output message.
+
 ## Examples
 
 Write string to pipe:
@@ -37,6 +40,11 @@ Returns `0` on success. Returns `1` on:
 - Connection timeout
 
 - I/O errors
+
+## Bugs
+
+See `rbmk pipe --help` for details regarding issues that could arise
+with the maximum platform-specific Unix domain socket path length.
 
 ## History
 
