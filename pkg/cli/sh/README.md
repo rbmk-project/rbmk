@@ -65,12 +65,11 @@ First, let's see the content of the the `script.bash` file:
 ```sh
 #!/bin/bash
 set -x
-timestamp=$(rbmk timestamp)
-outdir="$timestamp"
+outdir="$(rbmk timestamp --full)-$(rbmk random)"
 rbmk mkdir -p "$outdir"
 rbmk dig +short=ip A "dns.google" > "$outdir/dig1.txt"
 rbmk dig +short=ip AAAA "dns.google" > "$outdir/dig2.txt"
-rbmk tar -czf "results_$timestamp.tar.gz" "$outdir"
+rbmk tar -czf "results_$outdir.tar.gz" "$outdir"
 rbmk rm -rf "$outdir"
 ```
 

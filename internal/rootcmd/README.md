@@ -27,6 +27,7 @@ to facilitate network exploration and measurements.
 * `mkdir` - Creates directories.
 * `mv` - Moves (renames) files and directories.
 * `pipe` - Creates named pipes for inter-process communication.
+* `random` - Generates random bytes.
 * `rm` - Removes files and directories.
 * `sh` - Runs POSIX shell scripts.
 * `tar` - Creates tar archives.

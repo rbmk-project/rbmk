@@ -32,6 +32,7 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/mv"
 	"github.com/rbmk-project/rbmk/pkg/cli/nc"
 	"github.com/rbmk-project/rbmk/pkg/cli/pipe"
+	"github.com/rbmk-project/rbmk/pkg/cli/random"
 	"github.com/rbmk-project/rbmk/pkg/cli/rm"
 	"github.com/rbmk-project/rbmk/pkg/cli/stun"
 	"github.com/rbmk-project/rbmk/pkg/cli/tar"
@@ -69,6 +70,7 @@ func CommandsWithoutSh() map[string]cliutils.Command {
 		"mv":        mv.NewCommand(),
 		"nc":        nc.NewCommand(),
 		"pipe":      pipe.NewCommand(),
+		"random":    random.NewCommand(),
 		"rm":        rm.NewCommand(),
 		"stun":      stun.NewCommand(),
 		"tar":       tar.NewCommand(),

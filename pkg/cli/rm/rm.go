@@ -25,11 +25,13 @@ func NewCommand() cliutils.Command {
 
 type command struct{}
 
+// Help implements [cliutils.Command].
 func (cmd command) Help(env cliutils.Environment, argv ...string) error {
 	fmt.Fprintf(env.Stdout(), "%s\n", markdown.MaybeRender(readme))
 	return nil
 }
 
+// Main implements [cliutils.Command].
 func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	// 1. honour requests for printing the help
 	if cliutils.HelpRequested(argv...) {
