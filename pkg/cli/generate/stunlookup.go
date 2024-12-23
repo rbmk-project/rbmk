@@ -7,6 +7,7 @@
 package generate
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
 	"errors"
@@ -15,7 +16,9 @@ import (
 	"net"
 
 	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/common/fsx"
 	"github.com/rbmk-project/rbmk/internal/markdown"
+	"github.com/rbmk-project/x/closepool"
 	"github.com/spf13/pflag"
 )
 
@@ -52,6 +55,10 @@ func (cmd stunLookupCommand) Main(ctx context.Context, env cliutils.Environment,
 	inputs := clip.StringSlice("input", []string{}, "input endpoints to measure")
 	inputfiles := clip.StringSlice("input-file", []string{}, "files containing input endpoints to measure")
 
+	// Options controlling the output
+	output := clip.String("output", "-", "output script file")
+	minify := clip.Bool("minify", false, "minify the output script")
+
 	if err := clip.Parse(argv[1:]); err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk generate stun_lookup: %s\n", err.Error())
 		fmt.Fprintf(env.Stderr(), "Run `rbmk generate stun_lookup --help` for usage.\n")
@@ -66,30 +73,72 @@ func (cmd stunLookupCommand) Main(ctx context.Context, env cliutils.Environment,
 		return err
 	}
 
-	// 4. create the generator context
-	gen := newGenerator(env.Stdout())
+	// 4. collect all the input endpoints
+	allinputs := cmd.loadInputs(env, *inputs, *inputfiles)
 
-	// 5. write the script prefix
+	// 5. generate the script code into a bytes buffer
+	var code bytes.Buffer
+	cmd.generate(allinputs, &code)
+
+	// 6. see whether we need to open an output file
+	var (
+		filepool closepool.Pool
+		outfp    io.Writer
+	)
+	switch *output {
+	case "-":
+		outfp = env.Stdout()
+	default:
+		filep, err := env.FS().OpenFile(*output, fsx.O_CREATE|fsx.O_WRONLY|fsx.O_TRUNC, 0600)
+		if err != nil {
+			err = fmt.Errorf("cannot open output file: %w", err)
+			fmt.Fprintf(env.Stderr(), "rbmk generate stun_lookup: %s\n", err.Error())
+			return err
+		}
+		filepool.Add(filep)
+		outfp = filep
+	}
+
+	// 7. format and emit the shell script
+	if err := shFormatDump(code.Bytes(), *minify, outfp); err != nil {
+		err = fmt.Errorf("cannot format output script: %w", err)
+		fmt.Fprintf(env.Stderr(), "rbmk generate stun_lookup: %s\n", err.Error())
+		return err
+	}
+
+	// 8. ensure we close any open file successfully
+	if err := filepool.Close(); err != nil {
+		err = fmt.Errorf("cannot close output file: %w", err)
+		fmt.Fprintf(env.Stderr(), "rbmk generate stun_lookup: %s\n", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (cmd stunLookupCommand) generate(allinputs []endpoint, w io.Writer) {
+	// 1. create the generator context
+	gen := newShGenerator(w)
+
+	// 2. write the script prefix
 	gen.ScriptPrefix()
 	cmd.generateLookupFunc(gen.Writer())
 
-	// 6. compute the total number of measurements to perform
-	allinputs := cmd.loadInputs(env, *inputs, *inputfiles)
+	// 3. intercept the `-h, --help` option
+	gen.WriteHelpInterceptor("rbmk_stun_lookup_help")
 
-	// 7. create the results directory
+	// 4. create the results directory
 	gen.MakeResultsDir("stunlookup")
 
-	// 8. generate code to measure each valid input domain
+	// 5. generate code to measure each valid input domain
 	for idx := range allinputs {
 		cmd.generateMeasurementCode(gen, allinputs, idx)
 	}
 
-	// 9. compress the results directory
-	gen.CompressResultsDir()
+	// 6. update the progress bar
+	gen.ProgressBarDone("stunlookup", len(allinputs))
 
-	// 10. update the progress bar
-	gen.ProgressBarDone(len(allinputs))
-	return nil
+	// 7. compress the results directory
+	gen.CompressResultsDir()
 }
 
 // endpoint is a network endpoint.
@@ -142,7 +191,7 @@ func (cmd stunLookupCommand) generateLookupFunc(w io.Writer) {
 }
 
 // generateMeasurementCode generates the shell code to measure a STUN lookup.
-func (cmd stunLookupCommand) generateMeasurementCode(gen *generator, epnts []endpoint, idx int) {
+func (cmd stunLookupCommand) generateMeasurementCode(gen *shGenerator, epnts []endpoint, idx int) {
 	// 1. create subshell for the measurement
 	epnt := epnts[idx]
 	fmt.Fprintf(gen.Writer(), "# Measure %s in a subshell\n",
@@ -150,7 +199,7 @@ func (cmd stunLookupCommand) generateMeasurementCode(gen *generator, epnts []end
 	fmt.Fprintf(gen.Writer(), "(\n")
 
 	// 2. update the progress bar
-	gen.UpdateProgressBar(idx, len(epnts))
+	gen.UpdateProgressBar("stunlookup", idx, len(epnts))
 
 	// 3. create working directory and enter inside it
 	fmt.Fprintf(gen.Writer(), "# Create working directory trying to keep the path\n")
@@ -166,6 +215,7 @@ func (cmd stunLookupCommand) generateMeasurementCode(gen *generator, epnts []end
 	fmt.Fprintf(gen.Writer(), "# passed do the script to ensure these do\n")
 	fmt.Fprintf(gen.Writer(), "# not change the measured endpoints.\n")
 	fmt.Fprintf(gen.Writer(), "rbmk_stun_lookup \\\n")
+	fmt.Fprintf(gen.Writer(), "\t--generated \\\n")
 	fmt.Fprintf(gen.Writer(), "\t\"$@\" \\\n")
 	fmt.Fprintf(gen.Writer(), "\t--stun-hostname \"%s\" \\\n", epnt.domain)
 	fmt.Fprintf(gen.Writer(), "\t--stun-port \"%s\" \\\n", epnt.port)

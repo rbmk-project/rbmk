@@ -15,31 +15,32 @@ import (
 	"github.com/rbmk-project/common/runtimex"
 )
 
-// generator generates a shell script.
+// shGenerator generates a shell script.
 //
 // The zero value IS NOT ready to use and you must explicitly
-// call [newGenerator] to obtain a ready-to-use generator.
-type generator struct {
+// call [newGenerator] to obtain a ready-to-use shGenerator.
+type shGenerator struct {
 	// writer is the writer to which we write the shell script.
 	writer io.Writer
 }
 
-// newGenerator creates a new [*generator] using the given [io.Writer].
-func newGenerator(w io.Writer) *generator {
-	return &generator{writer: w}
+// newShGenerator creates a new [*generator] using the given [io.Writer].
+func newShGenerator(w io.Writer) *shGenerator {
+	return &shGenerator{writer: w}
 }
 
 // CompressResultsDir generates the code to compress the results
 // directory into a tarball and remove the original directory.
-func (g *generator) CompressResultsDir() {
+func (g *shGenerator) CompressResultsDir() {
 	fmt.Fprintf(g.writer, "# Compress the results directory\n")
 	fmt.Fprintf(g.writer, "rbmk tar -czf \"$RESULTSDIR.tar.gz\" \"$RESULTSDIR\"\n")
 	fmt.Fprintf(g.writer, "rbmk rm -rf \"$RESULTSDIR\"\n")
+	fmt.Fprintf(g.writer, "echo \"Written results at $RESULTSDIR.tar.gz\"\n")
 	fmt.Fprintf(g.writer, "\n")
 }
 
 // MakeResultsDir generates the code to make the results directory.
-func (g *generator) MakeResultsDir(name string) {
+func (g *shGenerator) MakeResultsDir(name string) {
 	fmt.Fprintf(g.writer, "# Make the results directory\n")
 	fmt.Fprintf(g.writer, "RESULTSDIR=\"$(rbmk timestamp)-%s\"\n", name)
 	fmt.Fprintf(g.writer, "rbmk mkdir -p \"$RESULTSDIR\"\n")
@@ -47,14 +48,20 @@ func (g *generator) MakeResultsDir(name string) {
 }
 
 // ProgressBarDone generates the code to finish the progress bar.
-func (g *generator) ProgressBarDone(total int) {
+func (g *shGenerator) ProgressBarDone(name string, total int) {
 	fmt.Fprintf(g.writer, "# Update the progress bar\n")
-	fmt.Fprintf(g.writer, "printf \"%%s\\n\" \"[====================] 100%% (%d/%d)\"\n", total, total)
+	fmt.Fprintf(
+		g.writer,
+		"printf \"%%s\\n\" \"%s [====================] 100%% (%d/%d)\"\n",
+		name,
+		total,
+		total,
+	)
 	fmt.Fprintf(g.writer, "\n")
 }
 
 // ScriptPrefix generates the shell script prefix.
-func (g *generator) ScriptPrefix() {
+func (g *shGenerator) ScriptPrefix() {
 	fmt.Fprintf(g.writer, "#!/bin/bash\n")
 	fmt.Fprintf(g.writer, "\n")
 
@@ -73,7 +80,7 @@ func (g *generator) ScriptPrefix() {
 }
 
 // UpdateProgressBar generates the code to update the progress bar.
-func (g *generator) UpdateProgressBar(idx, total int) {
+func (g *shGenerator) UpdateProgressBar(name string, idx, total int) {
 	runtimex.Assert(total > 0, "total must be a positive value")
 	fmt.Fprintf(g.writer, "# Update the progress bar\n")
 	progress := (20 * idx) / total
@@ -89,7 +96,8 @@ func (g *generator) UpdateProgressBar(idx, total int) {
 	bar.WriteRune(']')
 	fmt.Fprintf(
 		g.writer,
-		"printf \"%%s\\r\" \"%s %d%% (%d/%d)\"\n",
+		"printf \"%%s\\r\" \"%s %s %d%% (%d/%d)\"\n",
+		name,
 		bar.String(),
 		progress*5, // convert from 1/20 to 1/100
 		idx,
@@ -98,7 +106,21 @@ func (g *generator) UpdateProgressBar(idx, total int) {
 	fmt.Fprintf(g.writer, "\n")
 }
 
+// WriteHelpInterceptor writes the code to intercept the `-h, --help` option.
+func (g *shGenerator) WriteHelpInterceptor(helpFuncName string) {
+	fmt.Fprintf(g.writer, "# Intercept the `-h, --help` option\n")
+	fmt.Fprintf(g.writer, "for arg in \"$@\"; do\n")
+	fmt.Fprintf(g.writer, "\tcase \"$arg\" in\n")
+	fmt.Fprintf(g.writer, "\t-h|--help)\n")
+	fmt.Fprintf(g.writer, "\t\t%s\n", helpFuncName)
+	fmt.Fprintf(g.writer, "\t\texit 0\n")
+	fmt.Fprintf(g.writer, "\t\t;;\n")
+	fmt.Fprintf(g.writer, "\tesac\n")
+	fmt.Fprintf(g.writer, "done\n")
+	fmt.Fprintf(g.writer, "\n")
+}
+
 // Writer returns the writer used by the generator.
-func (g *generator) Writer() io.Writer {
+func (g *shGenerator) Writer() io.Writer {
 	return g.writer
 }
