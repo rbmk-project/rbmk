@@ -12,10 +12,12 @@
 #doc: --dns-server string (default "8.8.8.8")
 #doc:     The DNS server to use for resolving the STUN server hostname.
 #doc:
-#doc: --generated
-#doc:     Indicates the function is being called from a generated script,
-#doc:     causing it to ignore options that would conflict with the
-#doc:     generated script's configuration.
+#doc: --start-user-options
+#doc:     Indicates that user-provided options start here. Allows to
+#doc:     ignore options that would conflict with the generated configuration.
+#doc:
+#doc: --stop-user-options
+#doc:     Indicates that user-provided options stop here.
 #doc:
 #doc: --stun-addr-ipv4 string (default "")
 #doc:     Well-known IPv4 address of the STUN server.
@@ -55,11 +57,11 @@ rbmk_stun_lookup() {
 	# Configure the default values.
 	local dns_protocol="udp"
 	local dns_server="8.8.8.8"
-	local generated=0
 	local stun_addr_ipv4=""
 	local stun_addr_ipv6=""
 	local stun_hostname="stun.l.google.com"
 	local stun_port="19302"
+	local user_options=0
 
 	# Process function arguments to override defaults.
 	while [[ $# -gt 0 ]]; do
@@ -72,30 +74,34 @@ rbmk_stun_lookup() {
 			dns_server="$2"
 			shift 2
 			;;
-		--generated)
-			generated=1
+		--start-user-options)
+			user_options=1
+			shift
+			;;
+		--stop-user-options)
+			user_options=0
 			shift
 			;;
 		--stun-addr-ipv4)
-			if [[ $generated -eq 0 ]]; then
+			if [[ $user_options -eq 0 ]]; then
 				stun_addr_ipv4="$2"
 			fi
 			shift 2
 			;;
 		--stun-addr-ipv6)
-			if [[ $generated -eq 0 ]]; then
+			if [[ $user_options -eq 0 ]]; then
 				stun_addr_ipv6="$2"
 			fi
 			shift 2
 			;;
 		--stun-hostname)
-			if [[ $generated -eq 0 ]]; then
+			if [[ $user_options -eq 0 ]]; then
 				stun_hostname="$2"
 			fi
 			shift 2
 			;;
 		--stun-port)
-			if [[ $generated -eq 0 ]]; then
+			if [[ $user_options -eq 0 ]]; then
 				stun_port="$2"
 			fi
 			shift 2
@@ -165,7 +171,7 @@ rbmk_stun_lookup() {
 				--logs "stun${fmt_count}.jsonl" \
 				"${endpoint}" \
 				2>"stun${fmt_count}.err" |
-				rbmk ipuniq -E >>"addrs${fmt_count}.txt" &
+				rbmk ipuniq -E >>"addrs${fmt_count}.txt"
 			count="$((count + 1))"
 		done
 
