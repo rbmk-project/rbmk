@@ -29,6 +29,7 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/head"
 	"github.com/rbmk-project/rbmk/pkg/cli/intro"
 	"github.com/rbmk-project/rbmk/pkg/cli/ipuniq"
+	"github.com/rbmk-project/rbmk/pkg/cli/markdown"
 	"github.com/rbmk-project/rbmk/pkg/cli/mkdir"
 	"github.com/rbmk-project/rbmk/pkg/cli/mv"
 	"github.com/rbmk-project/rbmk/pkg/cli/nc"
@@ -68,6 +69,7 @@ func CommandsWithoutSh() map[string]cliutils.Command {
 		"head":      head.NewCommand(),
 		"intro":     intro.NewCommand(),
 		"ipuniq":    ipuniq.NewCommand(),
+		"markdown":  markdown.NewCommand(),
 		"mkdir":     mkdir.NewCommand(),
 		"mv":        mv.NewCommand(),
 		"nc":        nc.NewCommand(),
