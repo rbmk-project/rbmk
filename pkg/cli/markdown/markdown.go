@@ -45,6 +45,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	// 3. read all content from stdin
 	input, err := io.ReadAll(env.Stdin())
 	if err != nil {
+		fmt.Fprintf(env.Stderr(), "rbmk markdown: %s\n", err)
 		return err
 	}
 
