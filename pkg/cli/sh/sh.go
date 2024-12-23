@@ -33,17 +33,17 @@ func (cmd command) Help(env cliutils.Environment, argv ...string) error {
 }
 
 func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
-	// 1. Honour requests for printing the help.
-	if cliutils.HelpRequested(argv...) {
-		return cmd.Help(env, argv...)
-	}
-
-	// 2. Ensure we have exactly one script to run.
+	// 1. Ensure we have exactly one script to run.
 	if len(argv) < 2 {
 		err := errors.New("expected a script with optional arguments")
 		fmt.Fprintf(env.Stderr(), "rbmk sh: %s\n", err.Error())
 		fmt.Fprintf(env.Stderr(), "Run `rbmk sh --help` for usage.\n")
 		return err
+	}
+
+	// 2. If the script is named `-h` or `--help` print help.
+	if argv[1] == "-h" || argv[1] == "--help" {
+		return cmd.Help(env, argv...)
 	}
 
 	// 3. Open and parse the shell script.
@@ -66,12 +66,14 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	// scripts written before the release of RBMK v0.7.0.
 	os.Setenv("RBMK_EXE", "rbmk")
 
-	// 5. Create the shell interpreter.
+	// 5. Create the shell interpreter ensuring we properly use `--` to
+	// ensure options get passed to the script itself.
+	scriptParams := append([]string{"--"}, argv[2:]...)
 	runner, err := interp.New(
 		interp.StdIO(env.Stdin(), env.Stdout(), env.Stderr()),
 		interp.Env(expand.FuncEnviron(os.Getenv)),
 		interp.ExecHandlers(newBuiltInMiddleware()),
-		interp.Params(argv[2:]...),
+		interp.Params(scriptParams...),
 	)
 	if err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk sh: cannot create interpreter: %s\n", err.Error())
