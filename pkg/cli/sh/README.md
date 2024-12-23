@@ -13,6 +13,9 @@ Run `SCRIPT` using a POSIX-compliant shell interpreter providing
 to the script the given `ARGUMENTS`, which will be available to
 the script as `$1`, `$2`, etc.
 
+As a special case, if `SCRIPT` is `-h` or `--help`, the command
+prints this help message and exits.
+
 This shell implementation (based on `mvdan.cc/sh/v3`) is consistent
 across operating systems and supports:
 
@@ -110,6 +113,9 @@ possible for scripts that work using `bash $script` to instead fail when
 using `rbmk sh $script` precisely because of this issue.
 
 ## History
+
+Since RBMK v0.12.0, the `-h, --help` flag is passed by default to the
+`SCRIPT` rather than printing the `rbmk sh` command's help.
 
 Since RBMK v0.10.0, it is possible to pass arguments to the script
 executed by `rbmk sh` using the command line.
