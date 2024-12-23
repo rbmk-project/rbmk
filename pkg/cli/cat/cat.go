@@ -6,7 +6,6 @@ package cat
 import (
 	"context"
 	_ "embed"
-	"errors"
 	"fmt"
 	"io"
 
@@ -24,23 +23,22 @@ func NewCommand() cliutils.Command {
 
 type command struct{}
 
+// Help implements [cliutils.Command].
 func (cmd command) Help(env cliutils.Environment, argv ...string) error {
 	fmt.Fprintf(env.Stdout(), "%s\n", markdown.MaybeRender(readme))
 	return nil
 }
 
+// Main implements [cliutils.Command].
 func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...string) error {
 	// 1. honour requests for printing the help
 	if cliutils.HelpRequested(argv...) {
 		return cmd.Help(env, argv...)
 	}
 
-	// 2. ensure we have at least one file to read
+	// 2. if there's no file to read, use the stdin
 	if len(argv) < 2 {
-		err := errors.New("expected one or more files to concatenate")
-		fmt.Fprintf(env.Stderr(), "rbmk cat: %s\n", err.Error())
-		fmt.Fprintf(env.Stderr(), "Run `rbmk cat --help` for usage.\n")
-		return err
+		argv = append(argv, "-")
 	}
 
 	// 3. concatenate each file to stdout
@@ -54,11 +52,17 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 }
 
 func catFile(env cliutils.Environment, path string) error {
-	filep, err := env.FS().Open(path)
-	if err != nil {
-		return err
+	var reader io.Reader
+	if path != "-" {
+		filep, err := env.FS().Open(path)
+		if err != nil {
+			return err
+		}
+		defer filep.Close()
+		reader = filep
+	} else {
+		reader = env.Stdin()
 	}
-	defer filep.Close()
-	_, err = io.Copy(env.Stdout(), filep)
+	_, err := io.Copy(env.Stdout(), reader)
 	return err
 }
