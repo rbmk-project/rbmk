@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 
+	"github.com/kballard/go-shellquote"
 	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/common/fsx"
 	"github.com/rbmk-project/rbmk/internal/markdown"
@@ -21,7 +22,7 @@ type builtInMiddleware func(next interp.ExecHandlerFunc) interp.ExecHandlerFunc
 
 // newBuiltInMiddleware creates a new built-in middleware for
 // executing built-in commands with the shell.
-func newBuiltInMiddleware() builtInMiddleware {
+func newBuiltInMiddleware(stderr io.Writer) builtInMiddleware {
 	return func(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
 		return func(ctx context.Context, args []string) error {
 			// 1. ensure we have a command to run and that such a
@@ -33,17 +34,23 @@ func newBuiltInMiddleware() builtInMiddleware {
 				return fmt.Errorf("%s: command not found", args[0])
 			}
 
-			// 2. construct the subcommand environment.
-			env := newBuiltInEnvironment(interp.HandlerCtx(ctx))
+			// 2. honour the `RBMK_TRACE` environment variable.
+			hc := interp.HandlerCtx(ctx)
+			if hc.Env.Get("RBMK_TRACE").String() == "1" {
+				fmt.Fprintf(stderr, "+ %s\n", shellquote.Join(args...))
+			}
 
-			// 3. construct the root command to switch depending on the
+			// 3. construct the subcommand environment.
+			env := newBuiltInEnvironment(hc)
+
+			// 4. construct the root command to switch depending on the
 			// actual `rbmk` subcommand being invoked.
 			directory := rootcmd.CommandsWithoutSh()
 			directory["sh"] = builtInShCommand{}
 			root := cliutils.NewCommandWithSubCommands(
 				"rbmk", markdown.LazyMaybeRender(rootcmd.HelpText()), directory)
 
-			// 4. execute the root command and return the result
+			// 5. execute the root command and return the result
 			return root.Main(ctx, env, args...)
 		}
 	}

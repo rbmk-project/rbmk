@@ -103,6 +103,9 @@ func (g *shGenerator) UpdateProgressBar(name string, idx, total int) {
 		idx,
 		total,
 	)
+	fmt.Fprintf(g.writer, "if [[ \"${RBMK_TRACE:-0}\" == \"1\" ]]; then\n")
+	fmt.Fprintf(g.writer, "\tprintf \"\\n\"\n")
+	fmt.Fprintf(g.writer, "fi\n")
 	fmt.Fprintf(g.writer, "\n")
 }
 
@@ -114,6 +117,19 @@ func (g *shGenerator) WriteHelpInterceptor(helpFuncName string) {
 	fmt.Fprintf(g.writer, "\t-h|--help)\n")
 	fmt.Fprintf(g.writer, "\t\t%s\n", helpFuncName)
 	fmt.Fprintf(g.writer, "\t\texit 0\n")
+	fmt.Fprintf(g.writer, "\t\t;;\n")
+	fmt.Fprintf(g.writer, "\tesac\n")
+	fmt.Fprintf(g.writer, "done\n")
+	fmt.Fprintf(g.writer, "\n")
+}
+
+// WriteTraceInterceptor writes the code to intercept the `-v, --verbose` option.
+func (g *shGenerator) WriteTraceInterceptor() {
+	fmt.Fprintf(g.writer, "# Intercept the `-v, --verbose` option\n")
+	fmt.Fprintf(g.writer, "for arg in \"$@\"; do\n")
+	fmt.Fprintf(g.writer, "\tcase \"$arg\" in\n")
+	fmt.Fprintf(g.writer, "\t-v|--verbose)\n")
+	fmt.Fprintf(g.writer, "\t\texport RBMK_TRACE=\"1\"\n")
 	fmt.Fprintf(g.writer, "\t\t;;\n")
 	fmt.Fprintf(g.writer, "\tesac\n")
 	fmt.Fprintf(g.writer, "done\n")

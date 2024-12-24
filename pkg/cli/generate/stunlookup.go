@@ -126,18 +126,21 @@ func (cmd stunLookupCommand) generate(allinputs []endpoint, w io.Writer) {
 	// 3. intercept the `-h, --help` option
 	gen.WriteHelpInterceptor("rbmk_stun_lookup_help")
 
-	// 4. create the results directory
+	// 4. intercept the `-v, --verbose` option
+	gen.WriteTraceInterceptor()
+
+	// 5. create the results directory
 	gen.MakeResultsDir("stunlookup")
 
-	// 5. generate code to measure each valid input domain
+	// 6. generate code to measure each valid input domain
 	for idx := range allinputs {
 		cmd.generateMeasurementCode(gen, allinputs, idx)
 	}
 
-	// 6. update the progress bar
+	// 7. update the progress bar
 	gen.ProgressBarDone("stunlookup", len(allinputs))
 
-	// 7. compress the results directory
+	// 8. compress the results directory
 	gen.CompressResultsDir()
 }
 

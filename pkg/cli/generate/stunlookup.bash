@@ -34,6 +34,9 @@
 #doc: --stun-port string (default "19302")
 #doc:     The port of the STUN server to use.
 #doc:
+#doc: -v, --verbose
+#doc:     Ignored by this function without producing usage errors.
+#doc:
 #doc: Files
 #doc:
 #doc: dig4.jsonl
@@ -114,6 +117,9 @@ rbmk_stun_lookup() {
 			fi
 			shift 2
 			;;
+		-v | --verbose)
+			shift
+			;;
 		*)
 			echo "rbmk_stun_lookup: unknown argument: $1" >&2
 			return 1
@@ -158,11 +164,11 @@ rbmk_stun_lookup() {
 
 	# Include well-known static IP addresses if available
 	# to circumvent potential DNS based censorship.
-	if [[ -n "${stun_addr_ipv4}" ]]; then
+	if [[ -n ${stun_addr_ipv4} ]]; then
 		(echo "${stun_addr_ipv4}" | rbmk pipe write a.pipe) &
 		workers="$((workers + 1))"
 	fi
-	if [[ -n "${stun_addr_ipv6}" && "${disable_ipv6}" -eq "0" ]]; then
+	if [[ -n ${stun_addr_ipv6} && ${disable_ipv6} -eq "0" ]]; then
 		(echo "${stun_addr_ipv6}" | rbmk pipe write a.pipe) &
 		workers="$((workers + 1))"
 	fi
@@ -246,6 +252,11 @@ resolver to map it to IP addresses and use the first IP address
 that works. The default is to use the `8.8.8.8` server.
 
 See `rbmk dig --help` for more information.
+
+### `-v, --verbose`
+
+Causes the script to print the `rbmk` commands it executes
+before actually running them. Useful for debugging.
 
 ## Files
 

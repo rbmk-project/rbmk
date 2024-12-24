@@ -51,6 +51,20 @@ v0.7.0 to continue running without modification. Since v0.7.0, `rbmk sh`
 cannot execute external commands and is only allowed to run shell
 built-in commands and the `rbmk` command.
 
+### `RBMK_TRACE`
+
+When this variable is set to `1`, executing `rbmk` commands within a
+shell script will print the executed commands on the stderr.
+
+For example:
+
+```
+bash$ export RBMK_TRACE=1
+bash$ rbmk sh measure.bash
++ rbmk mkdir -p /tmp/2021-09-01-12-00-00-000000-000000
+...
+```
+
 ## Example
 
 The following example demonstrates how to use `rbmk sh` to run a script that:

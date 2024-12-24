@@ -72,7 +72,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	runner, err := interp.New(
 		interp.StdIO(env.Stdin(), env.Stdout(), env.Stderr()),
 		interp.Env(expand.FuncEnviron(os.Getenv)),
-		interp.ExecHandlers(newBuiltInMiddleware()),
+		interp.ExecHandlers(newBuiltInMiddleware(env.Stderr())),
 		interp.Params(scriptParams...),
 	)
 	if err != nil {
