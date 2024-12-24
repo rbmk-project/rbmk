@@ -174,10 +174,9 @@ rbmk_stun_lookup() {
 	fi
 
 	# Collect the STUN endpoints and perform the STUN transactions
-	# as soon as the IP addresses are resolved. The STUN transactions
-	# will be performed sequentially since they write into the same
-	# output file. The `ipuniq` command is used to filter out duplicate
-	# IP addresses returned by DNS or STUN servers.
+	# as soon as the IP addresses are resolved. The `ipuniq` command
+	# is used to filter out duplicate IP addresses returned by
+	# DNS or STUN servers.
 	local count="0"
 	rbmk pipe read --writers "${workers}" a.pipe |
 		rbmk ipuniq -p "${stun_port}" |
