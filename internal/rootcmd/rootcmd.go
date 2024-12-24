@@ -33,10 +33,12 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/head"
 	"github.com/rbmk-project/rbmk/pkg/cli/intro"
 	"github.com/rbmk-project/rbmk/pkg/cli/ipuniq"
+	"github.com/rbmk-project/rbmk/pkg/cli/markdown"
 	"github.com/rbmk-project/rbmk/pkg/cli/mkdir"
 	"github.com/rbmk-project/rbmk/pkg/cli/mv"
 	"github.com/rbmk-project/rbmk/pkg/cli/nc"
 	"github.com/rbmk-project/rbmk/pkg/cli/pipe"
+	"github.com/rbmk-project/rbmk/pkg/cli/random"
 	"github.com/rbmk-project/rbmk/pkg/cli/rm"
 	"github.com/rbmk-project/rbmk/pkg/cli/stun"
 	"github.com/rbmk-project/rbmk/pkg/cli/tar"
@@ -71,10 +73,12 @@ func CommandsWithoutSh() map[string]cliutils.Command {
 		"head":      head.NewCommand(),
 		"intro":     &cmdwrapper{intro.NewCommand()},
 		"ipuniq":    &cmdwrapper{ipuniq.NewCommand()},
+		"markdown":  &cmdwrapper{markdown.NewCommand()},
 		"mkdir":     &cmdwrapper{mkdir.NewCommand()},
 		"mv":        &cmdwrapper{mv.NewCommand()},
 		"nc":        &cmdwrapper{nc.NewCommand()},
 		"pipe":      &cmdwrapper{pipe.NewCommand()},
+		"random":    &cmdwrapper{random.NewCommand()},
 		"rm":        &cmdwrapper{rm.NewCommand()},
 		"stun":      &cmdwrapper{stun.NewCommand()},
 		"tar":       &cmdwrapper{tar.NewCommand()},

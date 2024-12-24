@@ -17,6 +17,9 @@ or is zero, this command will `exit 1` and print an error.
 Each line from each writer is written atomically to stdout to prevent garbled
 output when multiple writers are sending data simultaneously.
 
+We implement the named pipe using Unix domain sockets as documented in
+the `rbmk pipe --help` output message.
+
 ## Flags
 
 ### `--writers N`
@@ -62,6 +65,11 @@ Returns `0` on success. Returns `1` on:
 - Connection errors
 
 - I/O errors
+
+## Bugs
+
+See `rbmk pipe --help` for details regarding issues that could arise
+with the maximum platform-specific Unix domain socket path length.
 
 ## History
 

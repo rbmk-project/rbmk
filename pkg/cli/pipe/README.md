@@ -70,6 +70,30 @@ Returns `0` on success. Returns `1` on:
 
 - I/O errors
 
+## Bugs
+
+Unix domain sockets have a platform-specific maximum path length
+ranging from ~90 to ~108 bytes. If the path length exceeds the
+maximum path length, you will see errors such as:
+
+```
+rbmk pipe read: cannot create pipe: listen unix .../pipe: bind: invalid argument
+```
+
+where `.../pipe` is a path that exceeds the maximum path length.
+
+This limitation could interact with how `rbmk sh` executes `rbmk
+COMMAND` commands (i.e., in the same process) as documented in
+detail by the `rbmk sh --help` output.
+
+To mitigate this issue, use paths relative to the current working
+directory in your scripts and attemp to keep them short. Specifically,
+you can create a unique directory for measuring with a short name,
+using `rbmk timestamp --full` to generate a timestamp-based name with
+nanosecond precision and possibly combining it with `rbmk random` to
+add additional entropy. Then, once the measurement is complete, you
+can move the results to a longer, more logical path name.
+
 ## History
 
 The `rbmk pipe` command was introduced in RBMK v0.4.0.

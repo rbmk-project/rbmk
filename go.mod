@@ -7,9 +7,9 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/miekg/dns v1.1.62
 	github.com/pion/stun/v3 v3.0.0
-	github.com/rbmk-project/common v0.14.0
-	github.com/rbmk-project/dnscore v0.9.0
-	github.com/rbmk-project/x v0.0.0-20241219092627-3a240441ca60
+	github.com/rbmk-project/common v0.16.0
+	github.com/rbmk-project/dnscore v0.10.0
+	github.com/rbmk-project/x v0.0.0-20241222125041-50c09e2a23df
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.10.0
 	mvdan.cc/sh/v3 v3.10.0

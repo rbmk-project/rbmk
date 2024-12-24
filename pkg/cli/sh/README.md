@@ -13,6 +13,9 @@ Run `SCRIPT` using a POSIX-compliant shell interpreter providing
 to the script the given `ARGUMENTS`, which will be available to
 the script as `$1`, `$2`, etc.
 
+As a special case, if `SCRIPT` is `-h` or `--help`, the command
+prints this help message and exits.
+
 This shell implementation (based on `mvdan.cc/sh/v3`) is consistent
 across operating systems and supports:
 
@@ -65,12 +68,11 @@ First, let's see the content of the the `script.bash` file:
 ```sh
 #!/bin/bash
 set -x
-timestamp=$(rbmk timestamp)
-outdir="$timestamp"
+outdir="$(rbmk timestamp --full)-$(rbmk random)"
 rbmk mkdir -p "$outdir"
 rbmk dig +short=ip A "dns.google" > "$outdir/dig1.txt"
 rbmk dig +short=ip AAAA "dns.google" > "$outdir/dig2.txt"
-rbmk tar -czf "results_$timestamp.tar.gz" "$outdir"
+rbmk tar -czf "results_$outdir.tar.gz" "$outdir"
 rbmk rm -rf "$outdir"
 ```
 
@@ -84,7 +86,36 @@ $ rbmk sh script.bash
 
 This command exits with `0` on success and `1` on failure.
 
+## Bugs
+
+The `rbmk sh` command executes other `rbmk COMMAND` commands in the same
+process without changing the current working directory. Because `rbmk pipe`
+uses Unix domain sockets, and because such sockets are restricted in the
+maximum path length, `rbmk sh` attempts to minimise path lengths by using
+paths relative to the current working directory.
+
+If `rbmk sh` cannot determine the current working directory when executing
+a command, or it cannot map the subcommand own working directory to the
+current working directory, it emits this warning message:
+
+```
+<date> rmbk sh: cannot create relative-to-cwd dir-path mapper: <error>
+```
+
+and then uses the absolute path instead.
+
+Regardless, using long paths could lead to errors when using `rbmk pipe`
+as documented in `rbmk pipe --help`. See `rbmk pipe --help` for advices
+regarding mitigating this issue in shell scripts.
+
+Note that, because `bash` changes the current working directory, it is
+possible for scripts that work using `bash $script` to instead fail when
+using `rbmk sh $script` precisely because of this issue.
+
 ## History
+
+Since RBMK v0.12.0, the `-h, --help` flag is passed by default to the
+`SCRIPT` rather than printing the `rbmk sh` command's help.
 
 Since RBMK v0.10.0, it is possible to pass arguments to the script
 executed by `rbmk sh` using the command line.
