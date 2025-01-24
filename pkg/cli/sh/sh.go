@@ -64,6 +64,12 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 
 	// 4. Ensure the RBMK_EXE environment variable is set to support
 	// scripts written before the release of RBMK v0.7.0.
+	//
+	// Note: os.Setenv is NOT THREAD SAFE in Go. At present it's unclear
+	// whether this os.Setenv has any implication, but we should keep this
+	// in mind in case we see strange crashes in the future.
+	//
+	// See: https://www.edgedb.com/blog/c-stdlib-isn-t-threadsafe-and-even-safe-rust-didn-t-save-us
 	os.Setenv("RBMK_EXE", "rbmk")
 
 	// 5. Create the shell interpreter ensuring we properly use `--` to
