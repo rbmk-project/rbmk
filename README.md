@@ -47,9 +47,11 @@ Key features:
 This design ensures that measurement scripts work consistently across
 different environments, eliminating common portability issues.
 
-## Minimum Go version
+## Minimum Required Go Version
 
-Go 1.23
+We maintain compatibility with the oldest supported version of Go as
+documented by the [Go Release Policy](https://golang.org/doc/devel/release.html#policy)
+and update our minimum required version of Go as needed.
 
 ## Installation
 
