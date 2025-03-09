@@ -62,16 +62,12 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		return err
 	}
 
-	// 4. Ensure the RBMK_EXE environment variable is set to support
-	// scripts written before the release of RBMK v0.7.0.
-	os.Setenv("RBMK_EXE", "rbmk")
-
-	// 5. Create the shell interpreter ensuring we properly use `--` to
+	// 4. Create the shell interpreter ensuring we properly use `--` to
 	// ensure options get passed to the script itself.
 	scriptParams := append([]string{"--"}, argv[2:]...)
 	runner, err := interp.New(
 		interp.StdIO(env.Stdin(), env.Stdout(), env.Stderr()),
-		interp.Env(expand.FuncEnviron(os.Getenv)),
+		interp.Env(expand.FuncEnviron(osGetenvWrapper)),
 		interp.ExecHandlers(newBuiltInMiddleware()),
 		interp.Params(scriptParams...),
 	)
@@ -80,11 +76,33 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 		return err
 	}
 
-	// 6. Finally, run the shell script.
+	// 5. Finally, run the shell script.
 	err = runner.Run(ctx, prog)
 	if err != nil {
 		fmt.Fprintf(env.Stderr(), "rbmk sh: %s\n", err.Error())
 		return err
 	}
 	return nil
+}
+
+// rbmkExeVarName is the name of the RBMK_EXE environment variable,
+// which is shared by this package and its unit tests.
+const rbmkExeVarName = "RBMK_EXE"
+
+// osGetenvWrapper is a wrapper for [os.Getenv] that ensures that the
+// RBMK_EXE environment variable is set to support scripts written
+// before the release of RBMK v0.7.0.
+//
+// We use a wrapper rather than setting the environment explicitly
+// because [os.Setenv] is NOT THREAD SAFE in Go. Thus, it seems more
+// robust to avoid using it and potentially racing between it and
+// [os.Getenv], used by the shell interpreter.
+//
+// See: https://www.edgedb.com/blog/c-stdlib-isn-t-threadsafe-and-even-safe-rust-didn-t-save-us
+func osGetenvWrapper(key string) string {
+	value := os.Getenv(key)
+	if value == "" && key == rbmkExeVarName {
+		value = "rbmk"
+	}
+	return value
 }
