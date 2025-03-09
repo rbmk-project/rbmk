@@ -85,6 +85,10 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	return nil
 }
 
+// rbmkExeVarName is the name of the RBMK_EXE environment variable,
+// which is shared by this package and its unit tests.
+const rbmkExeVarName = "RBMK_EXE"
+
 // osGetenvWrapper is a wrapper for [os.Getenv] that ensures that the
 // RBMK_EXE environment variable is set to support scripts written
 // before the release of RBMK v0.7.0.
@@ -97,7 +101,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 // See: https://www.edgedb.com/blog/c-stdlib-isn-t-threadsafe-and-even-safe-rust-didn-t-save-us
 func osGetenvWrapper(key string) string {
 	value := os.Getenv(key)
-	if value == "" && key == "RBMK_EXE" {
+	if value == "" && key == rbmkExeVarName {
 		value = "rbmk"
 	}
 	return value
