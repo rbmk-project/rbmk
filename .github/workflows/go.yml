@@ -1,4 +1,6 @@
-# This workflow builds and tests rbmk Go code.
+# This workflow builds and tests a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
 name: Go
 
 on:
@@ -8,13 +10,14 @@ on:
     branches: ["main"]
 
 jobs:
-  build:
+  build_and_test:
     strategy:
       matrix:
         goversion:
           # The first entry of the matrix should be the
           # version indicated inside the `go.mod`
           - "1.23"
+          - "1.24"
 
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +29,28 @@ jobs:
           go-version: "${{ matrix.goversion }}"
 
       - name: Build
-        run: make all
+        run: go build ./...
 
       - name: Test
-        run: make check
+        run: go test -race ./...
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          # Here we should use the current go version
+          go-version: "1.24"
+
+      - name: Measure Coverage
+        run: go test -short -race -covermode=atomic -coverprofile=coverage.out ./...
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.out
+          fail_ci_if_error: true

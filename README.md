@@ -1,6 +1,6 @@
 # Really Basic Measurement Kit
 
-[![GoDoc](https://pkg.go.dev/badge/github.com/rbmk-project/rbmk)](https://pkg.go.dev/github.com/rbmk-project/rbmk)
+[![GoDoc](https://pkg.go.dev/badge/github.com/rbmk-project/rbmk)](https://pkg.go.dev/github.com/rbmk-project/rbmk) [![Build Status](https://github.com/rbmk-project/rbmk/actions/workflows/go.yml/badge.svg)](https://github.com/rbmk-project/rbmk/actions) [![codecov](https://codecov.io/gh/rbmk-project/rbmk/branch/main/graph/badge.svg)](https://codecov.io/gh/rbmk-project/rbmk)
 
 RBMK (Really Basic Measurement Kit) is a command-line utility
 to facilitate network exploration and measurements. It provides
@@ -47,9 +47,11 @@ Key features:
 This design ensures that measurement scripts work consistently across
 different environments, eliminating common portability issues.
 
-## Minimum Go version
+## Minimum Required Go Version
 
-Go 1.23
+We maintain compatibility with the oldest supported version of Go as
+documented by the [Go Release Policy](https://golang.org/doc/devel/release.html#policy)
+and update our minimum required version of Go as needed.
 
 ## Installation
 
