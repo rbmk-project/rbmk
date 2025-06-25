@@ -76,7 +76,7 @@ clean:
 #doc:
 #doc: Installs the full version of rbmk for the current platform.
 #doc: Use PREFIX to specify installation prefix (default: `/usr/local`).
-#doc: For stated installations, use DESTDIR as usual.
+#doc: For staged installations, use DESTDIR as usual.
 #doc:
 #doc: Examples:
 #doc:     make install
