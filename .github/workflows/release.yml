@@ -25,7 +25,7 @@ jobs:
         goversion:
           # We should most likely only use the latest version of Go
           # but I'm keeping the matrix for flexibility
-          - "1.23"
+          - "1.24"
 
     runs-on: ubuntu-latest
     steps:
