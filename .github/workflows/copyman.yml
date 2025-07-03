@@ -1,0 +1,18 @@
+# This workflow ensures copied manual pages aren't stale
+
+name: CopyMan
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for Stale Manual Pages
+        run: ./scripts/copyman.bash --fail-if-dirty

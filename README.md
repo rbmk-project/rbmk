@@ -113,10 +113,6 @@ Run `make` without arguments to see all available targets.
 
 Read the packages documentation at [pkg.go.dev/rbmk-project/rbmk](https://pkg.go.dev/github.com/rbmk-project/rbmk).
 
-## Design
-
-The [docs/design](./docs/design) directory contains all the design documents.
-
 ## Architecture
 
 **Documentation:**
