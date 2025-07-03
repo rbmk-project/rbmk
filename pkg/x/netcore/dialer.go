@@ -15,7 +15,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/rbmk-project/common/errclass"
+	"github.com/rbmk-project/rbmk/pkg/common/errclass"
 )
 
 // DialContext establishes a new TCP/UDP connection.

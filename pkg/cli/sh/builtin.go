@@ -9,10 +9,10 @@ import (
 	"io"
 	"log"
 
-	"github.com/rbmk-project/common/cliutils"
-	"github.com/rbmk-project/common/fsx"
 	"github.com/rbmk-project/rbmk/internal/markdown"
 	"github.com/rbmk-project/rbmk/internal/rootcmd"
+	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
+	"github.com/rbmk-project/rbmk/pkg/common/fsx"
 	"mvdan.cc/sh/v3/interp"
 )
 

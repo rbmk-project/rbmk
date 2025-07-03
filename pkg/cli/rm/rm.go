@@ -9,9 +9,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/rbmk-project/common/cliutils"
-	"github.com/rbmk-project/common/fsx"
 	"github.com/rbmk-project/rbmk/internal/markdown"
+	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
+	"github.com/rbmk-project/rbmk/pkg/common/fsx"
 	"github.com/spf13/pflag"
 )
 

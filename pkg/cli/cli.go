@@ -6,10 +6,10 @@ package cli
 import (
 	_ "embed"
 
-	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/internal/markdown"
 	"github.com/rbmk-project/rbmk/internal/rootcmd"
 	"github.com/rbmk-project/rbmk/pkg/cli/sh"
+	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 )
 
 // NewCommand constructs a new [cliutils.Command] for the `rbmk` command.

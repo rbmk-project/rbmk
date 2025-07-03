@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/internal/markdown"
+	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"

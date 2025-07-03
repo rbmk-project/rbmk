@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rbmk-project/common/mocks"
-	"github.com/rbmk-project/common/runtimex"
+	"github.com/rbmk-project/rbmk/pkg/common/mocks"
+	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
 	"github.com/stretchr/testify/assert"
 )
 

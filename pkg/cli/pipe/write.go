@@ -11,8 +11,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/internal/markdown"
+	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 )
 
 // newWriteCommand creates the `rbmk pipe write` command.
