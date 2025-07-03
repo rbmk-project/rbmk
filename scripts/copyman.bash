@@ -11,7 +11,7 @@ for srcname in $(find ./pkg/cli -type f -name README.md); do
 done
 mv -v "./docs/man/rbmk-rootcmd.md" "./docs/man/rbmk.md"
 
-for name in $(find ./pkg/cli/tutorial -type f -name \*.md |grep -v 'README\.md'); do
+for name in $(find ./pkg/cli/tutorial -type f -name \*.md | grep -v 'README\.md'); do
 	cp -v "$name" "./docs/tutorial/$(basename "$name")"
 done
 
