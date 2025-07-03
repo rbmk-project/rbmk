@@ -1,4 +1,5 @@
-# This workflow ensures copied manual pages aren't stale
+# This workflow ensures copied manual pages and other
+# copied docs (e.g., tutorials) aren't stale
 
 name: CopyMan
 
