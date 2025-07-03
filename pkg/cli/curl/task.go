@@ -11,10 +11,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/rbmk-project/common/closepool"
 	"github.com/rbmk-project/common/dialonce"
-	"github.com/rbmk-project/dnscore"
 	"github.com/rbmk-project/rbmk/internal/testable"
+	"github.com/rbmk-project/rbmk/pkg/common/closepool"
+	"github.com/rbmk-project/rbmk/pkg/dns/dnscore"
 	"github.com/rbmk-project/x/netcore"
 )
 

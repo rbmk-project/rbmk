@@ -8,8 +8,8 @@ import (
 	"net/netip"
 	"time"
 
-	"github.com/rbmk-project/common/httpconntrace"
-	"github.com/rbmk-project/common/httpslog"
+	"github.com/rbmk-project/rbmk/pkg/common/httpconntrace"
+	"github.com/rbmk-project/rbmk/pkg/common/httpslog"
 )
 
 // httpDoAndLog performs the request and emits structured logs.

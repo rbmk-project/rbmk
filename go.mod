@@ -4,13 +4,16 @@ go 1.23.3
 
 require (
 	github.com/charmbracelet/glamour v0.10.0
+	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.66
 	github.com/pion/stun/v3 v3.0.0
+	github.com/quic-go/quic-go v0.53.0
 	github.com/rbmk-project/common v0.21.0
-	github.com/rbmk-project/dnscore v0.13.0
 	github.com/rbmk-project/x v0.0.0-20250625213336-5718c136805c
 	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/net v0.41.0
+	golang.org/x/sys v0.33.0
 	mvdan.cc/sh/v3 v3.11.0
 )
 
@@ -37,7 +40,7 @@ require (
 	github.com/pion/logging v0.2.4 // indirect
 	github.com/pion/transport/v3 v3.0.7 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/quic-go/quic-go v0.53.0 // indirect
+	github.com/rbmk-project/dnscore v0.13.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
@@ -48,9 +51,7 @@ require (
 	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
 	golang.org/x/mod v0.25.0 // indirect
-	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/term v0.32.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
