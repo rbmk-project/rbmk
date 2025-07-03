@@ -3,7 +3,7 @@
 |              |                                                |
 |--------------|------------------------------------------------|
 | Author       | [@bassosimone](https://github.com/bassosimone) |
-| Last-Updated | 2024-12-23                                     |
+| Last-Updated | 2025-07-03                                     |
 
 This document describes the scripting support design
 for RBMK, which builds on top of the core functionality
@@ -12,7 +12,7 @@ described in [dd-005-rbmk.md](dd-005-rbmk.md).
 ## Overview
 
 RBMK scripting support enables defining measurement
-algorithms as shell scripts, with focus on remote deployment
+algorithms as POSIX shell scripts, with focus on remote deployment
 and minimal dependencies.
 
 ## Core Principles
@@ -129,33 +129,48 @@ This ensures consistency across different execution environments.
 ## Design Choices
 
 1. Shell Interpreter
+
 - Use `mvdan.cc/sh` for portable, consistent behavior
+
 - Provide `RBMK_EXE` environment variable so that a script can
 invoke `rbmk` subcommands
 
 2. Script Generation
+
 - Python (or other scripting languages) for generation logic
+
 - Built-in shell for execution
+
 - Clear separation of roles
 
 3. Unix-like Commands
+
 - Minimal but complete set
+
 - Platform-independent behavior
+
 - Focus on measurement needs
 
 ## Future Extensions
 
 1. Script Templates
+
 - Common measurement patterns
+
 - Best practices examples
+
 - Reusable components
 
 2. Result Processing
+
 - Standard analysis tools
+
 - Report generation
+
 - Data visualization
 
 3. Unix Commands
+
 - More commands as needed
 
 ## References

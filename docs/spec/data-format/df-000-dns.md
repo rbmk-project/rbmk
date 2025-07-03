@@ -3,11 +3,10 @@
 |              |                                                |
 |--------------|------------------------------------------------|
 | Author       | [@bassosimone](https://github.com/bassosimone) |
-| Last-Updated | 2025-03-09                                     |
+| Last-Updated | 2025-07-03                                     |
 
 This document describes the format of DNS measurements emitted
-by [rbmk](https://github.com/rbmk-project/rbmk) and implemented by
-the [dnscore](https://github.com/rbmk-project/dnscore) library.
+by [rbmk](https://github.com/rbmk-project/rbmk).
 
 
 ## Table of contents
@@ -21,8 +20,8 @@ the [dnscore](https://github.com/rbmk-project/dnscore) library.
 
 ## Overview
 
-The [dnscore](https://github.com/rbmk-project/dnscore) library
-emits a "query" event before sending a DNS query and one or more
+The [dnscore](https://pkg.go.dev/github.com/rbmk-project/rbmk/pkg/dns/dnscore)
+package emits a "query" event before sending a DNS query and one or more
 "response" events when receiving responses. In general, we
 expect a single "response" per query. However, when using DNS
 over UDP, we may receive multiple responses for a single query,
@@ -102,7 +101,7 @@ of the time right before sending the query;
 
 - `"protocol"` (string) is the network protocol we use (e.g., `"tcp"`, `"udp"`).
 
-The current [dnscore](https://github.com/rbmk-project/dnscore)
+The current [dnscore](https://pkg.go.dev/github.com/rbmk-project/rbmk/pkg/dns/dnscore)
 implementation uses [log/slog](https://pkg.go.dev/log/slog), which
 causes the generated message to contain additional fields that
 you can safely ignore when processing the message.
@@ -159,7 +158,7 @@ of the time when the response was received;
 
 - `"protocol"` (string) is the network protocol we use (e.g., `"tcp"`, `"udp"`).
 
-The current [dnscore](https://github.com/rbmk-project/dnscore)
+The current [dnscore](https://pkg.go.dev/github.com/rbmk-project/rbmk/pkg/dns/dnscore)
 implementation uses [log/slog](https://pkg.go.dev/log/slog), which
 causes the generated message to contain additional fields that
 you can safely ignore when processing the message.
