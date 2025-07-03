@@ -119,6 +119,7 @@ Read the packages documentation at [pkg.go.dev/rbmk-project/rbmk](https://pkg.go
 - [docs/design](./docs/design): Design documents.
 - [docs/man](./docs/man): Manual pages for RBMK commands.
 - [docs/spec](./docs/spec): Specification documents.
+- [docs/tutorial](./docs/tutorial): Tutorials for using RBMK.
 
 **Main Entry Point:**
 - [cmd/rbmk](./cmd/rbmk): The main RBMK command-line tool.
