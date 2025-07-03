@@ -10,6 +10,7 @@ require (
 	github.com/quic-go/quic-go v0.53.0
 	github.com/rbmk-project/common v0.21.0
 	github.com/rbmk-project/x v0.0.0-20250625213336-5718c136805c
+	github.com/rogpeppe/go-internal v1.14.1
 	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/net v0.41.0
@@ -42,7 +43,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rbmk-project/dnscore v0.13.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yuin/goldmark v1.7.12 // indirect

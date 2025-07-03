@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/rbmk-project/common/runtimex"
+	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
 )
 
 // Config contains configuration for [New].
