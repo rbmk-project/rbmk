@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rbmk-project/common/errclass"
+	"github.com/rbmk-project/rbmk/pkg/common/errclass"
 )
 
 // connLocalAddr is a safe way to get the local address of a connection.

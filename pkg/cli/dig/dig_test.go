@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/rbmk-project/common/cliutils"
+	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 )
 
 func TestCommand(t *testing.T) {

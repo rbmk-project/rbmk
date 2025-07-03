@@ -2,7 +2,7 @@
 
 package markdown
 
-import "github.com/rbmk-project/common/cliutils"
+import "github.com/rbmk-project/rbmk/pkg/common/cliutils"
 
 // LazyMaybeRender returns a [cliutils.LazyHelpRenderer] that
 // attempts to render the provide help string using markdown by

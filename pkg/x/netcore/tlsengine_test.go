@@ -9,7 +9,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/rbmk-project/common/mocks"
+	"github.com/rbmk-project/rbmk/pkg/common/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

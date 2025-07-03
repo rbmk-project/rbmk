@@ -19,8 +19,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/rbmk-project/common/cliutils"
-	"github.com/rbmk-project/common/fsx"
+	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
+	"github.com/rbmk-project/rbmk/pkg/common/fsx"
 )
 
 // DialContextFunc is the type of the low-level dial function.

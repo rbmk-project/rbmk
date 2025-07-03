@@ -21,7 +21,6 @@ package rootcmd
 import (
 	_ "embed"
 
-	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/pkg/cli/cat"
 	"github.com/rbmk-project/rbmk/pkg/cli/curl"
 	"github.com/rbmk-project/rbmk/pkg/cli/dig"
@@ -40,6 +39,7 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/cli/timestamp"
 	"github.com/rbmk-project/rbmk/pkg/cli/tutorial"
 	"github.com/rbmk-project/rbmk/pkg/cli/version"
+	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 )
 
 //go:embed README.md

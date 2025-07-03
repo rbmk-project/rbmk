@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/rbmk-project/common/cliutils"
 	"github.com/rbmk-project/rbmk/internal/markdown"
+	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 	"github.com/spf13/pflag"
 )
 

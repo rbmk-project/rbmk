@@ -7,8 +7,8 @@ import (
 	_ "embed"
 	"os"
 
-	"github.com/rbmk-project/common/climain"
 	"github.com/rbmk-project/rbmk/pkg/cli"
+	"github.com/rbmk-project/rbmk/pkg/common/climain"
 )
 
 var mainArgs = os.Args
