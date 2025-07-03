@@ -19,7 +19,7 @@ import (
 	"github.com/rbmk-project/rbmk/internal/testable"
 	"github.com/rbmk-project/rbmk/pkg/common/closepool"
 	"github.com/rbmk-project/rbmk/pkg/dns/dnscore"
-	"github.com/rbmk-project/x/netcore"
+	"github.com/rbmk-project/rbmk/pkg/x/netcore"
 )
 
 // Task runs the `dig` task.

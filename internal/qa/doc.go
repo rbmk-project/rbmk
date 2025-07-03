@@ -21,7 +21,7 @@ tests and standalone QA runs.
 
 # Architecture
 
-The package uses github.com/rbmk-project/x/netsim to simulate network
+The package uses [github.com/rbmk-project/rbmk/pkg/x/netsim] to simulate network
 conditions. Each scenario runs in an isolated network environment where
 we can apply different forms of censorship and observe their effects.
 

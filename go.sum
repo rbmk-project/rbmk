@@ -73,10 +73,6 @@ github.com/quic-go/quic-go v0.53.0 h1:QHX46sISpG2S03dPeZBgVIZp8dGagIaiu2FiVYvpCZ
 github.com/quic-go/quic-go v0.53.0/go.mod h1:e68ZEaCdyviluZmy44P6Iey98v/Wfz6HCjQEm+l8zTY=
 github.com/rbmk-project/common v0.21.0 h1:zfA3FyXWkK4ILTde4SEgIe2sppEwei3YmioGQkicUjo=
 github.com/rbmk-project/common v0.21.0/go.mod h1:cUddXWilWAR0pwBFeckADyPXulUkINLl/wQVANAsu+U=
-github.com/rbmk-project/dnscore v0.13.0 h1:1TZZ1Jyp5YBjv09OuPwiyP7Z7Ypf2/bkjTYyO7P2M/I=
-github.com/rbmk-project/dnscore v0.13.0/go.mod h1:j+dHovZGfaIZagopr80Q4o5hf2ASvu+jL/9uu9zN1/4=
-github.com/rbmk-project/x v0.0.0-20250625213336-5718c136805c h1:N0fMG3Y7/GNBFKr5Oklksz3lNewrfMl9AWt9t3hsP78=
-github.com/rbmk-project/x v0.0.0-20250625213336-5718c136805c/go.mod h1:H8MX2Hl0+YOCIo8SUjIdBUzA5C+rg7BpYQYGjvLljWE=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
