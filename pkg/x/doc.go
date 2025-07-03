@@ -3,11 +3,11 @@
 /*
 Package x contains experimental packages.
 
-See [dd-002-x.md] for more information.
+See [dd-002-x] for more information.
 
 Originally, [github.com/rbmk-project/x]. Merged with [rbmk#78].
 
-[dd-002-x.md]: https://github.com/rbmk-project/rbmk-project.github.io/blob/main/docs/design/dd-002-x.md
+[dd-002-x]: https://rbmk-project.github.io/rbmk/design/dd-002-x
 [github.com/rbmk-project/x]: https://github.com/rbmk-project/x
 [rbmk#78]: https://github.com/rbmk-project/rbmk/pull/78
 */

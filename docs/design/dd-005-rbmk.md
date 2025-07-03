@@ -3,7 +3,7 @@
 |              |                                                |
 |--------------|------------------------------------------------|
 | Author       | [@bassosimone](https://github.com/bassosimone) |
-| Last-Updated | 2024-12-09                                     |
+| Last-Updated | 2025-07-03                                     |
 
 This document describes the design of the [rbmk](
 https://github.com/rbmk-project/rbmk) repository, which
@@ -390,4 +390,5 @@ detail.
 
 Beyond the `rbmk` command itself, we also aim to produce
 comprehensive documentation as part of the
-`rbmk-project.github.io` repository and website.
+`rbmk-project.github.io` repository and website (see
+also [dd-004-website.md](dd-004-website.md))
