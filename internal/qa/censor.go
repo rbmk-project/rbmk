@@ -3,9 +3,9 @@
 package qa
 
 import (
-	"github.com/rbmk-project/x/netsim"
-	"github.com/rbmk-project/x/netsim/censor"
-	"github.com/rbmk-project/x/netsim/dns"
+	"github.com/rbmk-project/rbmk/pkg/x/netsim"
+	"github.com/rbmk-project/rbmk/pkg/x/netsim/censor"
+	"github.com/rbmk-project/rbmk/pkg/x/netsim/dns"
 )
 
 // CensorDNSLikeIran returns a ScenarioEditor that implements Iran-like

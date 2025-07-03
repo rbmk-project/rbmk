@@ -12,7 +12,7 @@ import (
 	"net"
 
 	"github.com/rbmk-project/rbmk/pkg/dns/dnscore"
-	"github.com/rbmk-project/x/netcore"
+	"github.com/rbmk-project/rbmk/pkg/x/netcore"
 )
 
 // ErrNoConfiguredResolvers is returned when there are no configured resolvers.

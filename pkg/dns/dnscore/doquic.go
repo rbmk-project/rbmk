@@ -49,10 +49,10 @@ func (t *Transport) queryQUIC(ctx context.Context, addr *ServerAddr, query *dns.
 	// TODO(bassosimone,roopeshsn): for TCP connections, we abstract
 	// this process of combining the DNS lookup and dialing a connection,
 	// which, in turn, allows for better unit testing and also allows
-	// rbmk-project/rbmk to use rbmk-project/x/netcore for dialing.
+	// rbmk-project/rbmk to use ./pkg/x/netcore for dialing.
 	//
 	// We should probably see to create a similar dialing interface in
-	// rbmk-project/x/netcore for QUIC connections. We started discussing
+	// ./pkg/x/netcore for QUIC connections. We started discussing
 	// this in https://github.com/rbmk-project/dnscore/pull/18.
 
 	// 3. Open the UDP connection for supporting QUIC
