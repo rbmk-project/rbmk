@@ -1,114 +1,57 @@
-# Really Basic Measurement Kit
+# Really Basic Measurement Kit (RBMK)
 
 [![GoDoc](https://pkg.go.dev/badge/github.com/rbmk-project/rbmk)](https://pkg.go.dev/github.com/rbmk-project/rbmk) [![Build Status](https://github.com/rbmk-project/rbmk/actions/workflows/go.yml/badge.svg)](https://github.com/rbmk-project/rbmk/actions) [![codecov](https://codecov.io/gh/rbmk-project/rbmk/branch/main/graph/badge.svg)](https://codecov.io/gh/rbmk-project/rbmk)
 
-RBMK (Really Basic Measurement Kit) is a command-line utility
-to facilitate network exploration and measurements. It provides
-fundamental network operations (`dig`, `curl`, `nc`, and `stun`) that you can
-compose together to perform modular network measurements where
-you can observe each operation in isolation.
+RBMK is a CLI tool for performing low-level, scriptable network measurements.
 
 ## Features
 
-- Modular design with DNS, HTTP(S), and STUN measurement operations
-- CLI-first approach with composable subcommands
-- Extensive structured logging for detailed analysis
-- Support for multiple DNS protocols (UDP, TCP, DoT, and DoH)
-- Integrated online help with optional markdown rendering
+1. Run commands you already know (e.g., `rbmk dig`, `rbmk curl`).
 
-- Core Measurement Commands:
-  - `dig`: DNS measurements with multiple protocols
-  - `curl`: HTTP(S) endpoint measurements
-  - `nc`: TCP/TLS endpoint measurements
-  - `stun`: Resolve the public IP addresses
+2. Measure fundamental network operations: DNS, HTTP(S), TCP, TLS, and STUN.
 
-The tool is designed to support both general use and measurement-specific
-features, with support for scripting and extensive integration testing
-capabilities through the [internal/qa](internal/qa) package.
+3. Obtain structured logs in JSONL format for easy analysis using `--logs FILE`.
 
-### Portable Scripting Support
+4. Organize measurements as portable shell scripts run using `rbmk sh`.
 
-RBMK provides a POSIX-compliant shell environment through `rbmk sh` that
-guarantees script portability:
+5. Support shell scripting with built-in commands like `rbmk tar`, and `rbmk mv`.
 
-```bash
-$ rbmk sh measurement.sh
-```
+6. Get extensive help using `rbmk help` and `rbmk tutorial`.
 
-Key features:
+## Use Cases
 
-- Scripts only use `rbmk` commands as built-in commands
-- Executing external commands is not possible
-- Cross-platform Unix-like built-in subcommands (e.g., `rbmk tar`, `rbmk mv`)
-- Identical behavior across Unix-like systems and Windows
-- Develop locally, deploy anywhere without modification
-- No surprises caused by missing or different external tools
-
-This design ensures that measurement scripts work consistently across
-different environments, eliminating common portability issues.
+RBMK is mostly useful when investigating network anomalies, including
+outages, misconfigurations, censorship, and performance issues.
 
 ## Minimum Required Go Version
 
-We maintain compatibility with the oldest supported version of Go as
-documented by the [Go Release Policy](https://golang.org/doc/devel/release.html#policy)
-and update our minimum required version of Go as needed.
+Go 1.23.
 
 ## Installation
 
-```sh
-go install github.com/rbmk-project/rbmk/cmd/rbmk@latest
+```bash
+go install -v -tags netgo github.com/rbmk-project/rbmk/cmd/rbmk@latest
 ```
-
-## Building
-
-```sh
-go build -v ./cmd/rbmk
-```
-
-If you have GNU make installed, you can also run:
-
-```sh
-make
-```
-
-to see all the available build/install options.
-
-## Feature Flags
-
-We support the following build-time feature flags:
-
-* `rbmk_disable_markdown` disables markdown rendering when
-producing help text thus making the binary much smaller.
-
-You need to pass these feature flags to the `go build` command
-or the `go install` command using the `-tags` flag.
-
-For example, this command:
-
-```sh
-go build -v -tags rbmk_disable_markdown,netgo ./cmd/rbmk
-```
-
-builds with disabled markdown rendering (`rbmk_disable_markdown`) and
-using the pure-Go DNS lookup engine (`netgo`).
 
 ## Quick Start
 
-```sh
+These examples demonstrate how to use RBMK for common network measurements:
+
+```bash
 # Resolve a domain name
 rbmk dig +short=ip example.com
 93.184.215.14
 
 # Make an HTTP request
-rbmk curl https://example.com/
+rbmk curl -vo index.html https://example.com/
 
 # Combine dig and curl for step-by-step measurement
 addr=$(rbmk dig +short=ip example.com | rbmk head -n 1)
 rbmk curl --resolve example.com:443:$addr https://example.com/
 
-# Collect measurement data in flat JSONL format
-rbmk dig --logs dns.jsonl example.com
-rbmk curl --logs http.jsonl https://example.com/
+# Use --logs to get structured logs in JSONL format
+rbmk dig --logs dns.jsonl +short=ip example.com
+rbmk curl --logs http.jsonl -vo index.html https://example.com/
 ```
 
 For a quick introduction with more examples, run:
@@ -123,48 +66,79 @@ For comprehensive usage documentation, run:
 rbmk tutorial
 ```
 
+## Build Tags
+
+RBMK supports the following build tags to customize the build:
+
+| Feature Flag            | Description                                                     |
+| ----------------------- | --------------------------------------------------------------- |
+| `netgo`                 | Use pure-Go functions instead of linking the C stdlib.          |
+| `rbmk_disable_markdown` | Disables Markdown rendering in help text, reducing binary size. |
+
+You can pass those flags to `go install` or `go build`. For example:
+
+```bash
+go install -v -tags netgo,rbmk_disable_markdown github.com/rbmk-project/rbmk/cmd/rbmk@latest
+```
+
 ## Commands
 
-Core Measurement Commands:
-- `curl`: Measures HTTP/HTTPS endpoints with `curl(1)`-like syntax.
-- `dig`: Performs DNS measurements with `dig(1)`-like syntax.
-- `nc` - Measures TCP and TLS endpoints with an OpenBSD `nc(1)`-like syntax.
-- `stun`: Resolves the public IP addresses using STUN.
+1. Core Measurement Commands: `curl`, `dig`, `nc`, `stun`.
 
-Unix-like Commands for Scripting:
-- `cat`: Concatenates files.
-- `head`: Print first lines of files.
-- `ipuniq`: Shuffle, deduplicate, and format IP addresses.
-- `markdown`: Renders Markdown to console.
-- `mkdir`: Creates directories.
-- `mv`: Moves (renames) files and directories.
-- `pipe`: Creates named pipes for inter-process communication.
-- `random`: Generates random bytes.
-- `rm`: Removes files and directories.
-- `sh`: Runs POSIX shell scripts.
-- `tar`: Creates tar archives.
-- `timestamp`: Prints filesystem-friendly timestamps.
-- `version`: Prints the `rbmk` version.
+2. Unix-like Commands for Scripting: `cat`, `head`, `mkdir`, `mv`, `rm`, `sh`, `tar`.
 
-Helper Commands:
-- `intro`: Shows a brief introduction with usage examples.
-- `tutorial`: Provides comprehensive usage documentation.
+3. RBMK-Specific Commands for Scripting: `ipuniq`, `markdown`, `pipe`, `random`, `timestamp`.
+
+4. Helper Commands: `intro`, `tutorial`, `version`.
 
 Each command supports the `--help` flag for detailed usage information.
 
+For example:
+
+```bash
+rbmk curl --help
+```
+
+## Release Builds
+
+You need GNU make installed. Run:
+
+```bash
+make release
+```
+
+Run `make` without arguments to see all available targets.
+
+## Documentation
+
+Read the packages documentation at [pkg.go.dev/rbmk-project/rbmk](https://pkg.go.dev/github.com/rbmk-project/rbmk).
+
 ## Design
 
-The project focuses on modular, composable measurements where each
-operation that may fail is executed independently. This allows for precise
-analysis of network behavior and easier debugging of issues.
+The [docs/design](./docs/design) directory contains all the design documents.
 
-See [DESIGN.md](docs/DESIGN.md) for detailed design documentation.
+## Architecture
+
+**Documentation:**
+- [docs/design](./docs/design): Design documents.
+- [docs/man](./docs/man): Manual pages for RBMK commands.
+- [docs/spec](./docs/spec): Specification documents.
+
+**Main Entry Point:**
+- [cmd/rbmk](./cmd/rbmk): The main RBMK command-line tool.
+
+**Go Packages:**
+- [pkg/cli](./pkg/cli): CLI implementation.
+- [pkg/common](./pkg/common): Common utilities and helpers.
+- [pkg/dns](./pkg/dns): DNS measurement implementation.
+- [pkg/x](./pkg/x): Experimental Go packages.
+
+**Build System:**
+- [GNUmakefile](./GNUmakefile): Makefile for RBMK.
 
 ## Contributing
 
-Contributions are welcome! Please submit pull requests using
-GitHub. Use [rbmk-project/issues](https://github.com/rbmk-project/issues)
-to create issues and discuss features.
+Contributions are welcome! Please submit pull requests using GitHub.
 
 ## License
 
