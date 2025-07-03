@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/pion/stun/v3"
-	"github.com/rbmk-project/rbmk/internal/testable"
+	"github.com/rbmk-project/rbmk/pkg/cli/internal/testable"
 	"github.com/rbmk-project/rbmk/pkg/common/closepool"
 	"github.com/rbmk-project/rbmk/pkg/x/netcore"
 )

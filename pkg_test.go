@@ -25,7 +25,6 @@ var groups = []packageGroup{
 	{
 		Name: "pkg/cli",
 		Allowed: []string{
-			"internal",
 			"pkg/cli",
 			"pkg/common",
 			"pkg/dns",

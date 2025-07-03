@@ -5,7 +5,7 @@ package qa_test
 import (
 	"testing"
 
-	"github.com/rbmk-project/rbmk/internal/qa"
+	"github.com/rbmk-project/rbmk/pkg/cli/internal/qa"
 )
 
 func TestQA(t *testing.T) {
