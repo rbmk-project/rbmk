@@ -12,8 +12,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/rbmk-project/common/closepool"
 	"github.com/rbmk-project/rbmk/internal/testable"
+	"github.com/rbmk-project/rbmk/pkg/common/closepool"
 	"github.com/rbmk-project/x/netcore"
 )
 
