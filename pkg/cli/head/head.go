@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/rbmk-project/rbmk/internal/markdown"
+	"github.com/rbmk-project/rbmk/pkg/cli/internal/markdown"
 	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 	"github.com/spf13/pflag"
 )

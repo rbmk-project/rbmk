@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/rbmk-project/rbmk/internal/testable"
+	"github.com/rbmk-project/rbmk/pkg/cli/internal/testable"
 	"github.com/rbmk-project/rbmk/pkg/common/closepool"
 	"github.com/rbmk-project/rbmk/pkg/common/dialonce"
 	"github.com/rbmk-project/rbmk/pkg/dns/dnscore"
