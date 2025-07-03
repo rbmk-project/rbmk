@@ -83,32 +83,21 @@ go install -v -tags netgo,rbmk_disable_markdown github.com/rbmk-project/rbmk/cmd
 
 ## Commands
 
-Core Measurement Commands:
-- `curl`: Measures HTTP/HTTPS endpoints with `curl(1)`-like syntax.
-- `dig`: Performs DNS measurements with `dig(1)`-like syntax.
-- `nc`: Measures TCP and TLS endpoints with an OpenBSD `nc(1)`-like syntax.
-- `stun`: Resolves the public IP addresses using STUN.
+1. Core Measurement Commands: `curl`, `dig`, `nc`, `stun`.
 
-Unix-like Commands for Scripting:
-- `cat`: Concatenates files.
-- `head`: Print first lines of files.
-- `ipuniq`: Shuffle, deduplicate, and format IP addresses.
-- `markdown`: Renders Markdown to console.
-- `mkdir`: Creates directories.
-- `mv`: Moves (renames) files and directories.
-- `pipe`: Creates named pipes for inter-process communication.
-- `random`: Generates random bytes.
-- `rm`: Removes files and directories.
-- `sh`: Runs POSIX shell scripts.
-- `tar`: Creates tar archives.
-- `timestamp`: Prints filesystem-friendly timestamps.
-- `version`: Prints the `rbmk` version.
+2. Unix-like Commands for Scripting: `cat`, `head`, `mkdir`, `mv`, `rm`, `sh`, `tar`.
 
-Helper Commands:
-- `intro`: Shows a brief introduction with usage examples.
-- `tutorial`: Provides comprehensive usage documentation.
+3. RBMK-Specific Commands for Scripting: `ipuniq`, `markdown`, `pipe`, `random`, `timestamp`.
+
+4. Helper Commands: `intro`, `tutorial`, `version`.
 
 Each command supports the `--help` flag for detailed usage information.
+
+For example:
+
+```bash
+rbmk curl --help
+```
 
 ## Release Builds
 
@@ -122,12 +111,30 @@ Run `make` without arguments to see all available targets.
 
 ## Documentation
 
-Read the packages documentation at [pkg.go.dev/rbmk-project/rbmk](
-https://pkg.go.dev/github.com/rbmk-project/rbmk).
+Read the packages documentation at [pkg.go.dev/rbmk-project/rbmk](https://pkg.go.dev/github.com/rbmk-project/rbmk).
 
 ## Design
 
 The [docs/design](./docs/design) directory contains all the design documents.
+
+## Architecture
+
+**Documentation:**
+- [docs/design](./docs/design): Design documents.
+- [docs/man](./docs/man): Manual pages for RBMK commands.
+- [docs/spec](./docs/spec): Specification documents.
+
+**Main Entry Point:**
+- [cmd/rbmk](./cmd/rbmk): The main RBMK command-line tool.
+
+**Go Packages:**
+- [pkg/cli](./pkg/cli): CLI implementation.
+- [pkg/common](./pkg/common): Common utilities and helpers.
+- [pkg/dns](./pkg/dns): DNS measurement implementation.
+- [pkg/x](./pkg/x): Experimental Go packages.
+
+**Build System:**
+- [GNUmakefile](./GNUmakefile): Makefile for RBMK.
 
 ## Contributing
 
