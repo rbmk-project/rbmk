@@ -5,13 +5,13 @@
 
 set -euo pipefail
 
-for srcname in $(find ./pkg/cli -type f -name README.md); do
+find ./pkg/cli -type f -name README.md -print0 | while IFS= read -r -d '' srcname; do
 	destname="./docs/man/rbmk-$(basename "$(dirname "$srcname")").md"
 	cp -v "$srcname" "$destname"
 done
 mv -v "./docs/man/rbmk-rootcmd.md" "./docs/man/rbmk.md"
 
-for name in $(find ./pkg/cli/tutorial -type f -name \*.md | grep -v 'README\.md'); do
+find ./pkg/cli/tutorial -type f -name '*.md' ! -name 'README.md' -print0 | while IFS= read -r -d '' name; do
 	cp -v "$name" "./docs/tutorial/$(basename "$name")"
 done
 
