@@ -233,7 +233,7 @@ func TestTransport_queryStream(t *testing.T) {
 					},
 				}
 			},
-			expectedError: errors.New("dns: overflow unpacking uint16"),
+			expectedError: errors.New("bad header id: dns: overflow unpacking uint16"),
 		},
 
 		{

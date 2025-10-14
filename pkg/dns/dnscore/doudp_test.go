@@ -300,7 +300,7 @@ func TestTransport_recvResponseUDP(t *testing.T) {
 			setupTransport: func() *Transport {
 				return &Transport{}
 			},
-			expectedError: errors.New("dns: overflow unpacking uint16"),
+			expectedError: errors.New("bad header id: dns: overflow unpacking uint16"),
 		},
 	}
 
@@ -458,7 +458,7 @@ func TestTransport_queryUDP(t *testing.T) {
 					},
 				}
 			},
-			expectedError: errors.New("dns: overflow unpacking uint16"),
+			expectedError: errors.New("bad header id: dns: overflow unpacking uint16"),
 		},
 	}
 
@@ -629,7 +629,7 @@ func TestTransport_queryUDPWithDuplicates(t *testing.T) {
 					},
 				}
 			},
-			expectedError: errors.New("dns: overflow unpacking uint16"),
+			expectedError: errors.New("bad header id: dns: overflow unpacking uint16"),
 		},
 	}
 
