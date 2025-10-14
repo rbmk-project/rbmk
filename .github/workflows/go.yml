@@ -16,15 +16,15 @@ jobs:
         goversion:
           # The first entry of the matrix should be the
           # version indicated inside the `go.mod`
-          - "1.23"
           - "1.24"
+          - "1.25"
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "${{ matrix.goversion }}"
 
@@ -37,13 +37,13 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           # Here we should use the current go version
-          go-version: "1.24"
+          go-version: "1.25"
 
       - name: Measure Coverage
         run: go test -short -race -covermode=atomic -coverprofile=coverage.out ./...

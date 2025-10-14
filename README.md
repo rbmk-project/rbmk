@@ -25,7 +25,7 @@ outages, misconfigurations, censorship, and performance issues.
 
 ## Minimum Required Go Version
 
-Go 1.23.
+Go 1.24.
 
 ## Installation
 

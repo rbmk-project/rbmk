@@ -435,7 +435,7 @@ func TestTransport_queryHTTPS(t *testing.T) {
 			},
 			questionName:  "example.com.",
 			url:           "https://dns.google/dns-query",
-			expectedError: errors.New("dns: overflow unpacking uint16"),
+			expectedError: errors.New("bad header id: dns: overflow unpacking uint16"),
 		},
 
 		{
