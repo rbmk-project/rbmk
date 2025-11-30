@@ -18,7 +18,7 @@ func ExampleTransport_dnsOverQUIC() {
 	txp := &dnscore.Transport{}
 	serverAddr := &dnscore.ServerAddr{
 		Protocol: dnscore.ProtocolDoQ,
-		Address:  "dns0.eu:853",
+		Address:  "dns.adguard.com:853",
 	}
 	options := []dnscore.QueryOption{
 		dnscore.QueryOptionEDNS0(
