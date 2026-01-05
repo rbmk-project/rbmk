@@ -54,5 +54,5 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ## Reporting Bugs
 
-Please, use the [rbmk-project/issues](https://github.com/rbmk-project/issues)
+Please, use the [rbmk-project/rbmk](https://github.com/rbmk-project/rbmk)
 repository to report bugs or suggest improvements.
