@@ -7,13 +7,21 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"runtime/debug"
 
 	"github.com/rbmk-project/rbmk/pkg/cli/internal/markdown"
 	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 )
 
-// Version is the program version.
-var Version string = "dev"
+// version is the program version.
+var version string
+
+func init() {
+	version = "(devel)"
+	if binfo, ok := debug.ReadBuildInfo(); ok {
+		version = binfo.Main.Version
+	}
+}
 
 //go:embed README.md
 var readme string
@@ -47,6 +55,6 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	}
 
 	// 3. print the version
-	fmt.Fprintln(env.Stdout(), Version)
+	fmt.Fprintln(env.Stdout(), version)
 	return nil
 }
