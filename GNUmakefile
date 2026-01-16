@@ -16,7 +16,8 @@ all: rbmk rbmk-lite
 # Common variables
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
-LDFLAGS := -s -w
+VERSION ?= $(shell git describe --tags 2>/dev/null || echo "(devel)")
+LDFLAGS := -s -w -X github.com/rbmk-project/rbmk/pkg/cli/version.Version=$(VERSION)
 TAGS := netgo
 GOENV := CGO_ENABLED=0
 EXE ?=

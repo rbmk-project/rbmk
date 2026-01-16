@@ -13,13 +13,17 @@ import (
 	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 )
 
-// version is the program version.
-var version string
+// Version is the program version.
+//
+// This variable is public to allow `GNUmakefile` to set it.
+var Version string
 
 func init() {
-	version = "(devel)"
-	if binfo, ok := debug.ReadBuildInfo(); ok {
-		version = binfo.Main.Version
+	if Version == "" {
+		Version = "(devel)"
+		if binfo, ok := debug.ReadBuildInfo(); ok {
+			Version = binfo.Main.Version
+		}
 	}
 }
 
@@ -55,6 +59,6 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 	}
 
 	// 3. print the version
-	fmt.Fprintln(env.Stdout(), version)
+	fmt.Fprintln(env.Stdout(), Version)
 	return nil
 }
