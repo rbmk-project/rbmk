@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/bassosimone/runtimex"
 	"github.com/miekg/dns"
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/dns/dnscoretest"
 	"github.com/stretchr/testify/assert"
 )
@@ -110,8 +110,8 @@ func TestFakeDNSServer_HTTPS(t *testing.T) {
 	// Create the HTTP request
 	query := new(dns.Msg)
 	query.SetQuestion("example.com.", dns.TypeA)
-	rawQuery := runtimex.Try1(query.Pack())
-	httpReq := runtimex.Try1(http.NewRequest(
+	rawQuery := runtimex.PanicOnError1(query.Pack())
+	httpReq := runtimex.PanicOnError1(http.NewRequest(
 		"POST", server.URL, bytes.NewReader(rawQuery)))
 
 	// Send the query to the fake server
@@ -125,7 +125,7 @@ func TestFakeDNSServer_HTTPS(t *testing.T) {
 	if httpResp.StatusCode != http.StatusOK {
 		t.Fatal("expected 200, got", httpResp.StatusCode)
 	}
-	rawResp := runtimex.Try1(io.ReadAll(httpResp.Body))
+	rawResp := runtimex.PanicOnError1(io.ReadAll(httpResp.Body))
 	resp := &dns.Msg{}
 	if err := resp.Unpack(rawResp); err != nil {
 		t.Fatal(err)

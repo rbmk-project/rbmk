@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
+	"github.com/bassosimone/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/common/selfsignedcert"
 )
 
@@ -22,9 +22,9 @@ func TestSelfSignedCert(t *testing.T) {
 
 	// 2. create a suitable TLS listener
 	serverConfig := &tls.Config{Certificates: []tls.Certificate{
-		runtimex.Try1(tls.X509KeyPair(cert.CertPEM, cert.KeyPEM)),
+		runtimex.PanicOnError1(tls.X509KeyPair(cert.CertPEM, cert.KeyPEM)),
 	}}
-	listener := runtimex.Try1(tls.Listen("tcp", "127.0.0.1:0", serverConfig))
+	listener := runtimex.PanicOnError1(tls.Listen("tcp", "127.0.0.1:0", serverConfig))
 	defer listener.Close()
 
 	// 3. create a listening HTTP server using the testdata files
@@ -38,7 +38,7 @@ func TestSelfSignedCert(t *testing.T) {
 
 	// 4. create a suitable HTTP client
 	pool := x509.NewCertPool()
-	runtimex.Assert(pool.AppendCertsFromPEM(cert.CertPEM), "cannot append PEM cert")
+	runtimex.Assert(pool.AppendCertsFromPEM(cert.CertPEM))
 	clientConfig := &tls.Config{RootCAs: pool}
 	client := &http.Client{
 		Transport: &http.Transport{

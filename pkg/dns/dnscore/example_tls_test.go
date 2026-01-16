@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bassosimone/runtimex"
 	"github.com/miekg/dns"
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/dns/dnscore"
 )
 
@@ -45,7 +45,7 @@ func ExampleTransport_dnsOverTLS() {
 	if err := dnscore.ValidateResponse(query, resp); err != nil {
 		log.Fatal(err)
 	}
-	runtimex.Assert(len(query.Question) > 0, "expected at least one question")
+	runtimex.Assert(len(query.Question) > 0)
 	rrs, err := dnscore.ValidAnswers(query.Question[0], resp)
 	if err != nil {
 		log.Fatal(err)

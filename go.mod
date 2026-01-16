@@ -1,8 +1,9 @@
 module github.com/rbmk-project/rbmk
 
-go 1.24.2
+go 1.25.5
 
 require (
+	github.com/bassosimone/runtimex v0.0.0-20260108162100-336f3823f6b7
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.70

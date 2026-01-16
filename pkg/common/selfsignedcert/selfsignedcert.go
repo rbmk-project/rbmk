@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
+	"github.com/bassosimone/runtimex"
 )
 
 // Config contains configuration for [New].
@@ -58,8 +58,8 @@ type Cert struct {
 //
 // This method panics on failure.
 func (c *Cert) WriteFiles(baseDir string) {
-	runtimex.Try0(os.WriteFile(filepath.Join(baseDir, "cert.pem"), c.CertPEM, 0600))
-	runtimex.Try0(os.WriteFile(filepath.Join(baseDir, "key.pem"), c.KeyPEM, 0600))
+	runtimex.PanicOnError0(os.WriteFile(filepath.Join(baseDir, "cert.pem"), c.CertPEM, 0600))
+	runtimex.PanicOnError0(os.WriteFile(filepath.Join(baseDir, "key.pem"), c.KeyPEM, 0600))
 }
 
 // New generates a self-signed certificate and key with SANs.
@@ -67,12 +67,12 @@ func (c *Cert) WriteFiles(baseDir string) {
 // This function panics on failure.
 func New(config *Config) *Cert {
 	// Generate the private key
-	priv := runtimex.Try1(ecdsa.GenerateKey(elliptic.P256(), rand.Reader))
+	priv := runtimex.PanicOnError1(ecdsa.GenerateKey(elliptic.P256(), rand.Reader))
 
 	// Build the certificate template
 	notBefore := time.Now()
 	notAfter := notBefore.Add(365 * 24 * time.Hour)
-	serialNumber := runtimex.Try1(rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128)))
+	serialNumber := runtimex.PanicOnError1(rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128)))
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
@@ -91,12 +91,12 @@ func New(config *Config) *Cert {
 	template.IPAddresses = config.IPAddrs
 
 	// Generate the certificate proper and encoded to PEM
-	certDER := runtimex.Try1(x509.CreateCertificate(
+	certDER := runtimex.PanicOnError1(x509.CreateCertificate(
 		rand.Reader, &template, &template, &priv.PublicKey, priv))
 	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
 
 	// Generate the private key in PEM format
-	keyPEM := runtimex.Try1(x509.MarshalECPrivateKey(priv))
+	keyPEM := runtimex.PanicOnError1(x509.MarshalECPrivateKey(priv))
 	keyPEMBytes := pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: keyPEM})
 
 	// Return the results

@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bassosimone/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/common/mocks"
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -382,7 +382,7 @@ func TestNetwork_dialNet(t *testing.T) {
 				return d
 			},
 		}
-		parsed := runtimex.Try1(url.Parse(server.URL))
+		parsed := runtimex.PanicOnError1(url.Parse(server.URL))
 		conn, err := nx.dialNet(context.Background(), "tcp", parsed.Host)
 		assert.NoError(t, err)
 		assert.NotNil(t, conn)
@@ -397,7 +397,7 @@ func TestNetwork_dialNet(t *testing.T) {
 		defer server.Close()
 
 		nx := &Network{}
-		parsed := runtimex.Try1(url.Parse(server.URL))
+		parsed := runtimex.PanicOnError1(url.Parse(server.URL))
 		conn, err := nx.dialNet(context.Background(), "tcp", parsed.Host)
 		assert.NoError(t, err)
 		assert.NotNil(t, conn)
