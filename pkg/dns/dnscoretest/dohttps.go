@@ -9,22 +9,22 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
+	"github.com/bassosimone/runtimex"
 )
 
 // StartHTTPS starts an HTTPS server and handles incoming DNS queries.
 //
 // This method panics in case of failure.
 func (s *Server) StartHTTPS(handler Handler) <-chan struct{} {
-	runtimex.Assert(!s.started, "already started")
+	runtimex.Assert(!s.started)
 	ready := make(chan struct{})
 	go func() {
-		cert := runtimex.Try1(tls.X509KeyPair(certPEM, keyPEM))
+		cert := runtimex.PanicOnError1(tls.X509KeyPair(certPEM, keyPEM))
 		config := &tls.Config{Certificates: []tls.Certificate{cert}}
-		listener := runtimex.Try1(s.listenTLS("tcp", "127.0.0.1:0", config))
+		listener := runtimex.PanicOnError1(s.listenTLS("tcp", "127.0.0.1:0", config))
 		s.Addr = listener.Addr().String()
 		s.RootCAs = x509.NewCertPool()
-		runtimex.Assert(s.RootCAs.AppendCertsFromPEM(certPEM), "cannot append PEM cert")
+		runtimex.Assert(s.RootCAs.AppendCertsFromPEM(certPEM))
 		s.URL = (&url.URL{Scheme: "https", Host: s.Addr, Path: "/dns-query"}).String()
 		s.ioclosers = append(s.ioclosers, listener)
 		s.started = true
@@ -39,7 +39,7 @@ func (s *Server) StartHTTPS(handler Handler) <-chan struct{} {
 
 func newHTTPHandler(handler Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rawQuery := runtimex.Try1(io.ReadAll(r.Body))
+		rawQuery := runtimex.PanicOnError1(io.ReadAll(r.Body))
 		rw := &responseWriterHTTPS{w}
 		handler.Handle(rw, rawQuery)
 	})

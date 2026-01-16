@@ -6,8 +6,8 @@ import (
 	"io"
 	"net"
 
+	"github.com/bassosimone/runtimex"
 	"github.com/miekg/dns"
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
 )
 
 // ResponseWriter allows writing raw DNS responses.
@@ -38,7 +38,7 @@ var ExampleComAddrA = net.IPv4(93, 184, 215, 14)
 func NewExampleComHandler() Handler {
 	return HandlerFunc(func(rw ResponseWriter, rawQuery []byte) {
 		query := &dns.Msg{}
-		runtimex.Try0(query.Unpack(rawQuery))
+		runtimex.PanicOnError0(query.Unpack(rawQuery))
 		resp := &dns.Msg{}
 		resp.SetReply(query)
 		resp.Answer = append(resp.Answer, &dns.A{
@@ -51,7 +51,7 @@ func NewExampleComHandler() Handler {
 			},
 			A: ExampleComAddrA,
 		})
-		rawResp := runtimex.Try1(resp.Pack())
-		_ = runtimex.Try1(rw.Write(rawResp))
+		rawResp := runtimex.PanicOnError1(resp.Pack())
+		_ = runtimex.PanicOnError1(rw.Write(rawResp))
 	})
 }

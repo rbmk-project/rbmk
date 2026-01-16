@@ -5,17 +5,17 @@ package dnscoretest
 import (
 	"net"
 
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
+	"github.com/bassosimone/runtimex"
 )
 
 // StartUDP starts an UDP listener and listens for incoming DNS queries.
 //
 // This method panics in case of failure.
 func (s *Server) StartUDP(handler Handler) <-chan struct{} {
-	runtimex.Assert(!s.started, "already started")
+	runtimex.Assert(!s.started)
 	ready := make(chan struct{})
 	go func() {
-		pconn := runtimex.Try1(s.listenPacket("udp", "127.0.0.1:0"))
+		pconn := runtimex.PanicOnError1(s.listenPacket("udp", "127.0.0.1:0"))
 		s.Addr = pconn.LocalAddr().String()
 		s.ioclosers = append(s.ioclosers, pconn)
 		s.started = true

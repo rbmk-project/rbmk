@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"net/netip"
 
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
+	"github.com/bassosimone/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/dns/dnscoretest"
 	"github.com/rbmk-project/rbmk/pkg/x/netsim/simpki"
 )
@@ -144,14 +144,14 @@ func (s *Scenario) mustSetupDNSOverTLS(stack *Stack, cfg *StackConfig, cert tls.
 
 // mustSetupHTTPOverTCP configures the HTTP-over-TCP handler for the stack.
 func (s *Scenario) mustSetupHTTPOverTCP(stack *Stack, cfg *StackConfig) {
-	listener := runtimex.Try1(stack.Listen(context.Background(), "tcp", "[::]:80"))
+	listener := runtimex.PanicOnError1(stack.Listen(context.Background(), "tcp", "[::]:80"))
 	srv := &http.Server{Handler: cfg.HTTPHandler}
 	go srv.Serve(listener)
 }
 
 // mustSetupHTTPOverTLS configures the HTTP-over-TLS handler for the stack.
 func (s *Scenario) mustSetupHTTPOverTLS(stack *Stack, cfg *StackConfig, cert tls.Certificate) {
-	listener := runtimex.Try1(stack.Listen(context.Background(), "tcp", "[::]:443"))
+	listener := runtimex.PanicOnError1(stack.Listen(context.Background(), "tcp", "[::]:443"))
 	srv := &http.Server{
 		Handler: cfg.HTTPSHandler,
 		TLSConfig: &tls.Config{

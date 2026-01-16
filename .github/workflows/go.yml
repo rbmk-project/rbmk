@@ -16,7 +16,6 @@ jobs:
         goversion:
           # The first entry of the matrix should be the
           # version indicated inside the `go.mod`
-          - "1.24"
           - "1.25"
 
     runs-on: ubuntu-latest

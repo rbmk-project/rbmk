@@ -5,8 +5,8 @@ package netsim
 import (
 	"crypto/x509"
 
+	"github.com/bassosimone/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/common/closepool"
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/x/netsim/packet"
 	"github.com/rbmk-project/rbmk/pkg/x/netsim/router"
 	"github.com/rbmk-project/rbmk/pkg/x/netsim/simpki"
@@ -69,9 +69,9 @@ func (s *Scenario) RootCAs() *x509.CertPool {
 // This method IS NOT goroutine safe.
 func (s *Scenario) MustNewStack(config *StackConfig) *Stack {
 	// Initialize and configure the stack.
-	runtimex.Try0(config.validate())
-	stack := runtimex.Try1(s.newBaseStack(config))
-	runtimex.Try0(config.setupClientResolvers(stack))
+	runtimex.PanicOnError0(config.validate())
+	stack := runtimex.PanicOnError1(s.newBaseStack(config))
+	runtimex.PanicOnError0(config.setupClientResolvers(stack))
 	s.dnsd.AddAddresses(config.DomainNames, config.Addresses)
 	cert, hasCert := s.mustSetupPKI(config)
 
@@ -83,7 +83,7 @@ func (s *Scenario) MustNewStack(config *StackConfig) *Stack {
 		s.mustSetupDNSOverTCP(stack, config)
 	}
 	if config.DNSOverTLSHandler != nil {
-		runtimex.Assert(hasCert, "no TLS certificate available")
+		runtimex.Assert(hasCert)
 		s.mustSetupDNSOverTLS(stack, config, cert)
 	}
 
@@ -92,7 +92,7 @@ func (s *Scenario) MustNewStack(config *StackConfig) *Stack {
 		s.mustSetupHTTPOverTCP(stack, config)
 	}
 	if config.HTTPSHandler != nil {
-		runtimex.Assert(hasCert, "no TLS certificate available")
+		runtimex.Assert(hasCert)
 		s.mustSetupHTTPOverTLS(stack, config, cert)
 	}
 

@@ -6,8 +6,8 @@ package dns
 import (
 	"net"
 
+	"github.com/bassosimone/runtimex"
 	"github.com/miekg/dns"
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/dns/dnscoretest"
 )
 
@@ -56,7 +56,7 @@ func (dd *Database) AddAddresses(domainNames, addresses []string) {
 		for _, addr := range addresses {
 			// Make sure the string is a valid IP address
 			ipAddr := net.ParseIP(addr)
-			runtimex.Assert(ipAddr != nil, "invalid IP address")
+			runtimex.Assert(ipAddr != nil)
 
 			// Create the common DNS header
 			header := dns.RR_Header{

@@ -8,7 +8,7 @@ import (
 	_ "embed"
 	"net"
 
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
+	"github.com/bassosimone/runtimex"
 )
 
 var (
@@ -23,15 +23,15 @@ var (
 //
 // This method panics in case of failure.
 func (s *Server) StartTLS(handler Handler) <-chan struct{} {
-	runtimex.Assert(!s.started, "already started")
+	runtimex.Assert(!s.started)
 	ready := make(chan struct{})
 	go func() {
-		cert := runtimex.Try1(tls.X509KeyPair(certPEM, keyPEM))
+		cert := runtimex.PanicOnError1(tls.X509KeyPair(certPEM, keyPEM))
 		config := &tls.Config{Certificates: []tls.Certificate{cert}}
-		listener := runtimex.Try1(s.listenTLS("tcp", "127.0.0.1:0", config))
+		listener := runtimex.PanicOnError1(s.listenTLS("tcp", "127.0.0.1:0", config))
 		s.Addr = listener.Addr().String()
 		s.RootCAs = x509.NewCertPool()
-		runtimex.Assert(s.RootCAs.AppendCertsFromPEM(certPEM), "cannot append PEM cert")
+		runtimex.Assert(s.RootCAs.AppendCertsFromPEM(certPEM))
 		s.ioclosers = append(s.ioclosers, listener)
 		s.started = true
 		close(ready)

@@ -8,17 +8,17 @@ import (
 	"math"
 	"net"
 
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
+	"github.com/bassosimone/runtimex"
 )
 
 // StartTCP starts a TCP listener and listens for incoming DNS queries.
 //
 // This method panics in case of failure.
 func (s *Server) StartTCP(handler Handler) <-chan struct{} {
-	runtimex.Assert(!s.started, "already started")
+	runtimex.Assert(!s.started)
 	ready := make(chan struct{})
 	go func() {
-		listener := runtimex.Try1(s.listen("tcp", "127.0.0.1:0"))
+		listener := runtimex.PanicOnError1(s.listen("tcp", "127.0.0.1:0"))
 		s.Addr = listener.Addr().String()
 		s.ioclosers = append(s.ioclosers, listener)
 		s.started = true
@@ -50,10 +50,10 @@ func (s *Server) serveConn(handler Handler, conn net.Conn) {
 	// Wrap the conn into a bufio.Reader and read the whole message
 	br := bufio.NewReader(conn)
 	header := make([]byte, 2)
-	_ = runtimex.Try1(io.ReadFull(br, header))
+	_ = runtimex.PanicOnError1(io.ReadFull(br, header))
 	length := int(header[0])<<8 | int(header[1])
 	rawQuery := make([]byte, length)
-	_ = runtimex.Try1(io.ReadFull(br, rawQuery))
+	_ = runtimex.PanicOnError1(io.ReadFull(br, rawQuery))
 
 	// Wrap into a response writer and serve
 	rw := &responseWriterStream{conn: conn}
@@ -70,7 +70,7 @@ var _ ResponseWriter = (*responseWriterStream)(nil)
 
 // Write implements ResponseWriter.
 func (r *responseWriterStream) Write(rawMsg []byte) (int, error) {
-	runtimex.Assert(len(rawMsg) <= math.MaxUint16, "message too large")
+	runtimex.Assert(len(rawMsg) <= math.MaxUint16)
 	rawMsgFrame := []byte{byte(len(rawMsg) >> 8)}
 	rawMsgFrame = append(rawMsgFrame, byte(len(rawMsg)))
 	rawMsgFrame = append(rawMsgFrame, rawMsg...)

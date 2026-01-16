@@ -13,9 +13,9 @@ import (
 	"net/netip"
 	"testing"
 
+	"github.com/bassosimone/runtimex"
 	"github.com/miekg/dns"
 	"github.com/rbmk-project/rbmk/pkg/common/mocks"
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -234,7 +234,7 @@ func TestTransport_httpClientDo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			transport := tt.setupTransport()
-			req := runtimex.Try1(http.NewRequest("GET", "https://example.com", nil))
+			req := runtimex.PanicOnError1(http.NewRequest("GET", "https://example.com", nil))
 			resp, la, ra, err := transport.httpClientDo(req)
 			if tt.expectedError != nil {
 				assert.Error(t, err)

@@ -16,7 +16,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/rbmk-project/rbmk/pkg/common/runtimex"
+	"github.com/bassosimone/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/common/selfsignedcert"
 	"github.com/rogpeppe/go-internal/lockedfile"
 )
@@ -58,15 +58,15 @@ type Config = selfsignedcert.Config
 func (pki *PKI) MustNewCert(config *Config) tls.Certificate {
 	// ensure there are no race conditions with concurrent invocations
 	baseDir := filepath.Join(pki.cacheDir, "pkistore")
-	runtimex.Try0(os.MkdirAll(baseDir, 0700))
+	runtimex.PanicOnError0(os.MkdirAll(baseDir, 0700))
 	mu := lockedfile.MutexAt(filepath.Join(baseDir, ".lock"))
-	unlock := runtimex.Try1(mu.Lock())
+	unlock := runtimex.PanicOnError1(mu.Lock())
 	defer unlock()
 
 	// possibly create the base directory for the certificate
 	dirname64 := base64.URLEncoding.EncodeToString([]byte(config.CommonName))
 	dirpath := filepath.Join(baseDir, dirname64)
-	runtimex.Try0(os.MkdirAll(dirpath, 0700))
+	runtimex.PanicOnError0(os.MkdirAll(dirpath, 0700))
 
 	// check whether cert.pem already exists
 	certPEM := filepath.Join(dirpath, "cert.pem")
@@ -88,10 +88,10 @@ func (pki *PKI) MustNewCert(config *Config) tls.Certificate {
 	}
 
 	// load the certificate and ensure we update the cert pool
-	certPEMData := runtimex.Try1(os.ReadFile(certPEM))
-	keyPEMData := runtimex.Try1(os.ReadFile(keyPEM))
-	runtimex.Assert(pki.pool.AppendCertsFromPEM(certPEMData), "could not append certificate to pool")
-	return runtimex.Try1(tls.X509KeyPair(certPEMData, keyPEMData))
+	certPEMData := runtimex.PanicOnError1(os.ReadFile(certPEM))
+	keyPEMData := runtimex.PanicOnError1(os.ReadFile(keyPEM))
+	runtimex.Assert(pki.pool.AppendCertsFromPEM(certPEMData))
+	return runtimex.PanicOnError1(tls.X509KeyPair(certPEMData, keyPEMData))
 }
 
 // CertPool returns the certificate pool that contains
