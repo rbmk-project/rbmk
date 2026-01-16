@@ -1,5 +1,6 @@
 .DS_Store
 /*.exe
 /*.tar.gz
+/coverage.out
 /rbmk
 /rbmk-*
