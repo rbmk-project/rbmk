@@ -3,13 +3,13 @@ module github.com/rbmk-project/rbmk
 go 1.25.5
 
 require (
+	github.com/bassosimone/pkitest v0.0.0-20260108162522-4e97d4738e31
 	github.com/bassosimone/runtimex v0.0.0-20260108162100-336f3823f6b7
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.70
 	github.com/pion/stun/v3 v3.1.1
 	github.com/quic-go/quic-go v0.59.0
-	github.com/rogpeppe/go-internal v1.14.1
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/net v0.49.0
@@ -45,6 +45,7 @@ require (
 	github.com/pion/transport/v4 v4.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yuin/goldmark v1.7.16 // indirect
