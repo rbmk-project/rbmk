@@ -5,11 +5,11 @@ package netsim
 import (
 	"crypto/x509"
 
+	"github.com/bassosimone/pkitest"
 	"github.com/bassosimone/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/common/closepool"
 	"github.com/rbmk-project/rbmk/pkg/x/netsim/packet"
 	"github.com/rbmk-project/rbmk/pkg/x/netsim/router"
-	"github.com/rbmk-project/rbmk/pkg/x/netsim/simpki"
 )
 
 // Scenario manages network simulation components using a star topology,
@@ -25,7 +25,7 @@ type Scenario struct {
 	dnsd *dnsDatabase
 
 	// pki is the [*PKI] database.
-	pki *simpki.PKI
+	pki *pkitest.PKI
 
 	// pool tracks all that which needs to be closed.
 	pool *closepool.Pool
@@ -40,7 +40,7 @@ type Scenario struct {
 func NewScenario(cacheDir string) *Scenario {
 	return &Scenario{
 		dnsd:   newDNSDatabase(),
-		pki:    simpki.MustNew(cacheDir),
+		pki:    pkitest.MustNewPKI(cacheDir),
 		pool:   &closepool.Pool{},
 		router: router.New(),
 	}

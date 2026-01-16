@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"net/netip"
 
+	"github.com/bassosimone/pkitest"
 	"github.com/bassosimone/runtimex"
 	"github.com/rbmk-project/rbmk/pkg/dns/dnscoretest"
-	"github.com/rbmk-project/rbmk/pkg/x/netsim/simpki"
 )
 
 // StackConfig contains configuration for creating a new network stack.
@@ -94,10 +94,11 @@ func (s *Scenario) mustSetupPKI(cfg *StackConfig) (tls.Certificate, bool) {
 	for _, addr := range cfg.Addresses {
 		ipAddr = append(ipAddr, netip.MustParseAddr(addr).AsSlice())
 	}
-	cert := s.pki.MustNewCert(&simpki.Config{
-		CommonName: cfg.DomainNames[0],
-		DNSNames:   cfg.DomainNames,
-		IPAddrs:    ipAddr,
+	cert := s.pki.MustNewCert(&pkitest.SelfSignedCertConfig{
+		CommonName:   cfg.DomainNames[0],
+		DNSNames:     cfg.DomainNames,
+		IPAddrs:      ipAddr,
+		Organization: []string{"RBMK"},
 	})
 	return cert, true
 }
