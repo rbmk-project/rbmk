@@ -7,7 +7,7 @@ require (
 	github.com/bassosimone/runtimex v0.0.0-20260108162100-336f3823f6b7
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/google/go-cmp v0.7.0
-	github.com/miekg/dns v1.1.70
+	github.com/miekg/dns v1.1.72
 	github.com/pion/stun/v3 v3.1.1
 	github.com/quic-go/quic-go v0.59.0
 	github.com/spf13/pflag v1.0.10
