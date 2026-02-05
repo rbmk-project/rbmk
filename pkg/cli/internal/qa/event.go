@@ -59,10 +59,10 @@ type Event struct {
 	Msg string `json:"msg"`
 
 	// T0 is the optional start timestamp for the event duration
-	T0 time.Time `json:"t0,omitempty"`
+	T0 time.Time `json:"t0"`
 
 	// T is the event timestamp
-	T time.Time `json:"t,omitempty"`
+	T time.Time `json:"t"`
 
 	//
 	// Network fields
@@ -318,6 +318,5 @@ func (ev *Event) verifyTLSPeerCertsEmpty(t Driver) {
 
 // VerifyEqual checks whether an event is equal to another.
 func (expect *ExpectedEvent) VerifyEqual(t Driver, got *Event) {
-	// Make sure the messages are equal
 	require.Equal(t, expect.Msg, got.Msg, "expected %q, got %q", expect.Msg, got.Msg)
 }

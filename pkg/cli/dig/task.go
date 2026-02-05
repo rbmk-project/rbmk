@@ -123,10 +123,10 @@ func (task *Task) Run(ctx context.Context) error {
 	case task.Protocol == "tcp":
 		return task.exchangeTCP(ctx, pool, logger, addr, query)
 
-	case task.Protocol == "tls":
+	case task.Protocol == "dot":
 		return task.exchangeTLS(ctx, pool, logger, addr, query)
 
-	case task.Protocol == "https":
+	case task.Protocol == "doh":
 		return task.exchangeHTTPS(ctx, pool, logger, addr, query)
 
 	default:
