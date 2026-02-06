@@ -106,6 +106,9 @@ func (task *Task) Run(ctx context.Context) error {
 	}
 	query := dnscodec.NewQuery(task.Name, queryType)
 
+	// TODO(bassosimone): before refactoring to `nop` we supported `@dns.google`
+	// as an argument, while now that support is gone and this is bad
+
 	// Create the endpoint address
 	addr, err := netip.ParseAddrPort(net.JoinHostPort(task.ServerAddr, task.ServerPort))
 	if err != nil {
