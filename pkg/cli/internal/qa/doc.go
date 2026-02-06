@@ -12,11 +12,11 @@ editors to create complex censorship scenarios. For example, [CensorDNSLikeIran]
 is an editor that implements Iran-like DNS censorship.
 
 A [*ScenarioDescriptor] combines editors with command line arguments and
-expected results to create a complete test case. The [Registry] variable
+expected results to create a complete test case. The [Registry] global
 contains all the available scenarios.
 
-The [Driver] interface abstracts running scenarios. It is compatible with
-[testing.T] and testify's TestingT, allowing scenarios to be used both in
+The [Driver] interface abstracts running scenarios. It is compatible with both
+[testing.T] and testify's TestingT, allowing scenarios to be used in
 tests and standalone QA runs.
 
 # Architecture

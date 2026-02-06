@@ -4,10 +4,12 @@ package dig
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
 	"net/netip"
+	"os"
 
 	"github.com/bassosimone/dnscodec"
 	"github.com/bassosimone/minest"
@@ -88,8 +90,13 @@ func (task *Task) waitUDP(
 	var count uint64
 	for {
 		if _, err = txp.RecvResponse(ctx, conn, queryMsg); err != nil {
-			// Declare success when the context is canceled and we received 1+ responses
-			if ctx.Err() != nil && count > 0 {
+			// Remap common errors to nil when we received 1+ DNS responses
+			switch {
+			case count > 0 && ctx.Err() != nil:
+				err = nil
+			case count > 0 && errors.Is(err, os.ErrDeadlineExceeded):
+				err = nil
+			case count > 0 && errors.Is(err, net.ErrClosed):
 				err = nil
 			}
 			lc.LogDone(t0, deadline, err)

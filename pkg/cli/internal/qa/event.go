@@ -35,6 +35,12 @@ const (
 	// Close events might appear at different points due to connection
 	// pooling and cleanup goroutine scheduling.
 	MatchAnyClose
+
+	// MatchAnySetDeadline matches zero or more setDeadline events.
+	//
+	// These events can appear at unpredictable times when we're using
+	// background goroutines and/or due to deferred cleanups.
+	MatchAnySetDeadline
 )
 
 // ExpectedEvent describes an expected event in a measurement sequence.
@@ -188,6 +194,18 @@ func (ev *Event) VerifyReadWriteClose(t Driver) {
 
 	case "closeDone":
 		ev.verifyDoneEventTime(t)
+		ev.verifyProtocol(t)
+		ev.verifyEndpoint(t, ev.LocalAddr)
+		ev.verifyEndpoint(t, ev.RemoteAddr)
+		// any value of err is okay
+		// any value of errClass is okay
+		ev.verifyIOBufferSizeZero(t)
+		ev.verifyIOBytesCountZero(t)
+
+	case "setDeadline", "setReadDeadline", "setWriteDeadline":
+		// TODO(bassosimone): we should improve our matching
+		// of setting the deadline to include the actual deadline
+		ev.verifyStartEventTime(t)
 		ev.verifyProtocol(t)
 		ev.verifyEndpoint(t, ev.LocalAddr)
 		ev.verifyEndpoint(t, ev.RemoteAddr)

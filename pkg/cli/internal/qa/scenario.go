@@ -184,7 +184,12 @@ func (desc *ScenarioDescriptor) VerifyEvents(t Driver, r io.Reader) {
 			fallthrough
 		case expect.Pattern&MatchAnyClose != 0 && got.Msg == "closeStart":
 			fallthrough
-		// TODO(bassosimone): need to add support for setting the deadline here
+		case expect.Pattern&MatchAnySetDeadline != 0 && got.Msg == "setDeadline":
+			fallthrough
+		case expect.Pattern&MatchAnySetDeadline != 0 && got.Msg == "setReadDeadline":
+			fallthrough
+		case expect.Pattern&MatchAnySetDeadline != 0 && got.Msg == "setWriteDeadline":
+			fallthrough
 		case expect.Pattern&MatchAnyClose != 0 && got.Msg == "closeDone":
 			t.Logf("skipping at j=%d: %+v", j, got)
 			got.VerifyReadWriteClose(t)
