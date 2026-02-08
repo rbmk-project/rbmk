@@ -82,6 +82,12 @@ type Simulation struct {
 	// pfmu protects the [PacketFilter].
 	pfmu sync.RWMutex
 
+	// wwwHandler is the configurable [http.Handler] for www.example.com.
+	wwwHandler http.Handler
+
+	// wwwmu protects wwwHandler.
+	wwwmu sync.RWMutex
+
 	// pki contains the PKI used for testing.
 	pki *pkitest.PKI
 
@@ -114,6 +120,14 @@ func (sx *Simulation) SetPacketFilter(pf PacketFilter) {
 	sx.pfmu.Lock()
 	sx.pf = pf
 	sx.pfmu.Unlock()
+}
+
+// SetWwwExampleComHandler sets the [http.Handler] for www.example.com.
+// Use nil to revert to the default handler serving the embedded HTML page.
+func (sx *Simulation) SetWwwExampleComHandler(handler http.Handler) {
+	sx.wwwmu.Lock()
+	sx.wwwHandler = handler
+	sx.wwwmu.Unlock()
 }
 
 // CertPool returns the cert pool that the user should use.
@@ -240,6 +254,12 @@ func (sx *Simulation) dnsGoogleMain(certificate tls.Certificate) {
 //go:embed example.com.html
 var exampleComHTML string
 
+// defaultWwwHandler is the default [http.Handler] for www.example.com.
+var defaultWwwHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(exampleComHTML))
+})
+
 // wwwExampleComMain is the main goroutine of the www.example.com stack.
 func (sx *Simulation) wwwExampleComMain(certificate tls.Certificate) {
 	// Listener
@@ -250,10 +270,15 @@ func (sx *Simulation) wwwExampleComMain(certificate tls.Certificate) {
 		makeStringEpnt(sx.scenario.WwwExampleCom, 443),
 	))
 
-	// Handler
+	// Handler that delegates to the configurable wwwHandler
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_, _ = w.Write([]byte(exampleComHTML))
+		sx.wwwmu.RLock()
+		h := sx.wwwHandler
+		sx.wwwmu.RUnlock()
+		if h == nil {
+			h = defaultWwwHandler
+		}
+		h.ServeHTTP(w, r)
 	})
 
 	// Server
