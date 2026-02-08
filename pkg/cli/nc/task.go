@@ -62,7 +62,9 @@ type Task struct {
 // Run runs the task and returns an error.
 func (task *Task) Run(ctx context.Context) error {
 	// 1. Setup logging
-	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
+	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
 
 	// 2. Setup the network stack
 	netx := netcore.NewNetwork()
