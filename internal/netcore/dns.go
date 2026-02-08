@@ -87,10 +87,8 @@ func (nx *Network) DialDNS(ctx context.Context, URL *url.URL) (DNSConn, error) {
 			nop.NewDNSOverHTTPSConnFunc(config, URL.String(), nx.Logger),
 			dnsConnAdapter[*nop.DNSOverHTTPSConn]{},
 		)
-
-	default:
-		runtimex.Assert(false)
 	}
+	runtimex.Assert(pipe != nil) // Catches refactor that breaks scheme validation
 
 	// Defer to the common dial code
 	return dial(ctx, nx, endpoint, pipe)

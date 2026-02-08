@@ -57,10 +57,8 @@ func (nx *Network) DialHTTP(req *http.Request) (*nop.HTTPConn, error) {
 			nx.tlsPipeline(config, "tcp", tc),
 			nop.NewHTTPConnFuncTLS(config, nx.Logger),
 		)
-
-	default:
-		runtimex.Assert(false)
 	}
+	runtimex.Assert(pipe != nil) // Catches refactor that breaks scheme validation
 
 	// Defer to the common dial code
 	return dial(req.Context(), nx, endpoint, pipe)

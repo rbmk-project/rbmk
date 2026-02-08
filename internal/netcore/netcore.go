@@ -122,6 +122,10 @@ func (nx *Network) plainPipeline(config *nop.Config, network string) nop.Func[ne
 }
 
 // DialTLSContext establishes a new TLS [net.Conn].
+//
+// The caller must set [Network.TLSConfig].ServerName before calling
+// this method. Unlike [Network.DialDNS] and [Network.DialHTTP], this
+// method does not automatically derive the ServerName from the address.
 func (nx *Network) DialTLSContext(ctx context.Context, network, address string) (net.Conn, error) {
 	return dial(ctx, nx, address, nop.Compose2(
 		nx.tlsPipeline(nx.NewNopConfig(), network, nx.TLSConfig.Clone()),
