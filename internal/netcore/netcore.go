@@ -54,7 +54,8 @@ type Network struct {
 
 	// TLSConfig is the TLS config to use.
 	//
-	// The [NewNetwork] function initializes this using an einitializedmpty [*tls.Config].
+	// The [NewNetwork] function initializes this using a [*tls.Config]
+	// with the root CAs from [testablenet.RootCAs].
 	TLSConfig *tls.Config
 
 	// Resolver is the resolver to use.
@@ -73,7 +74,7 @@ func NewNetwork() *Network {
 	return &Network{
 		DialContextFunc: testablenet.DialContext.Get(),
 		Logger:          slog.New(slog.NewJSONHandler(os.Stderr, nil)),
-		TLSConfig:       &tls.Config{},
+		TLSConfig:       &tls.Config{RootCAs: testablenet.RootCAs.Get()},
 		Resolver:        &net.Resolver{},
 		TimeNow:         time.Now,
 	}
