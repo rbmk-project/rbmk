@@ -12,78 +12,34 @@ by the [github.com/rbmk-project/rbmk/pkg/x/netsim] package.
 package testable
 
 import (
-	"context"
-	"crypto/x509"
 	"io"
-	"net"
 	"os"
 	"sync"
 
+	"github.com/rbmk-project/rbmk/internal/testablenet"
 	"github.com/rbmk-project/rbmk/pkg/common/cliutils"
 	"github.com/rbmk-project/rbmk/pkg/common/fsx"
 )
 
-// DialContextFunc is the type of the low-level dial function.
-type DialContextFunc func(ctx context.Context, network, address string) (net.Conn, error)
+// DialContextFunc is an alias for [testablenet.DialContextFunc].
+type DialContextFunc = testablenet.DialContextFunc
 
-// DialContextProvider provides a thread-safe way to override the dial function.
-//
-// The zero value is ready to use and dials with the standard library.
-type DialContextProvider struct {
-	fx DialContextFunc
-	mu sync.Mutex
-}
+// DialContextProvider is an alias for [testablenet.DialContextProvider].
+type DialContextProvider = testablenet.DialContextProvider
 
 // DialContext is the singleton allowing to override the function used
 // to establish network connections without data races.
 //
 // By default, we use the standard library to dial connections.
-var DialContext = &DialContextProvider{}
+var DialContext = testablenet.DialContext
 
-// Set sets the dial function to use to establish a new network connection.
-func (dcp *DialContextProvider) Set(fx DialContextFunc) {
-	dcp.mu.Lock()
-	defer dcp.mu.Unlock()
-	dcp.fx = fx
-}
-
-// Get returns the dial function to use to establish a new network connection.
-func (dcp *DialContextProvider) Get() DialContextFunc {
-	dcp.mu.Lock()
-	defer dcp.mu.Unlock()
-	fx := dcp.fx
-	if fx == nil {
-		fx = (&net.Dialer{}).DialContext
-	}
-	return fx
-}
-
-// RootCAsProvider provides a thread-safe way to override the root CAs.
-//
-// The zero value is ready to use and uses the system root CAs.
-type RootCAsProvider struct {
-	pool *x509.CertPool
-	mu   sync.Mutex
-}
+// RootCAsProvider is an alias for [testablenet.RootCAsProvider].
+type RootCAsProvider = testablenet.RootCAsProvider
 
 // RootCAs is the singleton allowing to override the root CAs.
 //
 // By default, we use the system root CAs.
-var RootCAs = &RootCAsProvider{}
-
-// Set sets the RootCA pool to use.
-func (rcp *RootCAsProvider) Set(pool *x509.CertPool) {
-	rcp.mu.Lock()
-	defer rcp.mu.Unlock()
-	rcp.pool = pool
-}
-
-// Get returns the RootCA pool to use.
-func (rcp *RootCAsProvider) Get() *x509.CertPool {
-	rcp.mu.Lock()
-	defer rcp.mu.Unlock()
-	return rcp.pool
-}
+var RootCAs = testablenet.RootCAs
 
 // Environment implements a testable [cliutils.Environment].
 //

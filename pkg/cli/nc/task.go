@@ -12,9 +12,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/rbmk-project/rbmk/pkg/cli/internal/testable"
-	"github.com/rbmk-project/rbmk/pkg/common/closepool"
-	"github.com/rbmk-project/rbmk/pkg/x/netcore"
+	"github.com/rbmk-project/rbmk/internal/netcore"
+	"github.com/rbmk-project/rbmk/internal/testablenet"
 )
 
 // Task runs the `nc` task.
@@ -65,27 +64,17 @@ func (task *Task) Run(ctx context.Context) error {
 	// 1. Setup logging
 	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
 
-	// 2. Create connection pool
-	pool := &closepool.Pool{}
-	defer pool.Close()
-
-	// 3. Setup the network stack
-	netx := &netcore.Network{}
-	netx.DialContextFunc = testable.DialContext.Get()
+	// 2. Setup the network stack
+	netx := netcore.NewNetwork()
 	netx.TLSConfig = &tls.Config{
 		InsecureSkipVerify: task.TLSNoVerify,
 		NextProtos:         task.ALPNProtocols,
-		RootCAs:            testable.RootCAs.Get(),
+		RootCAs:            testablenet.RootCAs.Get(),
 		ServerName:         task.ServerName,
 	}
 	netx.Logger = logger
-	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {
-		conn = netcore.WrapConn(ctx, netx, conn)
-		pool.Add(conn)
-		return conn
-	}
 
-	// 5. Establish TCP and possibly TLS connection(s)
+	// 3. Establish TCP and possibly TLS connection(s)
 	if task.WaitTimeout > 0 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, task.WaitTimeout)
@@ -105,17 +94,15 @@ func (task *Task) Run(ctx context.Context) error {
 		return fmt.Errorf("connect failed: %w", err)
 	}
 	fmt.Fprintf(task.Stderr, "connected to %s\n", conn.RemoteAddr())
+	defer conn.Close()
 
-	// 6. see whether we need to route data in and out
+	// 4. see whether we need to route data in and out
 	if !task.ScanMode {
 		errc := make(chan error, 2)
 		go task.copyStdinToConn(task.Stdin, conn, errc)
 		go task.copyConnToStdout(conn, task.Stdout, errc)
 		err = errors.Join(<-errc, <-errc)
 	}
-
-	// 7. Explicitly close the connection
-	pool.Close()
 	return err
 }
 
@@ -213,6 +200,10 @@ type netConner interface {
 var _ netConner = &tls.Conn{}
 
 // closeWrite closes the write side of the connection.
+//
+// TODO(bassosimone): the nop observer wrapper does not expose the
+// netConner or closeWriter interfaces, so the half-close on stdin
+// EOF is currently a no-op when the conn is wrapped.
 func closeWrite(conn net.Conn) error {
 	if nc, ok := conn.(netConner); ok {
 		conn = nc.NetConn()

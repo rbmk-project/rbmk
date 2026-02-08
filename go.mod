@@ -1,9 +1,10 @@
 module github.com/rbmk-project/rbmk
 
-go 1.25.5
+go 1.25.6
 
 require (
 	github.com/bassosimone/dnstest v0.0.0-20260122105318-ab3b84557bc6
+	github.com/bassosimone/nop v0.0.0-20260204083356-1950a9969166
 	github.com/bassosimone/pkitest v0.0.0-20260108162522-4e97d4738e31
 	github.com/bassosimone/runtimex v0.0.0-20260108162100-336f3823f6b7
 	github.com/charmbracelet/glamour v0.10.0
@@ -23,6 +24,13 @@ require (
 	github.com/alecthomas/chroma/v2 v2.22.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
+	github.com/bassosimone/dnscodec v0.0.0-20260122105318-0741a5d9ed5f // indirect
+	github.com/bassosimone/dnsoverhttps v0.0.0-20260123150230-54b370f39ff7 // indirect
+	github.com/bassosimone/dnsoverstream v0.0.0-20260128092127-e2b9f5de4d97 // indirect
+	github.com/bassosimone/iox v0.0.0-20260118074942-2e71dd93cf8f // indirect
+	github.com/bassosimone/minest v0.0.0-20260123150230-357b3d3db63a // indirect
+	github.com/bassosimone/safeconn v0.0.0-20260122214609-5028a520b41c // indirect
+	github.com/bassosimone/sud v0.0.0-20260122213159-faaec16bc685 // indirect
 	github.com/charmbracelet/colorprofile v0.4.1 // indirect
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834 // indirect
 	github.com/charmbracelet/x/ansi v0.11.4 // indirect
@@ -34,6 +42,7 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
