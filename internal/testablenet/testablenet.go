@@ -54,6 +54,41 @@ func (dcp *DialContextProvider) Get() DialContextFunc {
 	return fx
 }
 
+// LookupHostFunc is the type of the low-level lookup-host function.
+type LookupHostFunc func(ctx context.Context, domain string) ([]string, error)
+
+// LookupHostProvider provides a thread-safe way to override the lookup-host function.
+//
+// The zero value is ready to use and resolves with the standard library.
+type LookupHostProvider struct {
+	fx LookupHostFunc
+	mu sync.RWMutex
+}
+
+// LookupHost is the singleton allowing to override the function used
+// to resolve domain names without data races.
+//
+// By default, we use the standard library to resolve domain names.
+var LookupHost = &LookupHostProvider{}
+
+// Set sets the lookup-host function to use to resolve domain names.
+func (lhp *LookupHostProvider) Set(fx LookupHostFunc) {
+	lhp.mu.Lock()
+	defer lhp.mu.Unlock()
+	lhp.fx = fx
+}
+
+// Get returns the lookup-host function to use to resolve domain names.
+func (lhp *LookupHostProvider) Get() LookupHostFunc {
+	lhp.mu.RLock()
+	defer lhp.mu.RUnlock()
+	fx := lhp.fx
+	if fx == nil {
+		fx = (&net.Resolver{}).LookupHost
+	}
+	return fx
+}
+
 // RootCAsProvider provides a thread-safe way to override the root CAs.
 //
 // The zero value is ready to use and uses the system root CAs.

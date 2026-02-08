@@ -42,6 +42,18 @@ func (d dialerAdapter) DialContext(ctx context.Context, network string, address 
 	return d.fx(ctx, network, address)
 }
 
+// resolverAdapter adapts a [testablenet.LookupHostFunc] to the [Resolver] interface.
+type resolverAdapter struct {
+	fx testablenet.LookupHostFunc
+}
+
+var _ Resolver = resolverAdapter{}
+
+// LookupHost implements [Resolver].
+func (r resolverAdapter) LookupHost(ctx context.Context, domain string) ([]string, error) {
+	return r.fx(ctx, domain)
+}
+
 // Network allows to create network connections.
 //
 // Use [NewNetwork] to construct.
@@ -58,7 +70,7 @@ type Network struct {
 
 	// Resolver is the resolver to use.
 	//
-	// The [NewNetwork] function initializes this using an zero-initialized [*net.Resolver].
+	// The [NewNetwork] function initializes this using [testablenet.LookupHost].
 	Resolver Resolver
 
 	// SplitHostPort is the function that splits the endpoint to resolve into
@@ -84,7 +96,7 @@ func NewNetwork() *Network {
 	return &Network{
 		DialContextFunc: testablenet.DialContext.Get(),
 		Logger:          slog.New(slog.NewJSONHandler(os.Stderr, nil)),
-		Resolver:        &net.Resolver{},
+		Resolver:        resolverAdapter{testablenet.LookupHost.Get()},
 		SplitHostPort:   net.SplitHostPort,
 		TLSConfig:       &tls.Config{RootCAs: testablenet.RootCAs.Get()},
 		TimeNow:         time.Now,
