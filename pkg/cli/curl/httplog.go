@@ -3,57 +3,33 @@
 package curl
 
 import (
-	"log/slog"
 	"net/http"
-	"net/netip"
-	"time"
 
-	"github.com/rbmk-project/rbmk/pkg/common/httpconntrace"
-	"github.com/rbmk-project/rbmk/pkg/common/httpslog"
+	"github.com/rbmk-project/rbmk/internal/netcore"
+	"github.com/rbmk-project/rbmk/pkg/common/closepool"
 )
 
-// httpDoAndLog performs the request and emits structured logs.
+// httpLogTransport is an [http.RoundTripper] that emits logs
 //
-// We *assume* that the client does not follow redirects, which means
-// the connection we observe is the only one being used.
-//
-// Note: the slogger *may* be nil.
-//
-// We use [httpconntrace] to extract the local and remote addresses
-// emitted as part of the structured log events.
-func httpDoAndLog(
-	client *http.Client,
-	slogger *slog.Logger,
-	req *http.Request,
-) (*http.Response, error) {
-	// possibly emit a structured log event before performing the request
-	t0 := time.Now()
-	httpslog.MaybeLogRoundTripStart(
-		slogger,
-		netip.MustParseAddrPort("[::]:0"), // not known yet
-		"tcp",
-		netip.MustParseAddrPort("[::]:0"), // not known yet
-		req,
-		t0,
-	)
+// Construct using [newHTTPLogTransport].
+type httpLogTransport struct {
+	pool *closepool.Pool
+	netx *netcore.Network
+}
 
-	// perform the request
-	resp, epnts, err := httpconntrace.Do(client, req)
+// newHTTPLogTransport constructs a new [*httpLogTransport].
+func newHTTPLogTransport(netx *netcore.Network, pool *closepool.Pool) *httpLogTransport {
+	return &httpLogTransport{pool: pool, netx: netx}
+}
 
-	// possibly emit a structured log event after performing the request
-	t := time.Now()
-	httpslog.MaybeLogRoundTripDone(
-		slogger,
-		epnts.LocalAddr,
-		"tcp",
-		epnts.RemoteAddr,
-		req,
-		resp,
-		err,
-		t0,
-		t,
-	)
+var _ http.RoundTripper = &httpLogTransport{}
 
-	// Forward the results to the caller.
-	return resp, err
+// RoundTrip implements [http.RoundTripper].
+func (txp *httpLogTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	conn, err := txp.netx.DialHTTP(req)
+	if err != nil {
+		return nil, err
+	}
+	txp.pool.Add(conn)
+	return conn.RoundTrip(req)
 }

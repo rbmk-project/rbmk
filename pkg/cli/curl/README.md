@@ -47,10 +47,6 @@ Write the response body to `FILE` instead of using the stdout.
 
 Use `ADDR` instead of DNS resolution for `HOST:PORT`.
 
-Implementation note: we ignore the `PORT` and replace the `HOST` with
-`ADDR` for every port number. Additionally, when using this flag, the
-DNS lookup fails with "no such host" if the URL host is not `HOST`.
-
 ### `-v, --verbose`
 
 Make the operation more talkative.

@@ -11,11 +11,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/rbmk-project/rbmk/pkg/cli/internal/testable"
+	"github.com/rbmk-project/rbmk/internal/netcore"
+	"github.com/rbmk-project/rbmk/internal/testablenet"
 	"github.com/rbmk-project/rbmk/pkg/common/closepool"
 	"github.com/rbmk-project/rbmk/pkg/common/dialonce"
-	"github.com/rbmk-project/rbmk/pkg/dns/dnscore"
-	"github.com/rbmk-project/rbmk/pkg/x/netcore"
 )
 
 // Task runs the curl task.
@@ -49,7 +48,9 @@ func (task *Task) Run(ctx context.Context) error {
 	defer cancel()
 
 	// Set up the JSON logger for writing the measurements
-	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
+	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
 
 	// Create a pool containing closers
 	pool := &closepool.Pool{}
@@ -58,24 +59,20 @@ func (task *Task) Run(ctx context.Context) error {
 	// Create netcore network instance making sure we dial the
 	// endpoint at most once, thus avoiding infinite dialing loops such
 	// as the one occurring with https://avdox.globalvoices.org/.
-	netx := &netcore.Network{}
-	netx.DialContextFunc = dialonce.Wrap(testable.DialContext.Get())
-	netx.RootCAs = testable.RootCAs.Get()
+	netx := netcore.NewNetwork()
+	netx.DialContextFunc = dialonce.Wrap(testablenet.DialContext.Get())
 	netx.Logger = logger
-	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {
-		conn = netcore.WrapConn(ctx, netx, conn)
-		pool.Add(conn)
-		return conn
-	}
 
-	// Honour the `--resolve` command line flag
-	if len(task.ResolveMap) > 0 {
-		netx.LookupHostFunc = func(ctx context.Context, domain string) ([]string, error) {
-			if resolved, ok := task.ResolveMap[domain]; ok {
-				return []string{resolved}, nil
-			}
-			return nil, dnscore.ErrNoName
+	// Also, honor the `--resolve` flag.
+	netx.SplitHostPort = func(endpoint string) (string, string, error) {
+		hostname, port, err := net.SplitHostPort(endpoint)
+		if err != nil {
+			return "", "", err
 		}
+		if match, ok := task.ResolveMap[endpoint]; ok {
+			hostname = match
+		}
+		return hostname, port, nil
 	}
 
 	// Create the HTTP client to use and make sure we're using
@@ -94,21 +91,20 @@ func (task *Task) Run(ctx context.Context) error {
 			// this command with the address to use via `--resolve`.
 			return http.ErrUseLastResponse
 		},
-		Timeout: task.MaxTime, // ensure the overall operation is bounded
-		Transport: &http.Transport{
-			DialContext:       netx.DialContext,
-			DialTLSContext:    netx.DialTLSContext,
-			ForceAttemptHTTP2: true,
-		},
+		Timeout:   task.MaxTime, // ensure the overall operation is bounded
+		Transport: newHTTPLogTransport(netx, pool),
 	}
 
 	// Create the HTTP request
-	req, err := http.NewRequestWithContext(ctx, task.Method, task.URL, nil)
+	req, err := http.NewRequestWithContext(ctx, task.Method, task.URL, http.NoBody)
 	if err != nil {
 		return fmt.Errorf("cannot create request: %w", err)
 	}
 
 	// Print the request, if verbose
+	//
+	// TODO(bassosimone): when we'll enable redirects with `--location` we
+	// won't be able to print the intermediate steps anymore.
 	fmt.Fprintf(task.VerboseOutput, "> %s %s HTTP/%d.%d\n",
 		req.Method, req.URL.RequestURI(),
 		req.ProtoMajor, req.ProtoMinor)
@@ -117,7 +113,7 @@ func (task *Task) Run(ctx context.Context) error {
 	fmt.Fprintf(task.VerboseOutput, ">\n")
 
 	// Perform the request
-	resp, err := httpDoAndLog(client, logger, req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
@@ -131,6 +127,8 @@ func (task *Task) Run(ctx context.Context) error {
 	fmt.Fprintf(task.VerboseOutput, "<\n")
 
 	// Copy the response body
+	//
+	// TODO(bassosimone): maybe we should use [iox.CopyContext] here.
 	if _, err := io.Copy(task.Output, resp.Body); err != nil {
 		return fmt.Errorf("reading or writing response body: %w", err)
 	}

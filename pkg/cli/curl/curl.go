@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"strings"
 	"time"
 
@@ -99,9 +100,7 @@ func (cmd command) Main(ctx context.Context, env cliutils.Environment, argv ...s
 			fmt.Fprintf(env.Stderr(), "Run `rbmk curl --help` for usage.\n")
 			return err
 		}
-		// Implementation note: we ignore the port since our
-		// LookupHost function does not know the port.
-		task.ResolveMap[parts[0]] = parts[2]
+		task.ResolveMap[net.JoinHostPort(parts[0], parts[1])] = parts[2]
 	}
 
 	// 9. process other flags

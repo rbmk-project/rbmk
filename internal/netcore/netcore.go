@@ -7,8 +7,10 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net"
+	"net/http"
 	"net/netip"
 	"os"
 	"time"
@@ -52,16 +54,22 @@ type Network struct {
 	// The [NewNetwork] function initializes this using JSON slogger writing on the [os.Stderr].
 	Logger *slog.Logger
 
+	// Resolver is the resolver to use.
+	//
+	// The [NewNetwork] function initializes this using an zero-initialized [*net.Resolver].
+	Resolver Resolver
+
+	// SplitHostPort is the function that splits the endpoint to resolve into
+	// a hostname (or IPv4/IPv6 address) and a port.
+	//
+	// The [NewNetwork] function initializes this to [net.SplitHostPort].
+	SplitHostPort func(endpoint string) (hostname string, port string, err error)
+
 	// TLSConfig is the TLS config to use.
 	//
 	// The [NewNetwork] function initializes this using a [*tls.Config]
 	// with the root CAs from [testablenet.RootCAs].
 	TLSConfig *tls.Config
-
-	// Resolver is the resolver to use.
-	//
-	// The [NewNetwork] function initializes this using an zero-initialized [*net.Resolver].
-	Resolver Resolver
 
 	// TimeNow is the function to get the current time.
 	//
@@ -74,8 +82,9 @@ func NewNetwork() *Network {
 	return &Network{
 		DialContextFunc: testablenet.DialContext.Get(),
 		Logger:          slog.New(slog.NewJSONHandler(os.Stderr, nil)),
-		TLSConfig:       &tls.Config{RootCAs: testablenet.RootCAs.Get()},
 		Resolver:        &net.Resolver{},
+		SplitHostPort:   net.SplitHostPort,
+		TLSConfig:       &tls.Config{RootCAs: testablenet.RootCAs.Get()},
 		TimeNow:         time.Now,
 	}
 }
@@ -89,30 +98,91 @@ func (nx *Network) newNopConfig() *nop.Config {
 	}
 }
 
+// DialHTTP establishes a [*nop.HTTPConn].
+func (nx *Network) DialHTTP(req *http.Request) (*nop.HTTPConn, error) {
+	// Determine the default port
+	var (
+		config      = nx.newNopConfig()
+		defaultPort = ""
+	)
+	switch req.URL.Scheme {
+	case "http":
+		defaultPort = "80"
+	case "https":
+		defaultPort = "443"
+	default:
+		return nil, fmt.Errorf("unsupported scheme: %q", req.URL.Scheme)
+	}
+
+	// Determine the endpoint to connect to
+	var (
+		hostname = req.URL.Host
+		port     = ""
+	)
+	if uh, up, err := net.SplitHostPort(req.URL.Host); err == nil {
+		hostname, port = uh, up
+	} else {
+		port = defaultPort
+	}
+	endpoint := net.JoinHostPort(hostname, port)
+
+	// Make the dialing pipeline
+	var pipe nop.Func[netip.AddrPort, *nop.HTTPConn]
+	switch req.URL.Scheme {
+	case "http":
+		pipe = nop.Compose2(
+			nx.plainPipeline(config, "tcp"),
+			nop.NewHTTPConnFuncPlain(config, nx.Logger),
+		)
+
+	case "https":
+		tc := nx.TLSConfig.Clone()
+		tc.ServerName = hostname
+		pipe = nop.Compose2(
+			nx.tlsPipeline(config, "tcp", tc),
+			nop.NewHTTPConnFuncTLS(config, nx.Logger),
+		)
+
+	default:
+		runtimex.Assert(false)
+	}
+
+	// Defer to the common dialing code
+	return dial(req.Context(), nx, endpoint, pipe)
+}
+
 // DialContext establishes a new TCP/UDP [net.Conn].
 func (nx *Network) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
-	config := nx.newNopConfig()
-	return nx.dial(ctx, address, nop.Compose3(
+	return dial(ctx, nx, address, nx.plainPipeline(nx.newNopConfig(), network))
+}
+
+func (nx *Network) plainPipeline(config *nop.Config, network string) nop.Func[netip.AddrPort, net.Conn] {
+	return nop.Compose3(
 		nop.NewConnectFunc(config, network, nx.Logger),
 		nop.NewCancelWatchFunc(),
 		nop.NewObserveConnFunc(config, nx.Logger),
-	))
+	)
 }
 
 // DialTLSContext establishes a new TLS [net.Conn].
 func (nx *Network) DialTLSContext(ctx context.Context, network, address string) (net.Conn, error) {
-	config := nx.newNopConfig()
-	return nx.dial(ctx, address, nop.Compose5(
-		nop.NewConnectFunc(config, network, nx.Logger),
-		nop.NewCancelWatchFunc(),
-		nop.NewObserveConnFunc(config, nx.Logger),
-		nop.NewTLSHandshakeFunc(config, nx.TLSConfig, nx.Logger),
+	return dial(ctx, nx, address, nop.Compose2(
+		nx.tlsPipeline(nx.newNopConfig(), network, nx.TLSConfig.Clone()),
 		tlsConnAdapter{},
 	))
 }
 
+func (nx *Network) tlsPipeline(cfg *nop.Config, network string, tcfg *tls.Config) nop.Func[netip.AddrPort, nop.TLSConn] {
+	return nop.Compose4(
+		nop.NewConnectFunc(cfg, network, nx.Logger),
+		nop.NewCancelWatchFunc(),
+		nop.NewObserveConnFunc(cfg, nx.Logger),
+		nop.NewTLSHandshakeFunc(cfg, tcfg, nx.Logger),
+	)
+}
+
 // pipeline is the generic pipeline to create a new [net.Conn].
-type pipeline nop.Func[netip.AddrPort, net.Conn]
+type pipeline[T any] nop.Func[netip.AddrPort, T]
 
 // tlsConnAdapter adapts [nop.TLSConn] to be a [net.Conn].
 type tlsConnAdapter struct{}
@@ -123,17 +193,20 @@ func (tlsConnAdapter) Call(ctx context.Context, conn nop.TLSConn) (net.Conn, err
 }
 
 // dial is the internal function used for dialing.
-func (nx *Network) dial(ctx context.Context, address string, pipe pipeline) (net.Conn, error) {
+func dial[T any](ctx context.Context, nx *Network, address string, pipe pipeline[T]) (T, error) {
+	// Create zero value for error returns
+	var zero T
+
 	// Unpack the network endpoint
-	domain, port, err := net.SplitHostPort(address)
+	domain, port, err := nx.SplitHostPort(address)
 	if err != nil {
-		return nil, err
+		return zero, err
 	}
 
 	// Map the domain to addresses
 	addrs, err := nx.Resolver.LookupHost(ctx, domain)
 	if err != nil {
-		return nil, err
+		return zero, err
 	}
 	runtimex.Assert(len(addrs) >= 1)
 
@@ -152,5 +225,5 @@ func (nx *Network) dial(ctx context.Context, address string, pipe pipeline) (net
 		}
 		return conn, nil
 	}
-	return nil, errors.Join(errv...)
+	return zero, errors.Join(errv...)
 }
