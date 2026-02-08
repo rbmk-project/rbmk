@@ -12,9 +12,7 @@ import (
 	"time"
 
 	"github.com/pion/stun/v3"
-	"github.com/rbmk-project/rbmk/pkg/cli/internal/testable"
-	"github.com/rbmk-project/rbmk/pkg/common/closepool"
-	"github.com/rbmk-project/rbmk/pkg/x/netcore"
+	"github.com/rbmk-project/rbmk/internal/netcore"
 )
 
 // Task runs a STUN binding request.
@@ -39,29 +37,22 @@ func (task *Task) Run(ctx context.Context) error {
 	defer cancel()
 
 	// 2. Set up the JSON logger for writing measurements
-	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
+	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
 
-	// 3. Create a pool containing closers
-	pool := &closepool.Pool{}
-	defer pool.Close()
-
-	// 4. Create netcore network instance
-	netx := &netcore.Network{}
-	netx.DialContextFunc = testable.DialContext.Get()
+	// 3. Create netcore network instance
+	netx := netcore.NewNetwork()
 	netx.Logger = logger
-	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {
-		conn = netcore.WrapConn(ctx, netx, conn)
-		pool.Add(conn)
-		return conn
-	}
 
-	// 5. Establish UDP connection to STUN server and make sure
+	// 4. Establish UDP connection to STUN server and make sure
 	// we have proper context deadline propagation. Also, make sure
 	// that we bail immediately if the context is done.
 	conn, err := netx.DialContext(ctx, "udp", task.Endpoint)
 	if err != nil {
 		return fmt.Errorf("cannot connect to STUN server: %w", err)
 	}
+	defer conn.Close()
 	if d, ok := ctx.Deadline(); ok {
 		conn.SetDeadline(d)
 	}
@@ -70,24 +61,24 @@ func (task *Task) Run(ctx context.Context) error {
 		conn.Close()
 	}()
 
-	// 6. Build STUN binding request message
+	// 5. Build STUN binding request message
 	message := stun.MustBuild(stun.TransactionID, stun.BindingRequest)
 
 	// TODO(bassosimone): log the raw STUN request
 
-	// 7. Send the STUN request
+	// 6. Send the STUN request
 	if _, err := conn.Write(message.Raw); err != nil {
 		return fmt.Errorf("cannot send STUN request: %w", err)
 	}
 
-	// 8. Read the response
+	// 7. Read the response
 	buffer := make([]byte, 1024)
 	count, err := conn.Read(buffer)
 	if err != nil {
 		return fmt.Errorf("cannot read STUN response: %w", err)
 	}
 
-	// 9. Parse the STUN response
+	// 8. Parse the STUN response
 	response := &stun.Message{Raw: buffer[:count]}
 	if err := response.Decode(); err != nil {
 		return fmt.Errorf("cannot decode STUN response: %w", err)
@@ -95,13 +86,13 @@ func (task *Task) Run(ctx context.Context) error {
 
 	// TODO(bassosimone): log the raw STUN response
 
-	// 10. Extract the XOR-MAPPED-ADDRESS
+	// 9. Extract the XOR-MAPPED-ADDRESS
 	var xorAddr stun.XORMappedAddress
 	if err := xorAddr.GetFrom(response); err != nil {
 		return fmt.Errorf("cannot get reflexive address: %w", err)
 	}
 
-	// 11. Log and print the reflexive address
+	// 10. Log and print the reflexive address
 	fmt.Fprintf(task.Output, "%s\n", net.JoinHostPort(
 		xorAddr.IP.String(), strconv.Itoa(xorAddr.Port)))
 	logger.InfoContext(
@@ -111,7 +102,5 @@ func (task *Task) Run(ctx context.Context) error {
 		"stunReflexivePort", xorAddr.Port,
 	)
 
-	// 12. Explicitly close connections in the pool
-	pool.Close()
 	return nil
 }
