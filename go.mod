@@ -3,6 +3,7 @@ module github.com/rbmk-project/rbmk
 go 1.25.5
 
 require (
+	github.com/bassosimone/dnstest v0.0.0-20260122105318-ab3b84557bc6
 	github.com/bassosimone/pkitest v0.0.0-20260108162522-4e97d4738e31
 	github.com/bassosimone/runtimex v0.0.0-20260108162100-336f3823f6b7
 	github.com/charmbracelet/glamour v0.10.0
