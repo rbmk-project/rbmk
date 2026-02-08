@@ -4,22 +4,17 @@ package dig
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net"
-	"net/http"
 	"net/url"
-	"strings"
-	"sync"
 	"time"
 
+	"github.com/bassosimone/dnscodec"
 	"github.com/miekg/dns"
-	"github.com/rbmk-project/rbmk/pkg/cli/internal/testable"
-	"github.com/rbmk-project/rbmk/pkg/common/closepool"
-	"github.com/rbmk-project/rbmk/pkg/dns/dnscore"
-	"github.com/rbmk-project/rbmk/pkg/x/netcore"
+	"github.com/rbmk-project/rbmk/internal/netcore"
+	"github.com/rbmk-project/rbmk/internal/testablenet"
 )
 
 // Task runs the `dig` task.
@@ -88,71 +83,50 @@ var queryTypeMap = map[string]uint16{
 }
 
 // protocolMap maps protocol strings to DNS protocols.
-var protocolMap = map[string]dnscore.Protocol{
-	"udp": dnscore.ProtocolUDP,
-	"tcp": dnscore.ProtocolTCP,
-	"dot": dnscore.ProtocolDoT,
-	"doh": dnscore.ProtocolDoH,
+var protocolMap = map[string]struct{}{
+	"udp": {},
+	"tcp": {},
+	"dot": {},
+	"doh": {},
 }
 
 // newServerAddr returns a new server address string based on the protocol
 // and the specific fields configured for the task.
-func (task *Task) newServerAddr(protocol dnscore.Protocol) string {
-	switch protocol {
-	case dnscore.ProtocolUDP, dnscore.ProtocolTCP, dnscore.ProtocolDoT:
-		return net.JoinHostPort(task.ServerAddr, task.ServerPort)
+func (task *Task) newServerAddr() *url.URL {
+	switch task.Protocol {
+	case "udp", "tcp", "dot":
+		return &url.URL{
+			Scheme: task.Protocol,
+			Host:   net.JoinHostPort(task.ServerAddr, task.ServerPort),
+			Path:   "/",
+		}
 
-	case dnscore.ProtocolDoH:
-		URL := &url.URL{
+	case "doh":
+		return &url.URL{
 			Scheme: "https",
 			Host:   net.JoinHostPort(task.ServerAddr, task.ServerPort),
 			Path:   task.URLPath,
 		}
-		return URL.String()
 
 	default:
-		panic(fmt.Errorf("unsupported protocol: %s", protocol))
+		panic(fmt.Errorf("unsupported protocol: %s", task.Protocol))
 	}
 }
 
 // Run runs the task and returns an error.
 func (task *Task) Run(ctx context.Context) error {
-	// Setup the overal operation timeout using the context
+	// Setup the overall operation timeout using the context
 	const timeout = 5 * time.Second
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	// Set up the JSON logger for writing the measurements
-	logger := slog.New(slog.NewJSONHandler(task.LogsWriter, &slog.HandlerOptions{}))
-
-	// Create a pool containing closers
-	pool := &closepool.Pool{}
-	defer pool.Close()
+	logger := slog.New(task.newSlogHandler())
 
 	// Create netcore network instance
-	netx := &netcore.Network{}
-	netx.RootCAs = testable.RootCAs.Get()
-	netx.DialContextFunc = testable.DialContext.Get()
+	netx := netcore.NewNetwork()
+	netx.DialContextFunc = testablenet.DialContext.Get()
 	netx.Logger = logger
-	netx.WrapConn = func(ctx context.Context, netx *netcore.Network, conn net.Conn) net.Conn {
-		conn = netcore.WrapConn(ctx, netx, conn)
-		pool.Add(conn)
-		return conn
-	}
-
-	// Create a new transport using the logger and the network
-	transport := &dnscore.Transport{}
-	transport.DialContext = netx.DialContext
-	transport.DialTLSContext = netx.DialTLSContext
-	transport.HTTPClient = &http.Client{
-		Timeout: timeout, // ensure the overall operation is bounded
-		Transport: &http.Transport{
-			DialContext:       netx.DialContext,
-			DialTLSContext:    netx.DialTLSContext,
-			ForceAttemptHTTP2: true,
-		},
-	}
-	transport.Logger = logger
 
 	// Determine the DNS query type
 	queryType, ok := queryTypeMap[task.QueryType]
@@ -160,141 +134,34 @@ func (task *Task) Run(ctx context.Context) error {
 		return fmt.Errorf("unsupported query type: %s", task.QueryType)
 	}
 
-	// Determine the server protocol
-	protocol, ok := protocolMap[task.Protocol]
-	if !ok {
+	// Validate the server protocol
+	if _, ok := protocolMap[task.Protocol]; !ok {
 		return fmt.Errorf("unsupported protocol: %s", task.Protocol)
 	}
 
 	// Create the server address
-	server := dnscore.NewServerAddr(protocol, task.newServerAddr(protocol))
-	flags := 0
-	maxlength := uint16(dnscore.EDNS0SuggestedMaxResponseSizeUDP)
-	if protocol == dnscore.ProtocolDoT || protocol == dnscore.ProtocolDoH {
-		flags |= dnscore.EDNS0FlagDO | dnscore.EDNS0FlagBlockLengthPadding
-	}
-	if protocol != dnscore.ProtocolUDP {
-		maxlength = dnscore.EDNS0SuggestedMaxResponseSizeOtherwise
-	}
+	URL := task.newServerAddr()
 
 	// Create the DNS query
-	optEDNS0 := dnscore.QueryOptionEDNS0(maxlength, flags)
-	query, err := dnscore.NewQuery(task.Name, queryType, optEDNS0)
+	query := dnscodec.NewQuery(task.Name, queryType)
+
+	// Handle the `+udp=wait-duplicates` special case
+	if URL.Scheme == "udp" && task.WaitDuplicates {
+		return task.waitUDP(ctx, logger, netx, URL, query) // error already wrapped
+	}
+
+	// Connect to the server
+	conn, err := netx.DialDNS(ctx, URL)
 	if err != nil {
-		return fmt.Errorf("cannot create query: %w", err)
+		return fmt.Errorf("dial failed: %w", err)
 	}
-	fmt.Fprintf(task.QueryWriter, ";; Query:\n%s\n", query.String())
+	defer conn.Close()
 
-	// Perform the DNS query
-	response, err := task.query(ctx, transport, server, query)
-	if err != nil {
-		return fmt.Errorf("query round-trip failed: %w", err)
-	}
-
-	// Explicitly close the connections in the pool
-	pool.Close()
-
-	// TODO(bassosimone): we should probably not print the resulting IP addresses
-	// or entries if the response is invalid or the Rcode indicates failure.
-
-	// Validate the DNS response
-	if err = dnscore.ValidateResponse(query, response); err != nil {
-		return fmt.Errorf("cannot validate response: %w", err)
-	}
-
-	// Map the RCODE to an error, if any
-	if err := dnscore.RCodeToError(response); err != nil {
-		return fmt.Errorf("response code indicates error: %w", err)
+	// Perform the exchange; the response is intentionally discarded because
+	// the slogHandler intercepts raw DNS messages from structured logs and
+	// prints them to the configured writers.
+	if _, err := conn.Exchange(ctx, query); err != nil {
+		return fmt.Errorf("exchange failed: %w", err)
 	}
 	return nil
-}
-
-// query performs the query and returns response or error.
-//
-// If the WaitDuplicates flag is set, this function will wait
-// for duplicate responses, emit all the related structured logs,
-// and return the first response received. This function blocks
-// until the timeout configured in the context expires. Note that
-// all responses (including duplicates) are automatically
-// logged through the transport's logger.
-func (task *Task) query(
-	ctx context.Context,
-	txp *dnscore.Transport,
-	addr *dnscore.ServerAddr,
-	query *dns.Msg,
-) (*dns.Msg, error) {
-	// If we're not waiting for duplicates, our job is easy
-	if !task.WaitDuplicates {
-		return task.streamResponse(txp.Query(ctx, addr, query))
-	}
-
-	// Otherwise, we need to reading duplicate responses
-	// until the overall timeout says we should bail, which
-	// happens through context expiration.
-	var (
-		resp0 *dns.Msg
-		err0  error
-		once  sync.Once
-	)
-	respch := txp.QueryWithDuplicates(ctx, addr, query)
-	for entry := range respch {
-		resp, err := task.streamResponse(entry.Msg, entry.Err)
-		once.Do(func() {
-			resp0, err0 = resp, err
-		})
-	}
-	if resp0 == nil && err0 == nil {
-		return nil, errors.New("received nil response and nil error")
-	}
-	return resp0, err0
-}
-
-// streamResponse contains common code to immediately stream a response.
-func (task *Task) streamResponse(resp *dns.Msg, err error) (*dns.Msg, error) {
-	if resp != nil && err == nil {
-		fmt.Fprintf(task.ResponseWriter, "\n;; Response:\n%s\n\n", resp.String())
-		fmt.Fprintf(task.ShortWriter, "%s", task.formatShort(resp))
-	}
-	return resp, err
-}
-
-// formatShort returns a short string representation of the DNS response.
-func (task *Task) formatShort(response *dns.Msg) string {
-	var builder strings.Builder
-	for _, ans := range response.Answer {
-		switch ans := ans.(type) {
-		case *dns.A:
-			fmt.Fprintf(&builder, "%s\n", ans.A.String())
-
-		case *dns.AAAA:
-			fmt.Fprintf(&builder, "%s\n", ans.AAAA.String())
-
-		case *dns.CNAME:
-			if !task.ShortIP {
-				fmt.Fprintf(&builder, "%s\n", ans.Target)
-			}
-
-		case *dns.HTTPS:
-			if !task.ShortIP {
-				value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
-				fmt.Fprintf(&builder, "%s\n", value)
-			}
-
-		case *dns.MX:
-			if !task.ShortIP {
-				value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
-				fmt.Fprintf(&builder, "%s\n", value)
-			}
-
-		case *dns.NS:
-			if !task.ShortIP {
-				value := strings.TrimPrefix(ans.String(), ans.Hdr.String())
-				fmt.Fprintf(&builder, "%s\n", value)
-			}
-
-		default:
-			// TODO(bassosimone): implement the other answer types
-		}
-	}
-	return builder.String()
 }
