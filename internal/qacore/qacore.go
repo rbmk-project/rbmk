@@ -262,13 +262,7 @@ var defaultWwwHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Req
 
 // wwwExampleComMain is the main goroutine of the www.example.com stack.
 func (sx *Simulation) wwwExampleComMain(certificate tls.Certificate) {
-	// Listener
 	lcfg := uis.NewListenConfig(sx.wwwExampleComStack)
-	listener := runtimex.PanicOnError1(lcfg.Listen(
-		context.Background(),
-		"tcp",
-		makeStringEpnt(sx.scenario.WwwExampleCom, 443),
-	))
 
 	// Handler that delegates to the configurable wwwHandler
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -281,14 +275,29 @@ func (sx *Simulation) wwwExampleComMain(certificate tls.Certificate) {
 		h.ServeHTTP(w, r)
 	})
 
-	// Server
-	srv := httptest.NewUnstartedServer(handler)
-	srv.Listener = listener
-	srv.TLS = &tls.Config{
+	// HTTPS server on port 443
+	httpsListener := runtimex.PanicOnError1(lcfg.Listen(
+		context.Background(),
+		"tcp",
+		makeStringEpnt(sx.scenario.WwwExampleCom, 443),
+	))
+	httpsSrv := httptest.NewUnstartedServer(handler)
+	httpsSrv.Listener = httpsListener
+	httpsSrv.TLS = &tls.Config{
 		Certificates: []tls.Certificate{certificate},
 	}
-	srv.EnableHTTP2 = true
-	srv.StartTLS()
+	httpsSrv.EnableHTTP2 = true
+	httpsSrv.StartTLS()
+
+	// HTTP server on port 80
+	httpListener := runtimex.PanicOnError1(lcfg.Listen(
+		context.Background(),
+		"tcp",
+		makeStringEpnt(sx.scenario.WwwExampleCom, 80),
+	))
+	httpSrv := httptest.NewUnstartedServer(handler)
+	httpSrv.Listener = httpListener
+	httpSrv.Start()
 }
 
 // route routes packets between hosts in the [*Simulation].
