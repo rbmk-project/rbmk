@@ -5,13 +5,16 @@ package dnscore_test
 import (
 	"context"
 	"crypto/tls"
+	"net"
 	"net/http"
+	"net/netip"
 	"testing"
 	"time"
 
+	"github.com/bassosimone/dnstest"
+	"github.com/bassosimone/pkitest"
 	"github.com/miekg/dns"
 	"github.com/rbmk-project/rbmk/pkg/dns/dnscore"
-	"github.com/rbmk-project/rbmk/pkg/dns/dnscoretest"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,23 +25,28 @@ func checkResult(t *testing.T, resp *dns.Msg, err error) {
 	assert.Equal(t, "example.com.", resp.Answer[0].Header().Name)
 	assert.Equal(t, dns.TypeA, resp.Answer[0].Header().Rrtype)
 	assert.Equal(
-		t, dnscoretest.ExampleComAddrA.String(),
+		t, "93.184.215.14",
 		resp.Answer[0].(*dns.A).A.String(),
 	)
 }
 
+func newExampleComHandler() *dnstest.Handler {
+	cfg := dnstest.NewHandlerConfig()
+	cfg.AddNetipAddr("example.com", netip.MustParseAddr("93.184.215.14"))
+	return dnstest.NewHandler(cfg)
+}
+
 func TestTransport_RoundTrip_UDP(t *testing.T) {
 	// create and start a testing server
-	server := &dnscoretest.Server{}
-	handler := dnscoretest.NewExampleComHandler()
-	<-server.StartUDP(handler)
+	handler := newExampleComHandler()
+	server := dnstest.MustNewUDPServer(&net.ListenConfig{}, "127.0.0.1:0", handler)
 	defer server.Close()
 
 	// create transport, server addr, and query
 	txp := &dnscore.Transport{}
 	serverAddr := &dnscore.ServerAddr{
 		Protocol: dnscore.ProtocolUDP,
-		Address:  server.Addr,
+		Address:  server.Address(),
 	}
 	options := []dnscore.QueryOption{
 		dnscore.QueryOptionEDNS0(
@@ -62,16 +70,15 @@ func TestTransport_RoundTrip_UDP(t *testing.T) {
 
 func TestTransport_RoundTrip_TCP(t *testing.T) {
 	// create and start a testing server
-	server := &dnscoretest.Server{}
-	handler := dnscoretest.NewExampleComHandler()
-	<-server.StartTCP(handler)
+	handler := newExampleComHandler()
+	server := dnstest.MustNewTCPServer(&net.ListenConfig{}, "127.0.0.1:0", handler)
 	defer server.Close()
 
 	// create transport, server addr, and query
 	txp := &dnscore.Transport{}
 	serverAddr := &dnscore.ServerAddr{
 		Protocol: dnscore.ProtocolTCP,
-		Address:  server.Addr,
+		Address:  server.Address(),
 	}
 	options := []dnscore.QueryOption{
 		dnscore.QueryOptionEDNS0(
@@ -94,17 +101,25 @@ func TestTransport_RoundTrip_TCP(t *testing.T) {
 }
 
 func TestTransport_RoundTrip_TLS(t *testing.T) {
+	// create PKI and certificate for the testing server
+	pki := pkitest.MustNewPKI("testdata")
+	cert := pki.MustNewCert(&pkitest.SelfSignedCertConfig{
+		CommonName:   "dns.example.com",
+		DNSNames:     []string{"dns.example.com"},
+		Organization: []string{"Test"},
+		IPAddrs:      []net.IP{net.IPv4(127, 0, 0, 1)},
+	})
+
 	// create and start a testing server
-	server := &dnscoretest.Server{}
-	handler := dnscoretest.NewExampleComHandler()
-	<-server.StartTLS(handler)
+	handler := newExampleComHandler()
+	server := dnstest.MustNewTLSServer(&net.ListenConfig{}, "127.0.0.1:0", cert, handler)
 	defer server.Close()
 
 	// create transport, server addr, and query
-	txp := &dnscore.Transport{RootCAs: server.RootCAs}
+	txp := &dnscore.Transport{RootCAs: pki.CertPool()}
 	serverAddr := &dnscore.ServerAddr{
 		Protocol: dnscore.ProtocolDoT,
-		Address:  server.Addr,
+		Address:  server.Address(),
 	}
 	options := []dnscore.QueryOption{
 		dnscore.QueryOptionEDNS0(
@@ -127,10 +142,18 @@ func TestTransport_RoundTrip_TLS(t *testing.T) {
 }
 
 func TestTransport_RoundTrip_HTTPS(t *testing.T) {
+	// create PKI and certificate for the testing server
+	pki := pkitest.MustNewPKI("testdata")
+	cert := pki.MustNewCert(&pkitest.SelfSignedCertConfig{
+		CommonName:   "dns.example.com",
+		DNSNames:     []string{"dns.example.com"},
+		Organization: []string{"Test"},
+		IPAddrs:      []net.IP{net.IPv4(127, 0, 0, 1)},
+	})
+
 	// create and start a testing server
-	server := &dnscoretest.Server{}
-	handler := dnscoretest.NewExampleComHandler()
-	<-server.StartHTTPS(handler)
+	handler := newExampleComHandler()
+	server := dnstest.MustNewHTTPSServer(&net.ListenConfig{}, "127.0.0.1:0", cert, handler)
 	defer server.Close()
 
 	// create transport, server addr, and query
@@ -138,14 +161,14 @@ func TestTransport_RoundTrip_HTTPS(t *testing.T) {
 		HTTPClient: &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
-					RootCAs: server.RootCAs,
+					RootCAs: pki.CertPool(),
 				},
 			},
 		},
 	}
 	serverAddr := &dnscore.ServerAddr{
 		Protocol: dnscore.ProtocolDoH,
-		Address:  server.URL,
+		Address:  server.URL(),
 	}
 	options := []dnscore.QueryOption{
 		dnscore.QueryOptionEDNS0(
