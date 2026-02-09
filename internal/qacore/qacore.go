@@ -1,6 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-// Package qacore contains the core QA functionality for RBMK.
+// Package qacore provides a declarative network integration testing
+// environment built on top of gVisor userspace networking.
+//
+// Given a [Scenario] describing DNS servers, HTTP servers, and a client
+// stack, [MustNewSimulation] creates a complete simulated internet with
+// working DNS resolution, TLS certificates, and HTTP/HTTPS servers.
+//
+// A [Router] controls packet delivery between hosts. The [DefaultRouter]
+// supports swappable [PacketFilter] for simulating censorship conditions.
+//
+// Use [ScenarioV4] for a ready-made IPv4 topology, or build a custom
+// [Scenario] for specific test needs. Cancel the context and call
+// [*Simulation.Wait] for clean shutdown.
 package qacore
 
 import (
@@ -220,6 +232,14 @@ func (sx *Simulation) Wait() {
 	sx.wg.Wait()
 }
 
+// DnsDB returns the global DNS database used by the [*Simulation].
+//
+// You can use this to add extra DNS records (e.g., records
+// not associated with any stack) after construction.
+func (sx *Simulation) DnsDB() *dnstest.HandlerConfig {
+	return sx.dnsDB
+}
+
 // CertPool returns the cert pool that the user should use.
 func (sx *Simulation) CertPool() *x509.CertPool {
 	return sx.pki.CertPool()
@@ -384,8 +404,10 @@ func (sx *Simulation) mustInitDNSServer(ds *DNSServer) {
 //go:embed example.com.html
 var exampleComHTML string
 
-// defaultWwwHandler is the default [http.Handler] for HTTP servers.
-var defaultWwwHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// DefaultHTTPHandler is the default [http.Handler] used by [HTTPServer]
+// when [HTTPServer.Handler] is nil. It serves an embedded HTML page
+// modeled after the real example.com.
+var DefaultHTTPHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(exampleComHTML))
 })
@@ -417,7 +439,7 @@ func (sx *Simulation) mustInitHTTPServer(hs *HTTPServer) {
 	// Determine the handler to use
 	handler := hs.Handler
 	if handler == nil {
-		handler = defaultWwwHandler
+		handler = DefaultHTTPHandler
 	}
 
 	// Compute allDomains for the certificate (copy to avoid mutation)
