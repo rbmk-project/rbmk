@@ -246,19 +246,18 @@ func (sx *Simulation) CertPool() *x509.CertPool {
 }
 
 // DialContext dials a connection using the [*uis.Stack] assigned to the user.
-//
-// This method is not able to resolve domain names and can only connect to TCP/UDP endpoints.
 func (sx *Simulation) DialContext(ctx context.Context, network, address string) (net.Conn, error) {
-	return uis.NewConnector(sx.userStack).DialContext(ctx, network, address)
+	cx := uis.NewConnector(sx.userStack)
+	txp := minest.NewDNSOverUDPTransport(cx, sx.scenario.ClientStack.Resolver)
+	reso := minest.NewResolver(txp)
+	dx := minest.NewDialer(cx, reso)
+	return dx.DialContext(ctx, network, address)
 }
 
 // LookupHost resolves a domain name using the [*uis.Stack] assigned to the user.
-//
-// This method uses the user resolver configured using a [ClientStack].
-// Each call creates a fresh transport and resolver, which is acceptable for testing.
 func (sx *Simulation) LookupHost(ctx context.Context, domain string) ([]string, error) {
-	connector := uis.NewConnector(sx.userStack)
-	txp := minest.NewDNSOverUDPTransport(connector, sx.scenario.ClientStack.Resolver)
+	cx := uis.NewConnector(sx.userStack)
+	txp := minest.NewDNSOverUDPTransport(cx, sx.scenario.ClientStack.Resolver)
 	reso := minest.NewResolver(txp)
 	return reso.LookupHost(ctx, domain)
 }

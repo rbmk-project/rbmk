@@ -6,11 +6,9 @@ import (
 	"context"
 	"crypto/tls"
 	"io"
-	"net"
 	"net/http"
 	"testing"
 
-	"github.com/bassosimone/sud"
 	"github.com/rbmk-project/rbmk/internal/qacore"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,26 +21,14 @@ func fetchWwwExampleCom(t *testing.T) (int, string) {
 	ctx := t.Context()
 
 	// Resolve www.example.com
-	addrs, err := simulation.LookupHost(ctx, "www.example.com")
+	_, err := simulation.LookupHost(ctx, "www.example.com")
 	require.NoError(t, err)
 
-	// Dial and TLS handshake
-	endpoint := net.JoinHostPort(addrs[0], "443")
-	conn, err := simulation.DialContext(ctx, "tcp", endpoint)
-	require.NoError(t, err)
-	defer conn.Close()
-
-	tcfg := &tls.Config{
-		ServerName: "www.example.com",
-		RootCAs:    simulation.CertPool(),
+	// Get www.example.com
+	txp := &http.Transport{
+		DialContext:     simulation.DialContext,
+		TLSClientConfig: &tls.Config{RootCAs: simulation.CertPool()},
 	}
-	tconn := tls.Client(conn, tcfg)
-	defer tconn.Close()
-	require.NoError(t, tconn.HandshakeContext(ctx))
-
-	// HTTP round trip
-	suse := sud.NewSingleUseDialer(tconn)
-	txp := &http.Transport{DialTLSContext: suse.DialContext}
 	clnt := &http.Client{Transport: txp}
 	hr, err := clnt.Get("https://www.example.com/")
 	require.NoError(t, err)
@@ -60,18 +46,13 @@ func fetchWwwExampleComHTTP(t *testing.T) (int, string) {
 	ctx := t.Context()
 
 	// Resolve www.example.com
-	addrs, err := simulation.LookupHost(ctx, "www.example.com")
+	_, err := simulation.LookupHost(ctx, "www.example.com")
 	require.NoError(t, err)
 
-	// Dial plaintext TCP to port 80
-	endpoint := net.JoinHostPort(addrs[0], "80")
-	conn, err := simulation.DialContext(ctx, "tcp", endpoint)
-	require.NoError(t, err)
-	defer conn.Close()
-
-	// HTTP round trip
-	suse := sud.NewSingleUseDialer(conn)
-	txp := &http.Transport{DialContext: suse.DialContext}
+	// Get www.example.com
+	txp := &http.Transport{
+		DialContext: simulation.DialContext,
+	}
 	clnt := &http.Client{Transport: txp}
 	hr, err := clnt.Get("http://www.example.com/")
 	require.NoError(t, err)
@@ -113,24 +94,13 @@ func TestCustomHTTPHandler(t *testing.T) {
 	}()
 
 	// Resolve and fetch
-	addrs, err := sim.LookupHost(t.Context(), "www.example.com")
+	_, err := sim.LookupHost(t.Context(), "www.example.com")
 	require.NoError(t, err)
 
-	endpoint := net.JoinHostPort(addrs[0], "443")
-	conn, err := sim.DialContext(t.Context(), "tcp", endpoint)
-	require.NoError(t, err)
-	defer conn.Close()
-
-	tcfg := &tls.Config{
-		ServerName: "www.example.com",
-		RootCAs:    sim.CertPool(),
+	txp := &http.Transport{
+		DialContext:     sim.DialContext,
+		TLSClientConfig: &tls.Config{RootCAs: sim.CertPool()},
 	}
-	tconn := tls.Client(conn, tcfg)
-	defer tconn.Close()
-	require.NoError(t, tconn.HandshakeContext(t.Context()))
-
-	suse := sud.NewSingleUseDialer(tconn)
-	txp := &http.Transport{DialTLSContext: suse.DialContext}
 	clnt := &http.Client{Transport: txp}
 	hr, err := clnt.Get("https://www.example.com/")
 	require.NoError(t, err)

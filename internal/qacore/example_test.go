@@ -7,13 +7,11 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"testing"
 
 	"github.com/bassosimone/runtimex"
-	"github.com/bassosimone/sud"
 	"github.com/bassosimone/uis"
 	"github.com/rbmk-project/rbmk/internal/qacore"
 )
@@ -61,20 +59,10 @@ func Example() {
 	fmt.Printf("%+v\n", addrs)
 
 	// Fetch www.example.com
-	tcfg := &tls.Config{
-		ServerName: "www.example.com",
-		RootCAs:    simulation.CertPool(),
+	txp := &http.Transport{
+		DialContext:     simulation.DialContext,
+		TLSClientConfig: &tls.Config{RootCAs: simulation.CertPool()},
 	}
-	endpoint := net.JoinHostPort(addrs[0], "443")
-	conn := runtimex.PanicOnError1(simulation.DialContext(ctx, "tcp", endpoint))
-	defer conn.Close()
-
-	tconn := tls.Client(conn, tcfg)
-	defer tconn.Close()
-
-	runtimex.PanicOnError0(tconn.HandshakeContext(ctx))
-	suse := sud.NewSingleUseDialer(tconn)
-	txp := &http.Transport{DialTLSContext: suse.DialContext}
 	clnt := &http.Client{Transport: txp}
 	hr := runtimex.PanicOnError1(clnt.Get("https://www.example.com/"))
 	defer hr.Body.Close()
