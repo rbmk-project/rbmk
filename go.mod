@@ -5,14 +5,13 @@ go 1.25.6
 require (
 	github.com/bassosimone/dnscodec v0.0.0-20260122105318-0741a5d9ed5f
 	github.com/bassosimone/dnstest v0.0.0-20260122105318-ab3b84557bc6
+	github.com/bassosimone/iss v0.0.0-20260209052501-c70053c3fb4b
 	github.com/bassosimone/minest v0.0.0-20260123150230-357b3d3db63a
 	github.com/bassosimone/netstub v0.0.0-20260122214332-4e68c49ba4df
 	github.com/bassosimone/nop v0.0.0-20260204083356-1950a9969166
 	github.com/bassosimone/pkitest v0.0.0-20260108162522-4e97d4738e31
 	github.com/bassosimone/runtimex v0.0.0-20260108162100-336f3823f6b7
 	github.com/bassosimone/safeconn v0.0.0-20260122214609-5028a520b41c
-	github.com/bassosimone/sud v0.0.0-20260122213159-faaec16bc685
-	github.com/bassosimone/uis v0.0.0-20260203101125-8c36fb50ad56
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.72
@@ -33,6 +32,8 @@ require (
 	github.com/bassosimone/dnsoverhttps v0.0.0-20260123150230-54b370f39ff7 // indirect
 	github.com/bassosimone/dnsoverstream v0.0.0-20260128092127-e2b9f5de4d97 // indirect
 	github.com/bassosimone/iox v0.0.0-20260118074942-2e71dd93cf8f // indirect
+	github.com/bassosimone/sud v0.0.0-20260122213159-faaec16bc685 // indirect
+	github.com/bassosimone/uis v0.0.0-20260203101125-8c36fb50ad56 // indirect
 	github.com/charmbracelet/colorprofile v0.4.1 // indirect
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834 // indirect
 	github.com/charmbracelet/x/ansi v0.11.4 // indirect

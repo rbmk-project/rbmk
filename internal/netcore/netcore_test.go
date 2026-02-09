@@ -8,9 +8,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bassosimone/iss"
 	"github.com/bassosimone/netstub"
 	"github.com/rbmk-project/rbmk/internal/netcore"
-	"github.com/rbmk-project/rbmk/internal/qacore"
 	"github.com/rbmk-project/rbmk/internal/testablenet"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,17 +18,17 @@ import (
 
 // Package-level simulation state
 var (
-	router    = qacore.NewDefaultRouter()
+	router    = iss.NewDefaultRouter()
 	simCtx    context.Context
 	simCancel context.CancelFunc
 )
 
-// simulation is the qacore simulation used by all tests in this package.
-var simulation *qacore.Simulation
+// simulation is the [iss] simulation used by all tests in this package.
+var simulation *iss.Simulation
 
 func init() {
 	simCtx, simCancel = context.WithCancel(context.Background())
-	simulation = qacore.MustNewSimulation(simCtx, "testdata", qacore.ScenarioV4(), router)
+	simulation = iss.MustNewSimulation(simCtx, "testdata", iss.ScenarioV4(), router)
 }
 
 func TestMain(m *testing.M) {

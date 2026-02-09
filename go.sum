@@ -24,6 +24,8 @@ github.com/bassosimone/iotest v0.0.0-20260108162419-cc1a50b01693 h1:R9z1MEIO9XU9
 github.com/bassosimone/iotest v0.0.0-20260108162419-cc1a50b01693/go.mod h1:tcrllxHmwim0qCBvmbyQs0CGo4s4HwMaZwblEzp6eDk=
 github.com/bassosimone/iox v0.0.0-20260118074942-2e71dd93cf8f h1:v3gC7pMLx6Ia2+MnzhWRfS5Kwe3ckAu4PX4NrvaTxB8=
 github.com/bassosimone/iox v0.0.0-20260118074942-2e71dd93cf8f/go.mod h1:3dhCKfl705UjK5ZLwS69bsp2l7TpYPwW73B5n3GDSYI=
+github.com/bassosimone/iss v0.0.0-20260209052501-c70053c3fb4b h1:vpA6k9Psx8IxRGa8f5LMBFU5QL/Zj/0rEpv5hgFjqw8=
+github.com/bassosimone/iss v0.0.0-20260209052501-c70053c3fb4b/go.mod h1:R2ivGF9W1r82sNzj47Y+7o1iJcN2p3fGAAjH+PHafaw=
 github.com/bassosimone/minest v0.0.0-20260123150230-357b3d3db63a h1:YAsRVIpTGHZqPaJBEbV7h4fyalSGZpylR9E8r+7czpQ=
 github.com/bassosimone/minest v0.0.0-20260123150230-357b3d3db63a/go.mod h1:uvu9smDmBBSWxZPccZuhuM33VdFxJHDOzxCb11LDKGE=
 github.com/bassosimone/netstub v0.0.0-20260122214332-4e68c49ba4df h1:7A6gNpPA+eZGRYvaWiGv8Xlj3bFQ/Oqk7/Pgym0+Qvs=
