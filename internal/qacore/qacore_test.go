@@ -3,6 +3,7 @@
 package qacore_test
 
 import (
+	"context"
 	"crypto/tls"
 	"io"
 	"net"
@@ -10,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/bassosimone/sud"
+	"github.com/rbmk-project/rbmk/internal/qacore"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -80,33 +82,62 @@ func fetchWwwExampleComHTTP(t *testing.T) (int, string) {
 	return hr.StatusCode, string(body)
 }
 
-func TestSetWwwExampleComHandler(t *testing.T) {
-	const customBody = "custom response body"
-
-	// Set a custom handler that returns a plain text response
-	simulation.SetWwwExampleComHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(customBody))
-	}))
-
-	// Verify the custom handler is used
-	status, body := fetchWwwExampleCom(t)
-	assert.Equal(t, 200, status)
-	assert.Equal(t, customBody, body)
-
-	// Reset to default handler
-	simulation.SetWwwExampleComHandler(nil)
-
-	// Verify the default handler is restored
-	status, body = fetchWwwExampleCom(t)
-	assert.Equal(t, 200, status)
-	assert.Equal(t, 605, len(body))
-}
-
 // Verify that the HTTP (plaintext) server on port 80 serves the same
 // default content as the HTTPS server.
 func TestHTTPWwwExampleCom(t *testing.T) {
 	status, body := fetchWwwExampleComHTTP(t)
 	assert.Equal(t, 200, status)
 	assert.Equal(t, 605, len(body))
+}
+
+// Verify that a custom HTTP handler can be set at construction time
+// via the Scenario.
+func TestCustomHTTPHandler(t *testing.T) {
+	const customBody = "custom response body"
+
+	// Build a scenario with a custom handler for the HTTP server
+	scenario := qacore.ScenarioV4()
+	scenario.HTTPServers[0].Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(customBody))
+	})
+
+	// Create and tear down a dedicated simulation
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	r := qacore.NewDefaultRouter()
+	sim := qacore.MustNewSimulation(ctx, "testdata", scenario, r)
+	defer func() {
+		cancel()
+		sim.Wait()
+	}()
+
+	// Resolve and fetch
+	addrs, err := sim.LookupHost(t.Context(), "www.example.com")
+	require.NoError(t, err)
+
+	endpoint := net.JoinHostPort(addrs[0], "443")
+	conn, err := sim.DialContext(t.Context(), "tcp", endpoint)
+	require.NoError(t, err)
+	defer conn.Close()
+
+	tcfg := &tls.Config{
+		ServerName: "www.example.com",
+		RootCAs:    sim.CertPool(),
+	}
+	tconn := tls.Client(conn, tcfg)
+	defer tconn.Close()
+	require.NoError(t, tconn.HandshakeContext(t.Context()))
+
+	suse := sud.NewSingleUseDialer(tconn)
+	txp := &http.Transport{DialTLSContext: suse.DialContext}
+	clnt := &http.Client{Transport: txp}
+	hr, err := clnt.Get("https://www.example.com/")
+	require.NoError(t, err)
+	defer hr.Body.Close()
+
+	body, err := io.ReadAll(hr.Body)
+	require.NoError(t, err)
+	assert.Equal(t, 200, hr.StatusCode)
+	assert.Equal(t, customBody, string(body))
 }

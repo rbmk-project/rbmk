@@ -16,14 +16,29 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Package-level simulation state
+var (
+	router    = qacore.NewDefaultRouter()
+	simCtx    context.Context
+	simCancel context.CancelFunc
+)
+
 // simulation is the qacore simulation used by all tests in this package.
-var simulation = qacore.MustNewSimulation("testdata", qacore.ScenarioV4)
+var simulation *qacore.Simulation
+
+func init() {
+	simCtx, simCancel = context.WithCancel(context.Background())
+	simulation = qacore.MustNewSimulation(simCtx, "testdata", qacore.ScenarioV4(), router)
+}
 
 func TestMain(m *testing.M) {
 	testablenet.DialContext.Set(simulation.DialContext)
 	testablenet.LookupHost.Set(simulation.LookupHost)
 	testablenet.RootCAs.Set(simulation.CertPool())
-	os.Exit(m.Run())
+	code := m.Run()
+	simCancel()
+	simulation.Wait()
+	os.Exit(code)
 }
 
 // Verify that all fields are non-nil after construction.

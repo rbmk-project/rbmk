@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"testing"
 
 	"github.com/bassosimone/runtimex"
 	"github.com/bassosimone/sud"
@@ -17,8 +18,27 @@ import (
 	"github.com/rbmk-project/rbmk/internal/qacore"
 )
 
+// Package-level simulation state
+var (
+	router    = qacore.NewDefaultRouter()
+	simCtx    context.Context
+	simCancel context.CancelFunc
+)
+
 // Create the simulation once when the test code is run
-var simulation = qacore.MustNewSimulation("testdata", qacore.ScenarioV4)
+var simulation *qacore.Simulation
+
+func init() {
+	simCtx, simCancel = context.WithCancel(context.Background())
+	simulation = qacore.MustNewSimulation(simCtx, "testdata", qacore.ScenarioV4(), router)
+}
+
+func TestMain(m *testing.M) {
+	code := m.Run()
+	simCancel()
+	simulation.Wait()
+	os.Exit(code)
+}
 
 func Example() {
 	// Create a background context
@@ -31,7 +51,7 @@ func Example() {
 	defer pcaptrace.Close()
 
 	// Set a packet filter that captures all packets to the trace
-	simulation.SetPacketFilter(qacore.PacketFilterFunc(func(pkt uis.VNICFrame) bool {
+	router.SetPacketFilter(qacore.PacketFilterFunc(func(pkt uis.VNICFrame) bool {
 		pcaptrace.Dump(pkt.Packet)
 		return false
 	}))

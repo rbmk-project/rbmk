@@ -21,27 +21,89 @@ import (
 	"github.com/bassosimone/uis"
 )
 
-// AddressAssignments contains the IP address assignments.
-type AddressAssignments struct {
-	// DnsGoogle is the addresses assigned to dns.google.
-	DnsGoogle netip.Addr
+// DNSServer describes a DNS server in the [Scenario].
+type DNSServer struct {
+	// Addrs contains the IP addresses. Panics if empty.
+	Addrs []netip.Addr
 
-	// User is the address assigned to the user.
-	User netip.Addr
+	// Domains contains the domain names to register in the DNS database.
+	Domains []string
 
-	// UserResolver is the DNS-over-UDP resolver serving the user.
-	UserResolver netip.AddrPort
+	// Aliases contains CNAME aliases pointing to Domains[0].
+	// Panics if non-empty when Domains is empty.
+	Aliases []string
 
-	// WwwExampleCom is the address assigned to www.example.com.
-	WwwExampleCom netip.Addr
+	// Handler is the DNS handler. If nil, uses the global DNS database.
+	Handler *dnstest.Handler
 }
 
-// ScenarioV4 is the IPv4 testing scenario.
-var ScenarioV4 = &AddressAssignments{
-	DnsGoogle:     netip.MustParseAddr("8.8.4.4"),
-	User:          netip.MustParseAddr("130.192.91.211"),
-	UserResolver:  netip.MustParseAddrPort("130.192.3.21:53"),
-	WwwExampleCom: netip.MustParseAddr("104.18.26.120"),
+// ClientStack describes the client stack in the [Scenario].
+type ClientStack struct {
+	// Addrs contains the IP addresses. Panics if empty.
+	Addrs []netip.Addr
+
+	// Resolver is the DNS resolver address. Panics if zero value.
+	Resolver netip.AddrPort
+}
+
+// HTTPServer describes an HTTP server in the [Scenario].
+type HTTPServer struct {
+	// Addrs contains the IP addresses. Panics if empty.
+	Addrs []netip.Addr
+
+	// Domains contains the domain names to register in the DNS database.
+	Domains []string
+
+	// Aliases contains CNAME aliases pointing to Domains[0].
+	// Panics if non-empty when Domains is empty.
+	Aliases []string
+
+	// Handler is the HTTP handler. If nil, serves the default page.
+	Handler http.Handler
+}
+
+// Scenario describes the simulated network topology.
+type Scenario struct {
+	// ClientStack describes the client stack.
+	ClientStack ClientStack
+
+	// DNSServers describes the DNS servers.
+	DNSServers []DNSServer
+
+	// HTTPServers describes the HTTP servers.
+	HTTPServers []HTTPServer
+}
+
+// ScenarioV4 returns the IPv4 testing [*Scenario].
+//
+// This function returns a fresh [*Scenario] each time, so callers
+// may mutate the result (e.g., set a custom Handler) before
+// passing it to [MustNewSimulation].
+func ScenarioV4() *Scenario {
+	return &Scenario{
+		ClientStack: ClientStack{
+			Addrs:    []netip.Addr{netip.MustParseAddr("130.192.91.211")},
+			Resolver: netip.MustParseAddrPort("130.192.3.21:53"),
+		},
+		DNSServers: []DNSServer{
+			{
+				Addrs:   []netip.Addr{netip.MustParseAddr("130.192.3.21")},
+				Domains: []string{"giove.polito.it"},
+			},
+			{
+				Addrs:   []netip.Addr{netip.MustParseAddr("8.8.4.4"), netip.MustParseAddr("8.8.8.8")},
+				Domains: []string{"dns.google"},
+				Aliases: []string{"dns.google.com"},
+			},
+		},
+		HTTPServers: []HTTPServer{
+			{
+				Addrs:   []netip.Addr{netip.MustParseAddr("104.18.26.120")},
+				Domains: []string{"www.example.com", "example.com"},
+				Aliases: []string{"www.example.org", "example.org"},
+			},
+		},
+	}
 }
 
 // PacketFilter filters packets.
@@ -60,74 +122,102 @@ func (fx PacketFilterFunc) ShouldDrop(pkt uis.VNICFrame) bool {
 	return fx(pkt)
 }
 
-// Simulation simulates the internet in QA tests.
+// Router routes packets inside a [*Simulation].
+type Router interface {
+	// Route routes packets until ctx is canceled.
+	Route(ctx context.Context, ix *uis.Internet)
+}
+
+// DefaultRouter is the default [Router] implementation.
 //
-// Use [MustNewSimulation] to construct. A [*Simulation] is intended
-// to be created once (typically as a package-level variable) and
-// to live for the entire test process. Use [*Simulation.SetPacketFilter]
-// to vary censorship conditions between subtests.
-type Simulation struct {
-	// dnsDB models the global, distributed DNS database.
-	dnsDB *dnstest.HandlerConfig
-
-	// dnsGoogleStack is the dns.google [*uis.Stack].
-	dnsGoogleStack *uis.Stack
-
-	// internet is the [*uis.Internet].
-	internet *uis.Internet
-
+// Use [NewDefaultRouter] to construct.
+type DefaultRouter struct {
 	// pf is the configured [PacketFilter].
 	pf PacketFilter
 
 	// pfmu protects the [PacketFilter].
 	pfmu sync.RWMutex
+}
 
-	// wwwHandler is the configurable [http.Handler] for www.example.com.
-	wwwHandler http.Handler
+// NewDefaultRouter creates a new [*DefaultRouter].
+func NewDefaultRouter() *DefaultRouter {
+	return &DefaultRouter{}
+}
 
-	// wwwmu protects wwwHandler.
-	wwwmu sync.RWMutex
+// SetPacketFilter sets a [PacketFilter] for [*DefaultRouter].
+//
+// Use nil to clear the [PacketFilter].
+func (r *DefaultRouter) SetPacketFilter(pf PacketFilter) {
+	r.pfmu.Lock()
+	r.pf = pf
+	r.pfmu.Unlock()
+}
+
+// Route implements [Router].
+func (r *DefaultRouter) Route(ctx context.Context, ix *uis.Internet) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case frame := <-ix.InFlight():
+			r.pfmu.RLock()
+			pf := r.pf
+			r.pfmu.RUnlock()
+			if pf == nil || !pf.ShouldDrop(frame) {
+				_ = ix.Deliver(frame)
+			}
+		}
+	}
+}
+
+// Simulation simulates the internet in QA tests.
+//
+// Use [MustNewSimulation] to construct. Cancel the context passed to
+// [MustNewSimulation] to stop the simulation, then call [*Simulation.Wait]
+// to wait for all goroutines to finish.
+type Simulation struct {
+	// dnsDB models the global, distributed DNS database.
+	dnsDB *dnstest.HandlerConfig
 
 	// pki contains the PKI used for testing.
 	pki *pkitest.PKI
 
-	// scenario contains the [AddressAssignments].
-	scenario *AddressAssignments
+	// scenario contains the [*Scenario].
+	scenario *Scenario
 
-	// userResolverStack is the user-resolver [*uis.Stack].
-	userResolverStack *uis.Stack
+	// internet is the [*uis.Internet].
+	internet *uis.Internet
 
 	// userStack is the user [*uis.Stack].
 	userStack *uis.Stack
 
-	// wwwExampleComStack is the www.example.com [*uis.Stack].
-	wwwExampleComStack *uis.Stack
+	// closers collects things to close at shutdown time.
+	closers []interface{ Close() }
+
+	// wg tracks background goroutines.
+	wg sync.WaitGroup
 }
 
 // MustNewSimulation creates a new [*Simulation].
-func MustNewSimulation(datadir string, scenario *AddressAssignments) *Simulation {
+//
+// Cancel the ctx to stop the simulation, then call [*Simulation.Wait]
+// to join background goroutines.
+func MustNewSimulation(ctx context.Context, datadir string, scenario *Scenario, router Router) *Simulation {
 	sx := &Simulation{
 		dnsDB:    dnstest.NewHandlerConfig(),
 		pki:      pkitest.MustNewPKI(datadir),
 		scenario: scenario,
 	}
-	sx.mustInit()
+	sx.mustInit(ctx, router)
 	return sx
 }
 
-// SetPacketFilter sets a [PacketFilter]. Use nil to clear the [PacketFilter].
-func (sx *Simulation) SetPacketFilter(pf PacketFilter) {
-	sx.pfmu.Lock()
-	sx.pf = pf
-	sx.pfmu.Unlock()
-}
-
-// SetWwwExampleComHandler sets the [http.Handler] for www.example.com.
-// Use nil to revert to the default handler serving the embedded HTML page.
-func (sx *Simulation) SetWwwExampleComHandler(handler http.Handler) {
-	sx.wwwmu.Lock()
-	sx.wwwHandler = handler
-	sx.wwwmu.Unlock()
+// Wait waits for all background goroutines to finish.
+//
+// You should cancel the context passed to [MustNewSimulation] before
+// calling this method, otherwise it blocks forever.
+func (sx *Simulation) Wait() {
+	sx.wg.Wait()
 }
 
 // CertPool returns the cert pool that the user should use.
@@ -144,170 +234,244 @@ func (sx *Simulation) DialContext(ctx context.Context, network, address string) 
 
 // LookupHost resolves a domain name using the [*uis.Stack] assigned to the user.
 //
-// This method uses the user resolver configured using an [*AddressAssignment].
+// This method uses the user resolver configured using a [ClientStack].
 // Each call creates a fresh transport and resolver, which is acceptable for testing.
 func (sx *Simulation) LookupHost(ctx context.Context, domain string) ([]string, error) {
 	connector := uis.NewConnector(sx.userStack)
-	txp := minest.NewDNSOverUDPTransport(connector, sx.scenario.UserResolver)
+	txp := minest.NewDNSOverUDPTransport(connector, sx.scenario.ClientStack.Resolver)
 	reso := minest.NewResolver(txp)
 	return reso.LookupHost(ctx, domain)
 }
 
 // mustInit initializes the [*Simulation].
-func (sx *Simulation) mustInit() {
-	// Init the internet
-	sx.internet = uis.NewInternet()
-
+func (sx *Simulation) mustInit(ctx context.Context, router Router) {
 	// Ensure we initialized dependencies correctly
 	runtimex.Assert(sx.dnsDB != nil)
 	runtimex.Assert(sx.pki != nil)
 	runtimex.Assert(sx.scenario != nil)
 
-	// Init the user stack
+	// Init the internet
+	sx.internet = uis.NewInternet()
+
+	// Init the client stack
+	sx.mustInitClientStack()
+
+	// Init each DNS server
+	for idx := range sx.scenario.DNSServers {
+		sx.mustInitDNSServer(&sx.scenario.DNSServers[idx])
+	}
+
+	// Init each HTTP server
+	for idx := range sx.scenario.HTTPServers {
+		sx.mustInitHTTPServer(&sx.scenario.HTTPServers[idx])
+	}
+
+	// Start the teardown goroutine
+	sx.wg.Go(func() {
+		router.Route(ctx, sx.internet)
+		for idx := len(sx.closers) - 1; idx >= 0; idx-- {
+			sx.closers[idx].Close()
+		}
+	})
+}
+
+// mustInitClientStack initializes the client stack.
+func (sx *Simulation) mustInitClientStack() {
+	cs := &sx.scenario.ClientStack
+	runtimex.Assert(len(cs.Addrs) > 0)
+	runtimex.Assert(cs.Resolver != netip.AddrPort{})
 	sx.userStack = runtimex.PanicOnError1(sx.internet.NewStack(
-		uis.MTUEthernet, sx.scenario.User,
+		uis.MTUEthernet, cs.Addrs...,
 	))
-	sx.dnsDB.AddNetipAddr("whitespider.polito.it", sx.scenario.User)
-
-	// Init the user resolver stack
-	sx.userResolverStack = runtimex.PanicOnError1(sx.internet.NewStack(
-		uis.MTUEthernet, sx.scenario.UserResolver.Addr(),
-	))
-	sx.dnsDB.AddNetipAddr("giove.polito.it", sx.scenario.UserResolver.Addr())
-	go sx.userResolverMain()
-
-	// Init the dns.google stack
-	sx.dnsGoogleStack = runtimex.PanicOnError1(sx.internet.NewStack(
-		uis.MTUEthernet, sx.scenario.DnsGoogle,
-	))
-	sx.dnsDB.AddNetipAddr("dns.google", sx.scenario.DnsGoogle)
-	dnsGoogleCertificate := sx.pki.MustNewCert(&pkitest.SelfSignedCertConfig{
-		CommonName:   "dns.google",
-		DNSNames:     []string{"dns.google"},
-		IPAddrs:      []net.IP{sx.scenario.DnsGoogle.AsSlice()},
-		Organization: []string{"Google"},
-	})
-	go sx.dnsGoogleMain(dnsGoogleCertificate)
-
-	// Init the www.example.com stack
-	sx.wwwExampleComStack = runtimex.PanicOnError1(sx.internet.NewStack(
-		uis.MTUEthernet, sx.scenario.WwwExampleCom,
-	))
-	sx.dnsDB.AddNetipAddr("www.example.com", sx.scenario.WwwExampleCom)
-	wwwExampleComCertificate := sx.pki.MustNewCert(&pkitest.SelfSignedCertConfig{
-		CommonName:   "www.example.com",
-		DNSNames:     []string{"www.example.com"},
-		IPAddrs:      []net.IP{sx.scenario.WwwExampleCom.AsSlice()},
-		Organization: []string{"Example"},
-	})
-	go sx.wwwExampleComMain(wwwExampleComCertificate)
-
-	// Route packets
-	go sx.route()
+	sx.closers = append(sx.closers, sx.userStack)
 }
 
-// userResolverMain is the main goroutine of the user resolver stack.
-func (sx *Simulation) userResolverMain() {
-	lcfg := uis.NewListenConfig(sx.userResolverStack)
-	dnstest.MustNewUDPServer(
-		lcfg,
-		sx.scenario.UserResolver.String(),
-		dnstest.NewHandler(sx.dnsDB),
-	)
-}
+// mustInitDNSServer initializes a [DNSServer].
+func (sx *Simulation) mustInitDNSServer(ds *DNSServer) {
+	// Sanity checks
+	runtimex.Assert(len(ds.Addrs) > 0)
+	if len(ds.Aliases) > 0 {
+		runtimex.Assert(len(ds.Domains) > 0)
+	}
 
-// dnsGoogleMain is the main goroutine of the dns.google stack.
-func (sx *Simulation) dnsGoogleMain(certificate tls.Certificate) {
-	lcfg := uis.NewListenConfig(sx.dnsGoogleStack)
+	// Create the stack
+	stack := runtimex.PanicOnError1(sx.internet.NewStack(
+		uis.MTUEthernet, ds.Addrs...,
+	))
+	sx.closers = append(sx.closers, stack)
 
-	// UDP
-	dnstest.MustNewUDPServer(
-		lcfg,
-		makeStringEpnt(sx.scenario.DnsGoogle, 53),
-		dnstest.NewHandler(sx.dnsDB),
-	)
+	// Register domains and aliases in the DNS database
+	for _, domain := range ds.Domains {
+		for _, ipAddr := range ds.Addrs {
+			sx.dnsDB.AddNetipAddr(domain, ipAddr)
+		}
+	}
+	for _, alias := range ds.Aliases {
+		sx.dnsDB.AddCNAME(alias, ds.Domains[0])
+	}
 
-	// TCP
-	dnstest.MustNewTCPServer(
-		lcfg,
-		makeStringEpnt(sx.scenario.DnsGoogle, 53),
-		dnstest.NewHandler(sx.dnsDB),
-	)
+	// Determine the handler to use
+	handler := ds.Handler
+	if handler == nil {
+		handler = dnstest.NewHandler(sx.dnsDB)
+	}
 
-	// TLS
-	dnstest.MustNewTLSServer(
-		lcfg,
-		makeStringEpnt(sx.scenario.DnsGoogle, 853),
-		certificate,
-		dnstest.NewHandler(sx.dnsDB),
-	)
+	// Compute allDomains for the certificate (copy to avoid mutation)
+	allDomains := make([]string, 0, len(ds.Domains)+len(ds.Aliases))
+	allDomains = append(allDomains, ds.Domains...)
+	allDomains = append(allDomains, ds.Aliases...)
 
-	// HTTPS
-	dnstest.MustNewHTTPSServer(
-		lcfg,
-		makeStringEpnt(sx.scenario.DnsGoogle, 443),
-		certificate,
-		dnstest.NewHandler(sx.dnsDB),
+	// Create a TLS certificate if we have domains
+	var (
+		cert    tls.Certificate
+		hasCert bool
 	)
+	if len(ds.Domains) > 0 {
+		ipAddrs := make([]net.IP, 0, len(ds.Addrs))
+		for _, addr := range ds.Addrs {
+			ipAddrs = append(ipAddrs, addr.AsSlice())
+		}
+		cert = sx.pki.MustNewCert(&pkitest.SelfSignedCertConfig{
+			CommonName: ds.Domains[0],
+			DNSNames:   allDomains,
+			IPAddrs:    ipAddrs,
+		})
+		hasCert = true
+	}
+
+	// Create a listen config for this stack
+	lcfg := uis.NewListenConfig(stack)
+
+	// Start servers for each address
+	for _, addr := range ds.Addrs {
+		// UDP server
+		udpSrv := dnstest.MustNewUDPServer(
+			lcfg,
+			makeStringEpnt(addr, 53),
+			handler,
+		)
+		sx.closers = append(sx.closers, udpSrv)
+
+		// TCP server
+		tcpSrv := dnstest.MustNewTCPServer(
+			lcfg,
+			makeStringEpnt(addr, 53),
+			handler,
+		)
+		sx.closers = append(sx.closers, tcpSrv)
+
+		// TLS and HTTPS servers require a certificate
+		if hasCert {
+			tlsSrv := dnstest.MustNewTLSServer(
+				lcfg,
+				makeStringEpnt(addr, 853),
+				cert,
+				handler,
+			)
+			sx.closers = append(sx.closers, tlsSrv)
+
+			httpsSrv := dnstest.MustNewHTTPSServer(
+				lcfg,
+				makeStringEpnt(addr, 443),
+				cert,
+				handler,
+			)
+			sx.closers = append(sx.closers, httpsSrv)
+		}
+	}
 }
 
 //go:embed example.com.html
 var exampleComHTML string
 
-// defaultWwwHandler is the default [http.Handler] for www.example.com.
+// defaultWwwHandler is the default [http.Handler] for HTTP servers.
 var defaultWwwHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(exampleComHTML))
 })
 
-// wwwExampleComMain is the main goroutine of the www.example.com stack.
-func (sx *Simulation) wwwExampleComMain(certificate tls.Certificate) {
-	lcfg := uis.NewListenConfig(sx.wwwExampleComStack)
-
-	// Handler that delegates to the configurable wwwHandler
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		sx.wwwmu.RLock()
-		h := sx.wwwHandler
-		sx.wwwmu.RUnlock()
-		if h == nil {
-			h = defaultWwwHandler
-		}
-		h.ServeHTTP(w, r)
-	})
-
-	// HTTPS server on port 443
-	httpsListener := runtimex.PanicOnError1(lcfg.Listen(
-		context.Background(),
-		"tcp",
-		makeStringEpnt(sx.scenario.WwwExampleCom, 443),
-	))
-	httpsSrv := httptest.NewUnstartedServer(handler)
-	httpsSrv.Listener = httpsListener
-	httpsSrv.TLS = &tls.Config{
-		Certificates: []tls.Certificate{certificate},
+// mustInitHTTPServer initializes an [HTTPServer].
+func (sx *Simulation) mustInitHTTPServer(hs *HTTPServer) {
+	// Sanity checks
+	runtimex.Assert(len(hs.Addrs) > 0)
+	if len(hs.Aliases) > 0 {
+		runtimex.Assert(len(hs.Domains) > 0)
 	}
-	httpsSrv.EnableHTTP2 = true
-	httpsSrv.StartTLS()
 
-	// HTTP server on port 80
-	httpListener := runtimex.PanicOnError1(lcfg.Listen(
-		context.Background(),
-		"tcp",
-		makeStringEpnt(sx.scenario.WwwExampleCom, 80),
+	// Create the stack
+	stack := runtimex.PanicOnError1(sx.internet.NewStack(
+		uis.MTUEthernet, hs.Addrs...,
 	))
-	httpSrv := httptest.NewUnstartedServer(handler)
-	httpSrv.Listener = httpListener
-	httpSrv.Start()
-}
+	sx.closers = append(sx.closers, stack)
 
-// route routes packets between hosts in the [*Simulation].
-func (sx *Simulation) route() {
-	for frame := range sx.internet.InFlight() {
-		sx.pfmu.RLock()
-		pf := sx.pf
-		sx.pfmu.RUnlock()
-		if pf == nil || !pf.ShouldDrop(frame) {
-			_ = sx.internet.Deliver(frame)
+	// Register domains and aliases in the DNS database
+	for _, domain := range hs.Domains {
+		for _, ipAddr := range hs.Addrs {
+			sx.dnsDB.AddNetipAddr(domain, ipAddr)
+		}
+	}
+	for _, alias := range hs.Aliases {
+		sx.dnsDB.AddCNAME(alias, hs.Domains[0])
+	}
+
+	// Determine the handler to use
+	handler := hs.Handler
+	if handler == nil {
+		handler = defaultWwwHandler
+	}
+
+	// Compute allDomains for the certificate (copy to avoid mutation)
+	allDomains := make([]string, 0, len(hs.Domains)+len(hs.Aliases))
+	allDomains = append(allDomains, hs.Domains...)
+	allDomains = append(allDomains, hs.Aliases...)
+
+	// Create a TLS certificate if we have domains
+	var cert tls.Certificate
+	var hasCert bool
+	if len(hs.Domains) > 0 {
+		ipAddrs := make([]net.IP, 0, len(hs.Addrs))
+		for _, addr := range hs.Addrs {
+			ipAddrs = append(ipAddrs, addr.AsSlice())
+		}
+		cert = sx.pki.MustNewCert(&pkitest.SelfSignedCertConfig{
+			CommonName: hs.Domains[0],
+			DNSNames:   allDomains,
+			IPAddrs:    ipAddrs,
+		})
+		hasCert = true
+	}
+
+	// Create a listen config for this stack
+	lcfg := uis.NewListenConfig(stack)
+
+	// Start servers for each address
+	for _, addr := range hs.Addrs {
+		// HTTP server on port 80
+		httpListener := runtimex.PanicOnError1(lcfg.Listen(
+			context.Background(),
+			"tcp",
+			makeStringEpnt(addr, 80),
+		))
+		httpSrv := httptest.NewUnstartedServer(handler)
+		httpSrv.Listener = httpListener
+		httpSrv.Start()
+		sx.closers = append(sx.closers, httpSrv)
+
+		// HTTPS server on port 443 requires a certificate
+		if hasCert {
+			httpsListener := runtimex.PanicOnError1(lcfg.Listen(
+				context.Background(),
+				"tcp",
+				makeStringEpnt(addr, 443),
+			))
+			httpsSrv := httptest.NewUnstartedServer(handler)
+			httpsSrv.Listener = httpsListener
+			httpsSrv.TLS = &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			}
+			httpsSrv.EnableHTTP2 = true
+			httpsSrv.StartTLS()
+			sx.closers = append(sx.closers, httpsSrv)
 		}
 	}
 }
