@@ -7,6 +7,7 @@ import (
 	"crypto/tls"
 	"io"
 	"net/http"
+	"net/netip"
 	"testing"
 
 	"github.com/rbmk-project/rbmk/internal/qacore"
@@ -110,4 +111,16 @@ func TestCustomHTTPHandler(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 200, hr.StatusCode)
 	assert.Equal(t, customBody, string(body))
+}
+
+// Verify that DNSGlobalDB allows adding new hosts after construction
+// and that they can be resolved through the simulation.
+func TestDNSGlobalDBAddHost(t *testing.T) {
+	// Add a new domain to the global DNS database
+	simulation.DNSGlobalDB().AddNetipAddr("extra.example.com", netip.MustParseAddr("192.0.2.1"))
+
+	// Verify the new domain resolves correctly
+	addrs, err := simulation.LookupHost(t.Context(), "extra.example.com")
+	require.NoError(t, err)
+	assert.Equal(t, []string{"192.0.2.1"}, addrs)
 }

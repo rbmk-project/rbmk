@@ -232,11 +232,11 @@ func (sx *Simulation) Wait() {
 	sx.wg.Wait()
 }
 
-// DnsDB returns the global DNS database used by the [*Simulation].
+// DNSGlobalDB returns the global DNS database used by the [*Simulation].
 //
 // You can use this to add extra DNS records (e.g., records
 // not associated with any stack) after construction.
-func (sx *Simulation) DnsDB() *dnstest.HandlerConfig {
+func (sx *Simulation) DNSGlobalDB() *dnstest.HandlerConfig {
 	return sx.dnsDB
 }
 
