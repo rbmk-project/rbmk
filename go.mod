@@ -8,7 +8,7 @@ require (
 	github.com/bassosimone/iss v0.0.0-20260209052501-c70053c3fb4b
 	github.com/bassosimone/minest v0.0.0-20260123150230-357b3d3db63a
 	github.com/bassosimone/netstub v0.0.0-20260122214332-4e68c49ba4df
-	github.com/bassosimone/nop v0.0.0-20260204083356-1950a9969166
+	github.com/bassosimone/nop v0.0.0-20260212075908-4c1179e0e0ef
 	github.com/bassosimone/pkitest v0.0.0-20260108162522-4e97d4738e31
 	github.com/bassosimone/runtimex v0.0.0-20260108162100-336f3823f6b7
 	github.com/bassosimone/safeconn v0.0.0-20260122214609-5028a520b41c
@@ -19,9 +19,9 @@ require (
 	github.com/quic-go/quic-go v0.59.0
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/net v0.49.0
+	golang.org/x/net v0.50.0
 	golang.org/x/sys v0.41.0
-	golang.org/x/tools v0.41.0
+	golang.org/x/tools v0.42.0
 	mvdan.cc/sh/v3 v3.12.0
 )
 
@@ -66,12 +66,12 @@ require (
 	github.com/yuin/goldmark v1.7.16 // indirect
 	github.com/yuin/goldmark-emoji v1.0.6 // indirect
 	go.uber.org/mock v0.6.0 // indirect
-	golang.org/x/crypto v0.47.0 // indirect
+	golang.org/x/crypto v0.48.0 // indirect
 	golang.org/x/exp v0.0.0-20260112195511-716be5621a96 // indirect
-	golang.org/x/mod v0.32.0 // indirect
+	golang.org/x/mod v0.33.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/term v0.39.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/term v0.40.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gvisor.dev/gvisor v0.0.0-20260202191832-0bd9aedd142c // indirect

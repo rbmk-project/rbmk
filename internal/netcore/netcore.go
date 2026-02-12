@@ -16,7 +16,6 @@ import (
 	"github.com/bassosimone/nop"
 	"github.com/bassosimone/runtimex"
 	"github.com/rbmk-project/rbmk/internal/testablenet"
-	"github.com/rbmk-project/rbmk/pkg/common/errclass"
 )
 
 // Resolver is a [*net.Resolver]-like abstraction.
@@ -101,11 +100,10 @@ func NewNetwork() *Network {
 
 // NewNopConfig creates a new [*nop.Config] instance.
 func (nx *Network) NewNopConfig() *nop.Config {
-	return &nop.Config{
-		Dialer:        dialerAdapter{nx.DialContextFunc},
-		ErrClassifier: nop.ErrClassifierFunc(errclass.New),
-		TimeNow:       nx.TimeNow,
-	}
+	cfg := nop.NewConfig()
+	cfg.Dialer = dialerAdapter{nx.DialContextFunc}
+	cfg.TimeNow = nx.TimeNow
+	return cfg
 }
 
 // DialContext establishes a new TCP/UDP [net.Conn].
