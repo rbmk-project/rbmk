@@ -18,9 +18,9 @@ import (
 	"net"
 	"time"
 
+	"github.com/bassosimone/closepool"
 	"github.com/miekg/dns"
 	"github.com/quic-go/quic-go"
-	"github.com/rbmk-project/rbmk/pkg/common/closepool"
 )
 
 func (t *Transport) queryQUIC(ctx context.Context, addr *ServerAddr, query *dns.Msg) (*dns.Msg, error) {
