@@ -10,6 +10,8 @@ github.com/aymanbagabas/go-udiff v0.2.0 h1:TK0fH4MteXUDspT88n8CKzvK0X9O2xu9yQjWp
 github.com/aymanbagabas/go-udiff v0.2.0/go.mod h1:RE4Ex0qsGkTAJoQdQQCA0uG+nAzJO/pI/QwceO5fgrA=
 github.com/aymerick/douceur v0.2.0 h1:Mv+mAeH1Q+n9Fr+oyamOlAkUNPWPlA8PPGR0QAaYuPk=
 github.com/aymerick/douceur v0.2.0/go.mod h1:wlT5vV2O3h55X9m7iVYN0TBM0NH/MmbLnd30/FjWUq4=
+github.com/bassosimone/closepool v0.0.0-20260213174302-379ccac917c0 h1:tuxW8U89LKwE6PXnjE/urzXxN3UdNQArfTHG4aAOIuw=
+github.com/bassosimone/closepool v0.0.0-20260213174302-379ccac917c0/go.mod h1:/pEFe9OK8zhUCHsBzlx7xbjK8Cr1buT+nh2i9CWPJBU=
 github.com/bassosimone/dnstest v0.0.0-20260122105318-ab3b84557bc6 h1:UITVqD6Cy+zrmyAPkxhTCdy72KDBnwmXuaSkefQ5cVU=
 github.com/bassosimone/dnstest v0.0.0-20260122105318-ab3b84557bc6/go.mod h1:6SJAlt4hCrdwywCgIgUG/iaHV/Tr98ENciGCmGOToG0=
 github.com/bassosimone/pkitest v0.0.0-20260108162522-4e97d4738e31 h1:bWrYpMtPO3efLcYHqX9Z3mHmV0MGAE8uaJ1fJaEV2RE=
