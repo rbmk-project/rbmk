@@ -7,7 +7,7 @@ require (
 	github.com/bassosimone/dnstest v0.0.0-20260210075929-b5564aaef1fc
 	github.com/bassosimone/pkitest v0.0.0-20260108162522-4e97d4738e31
 	github.com/bassosimone/runtimex v0.0.0-20260108162100-336f3823f6b7
-	github.com/charmbracelet/glamour v0.10.0
+	github.com/charmbracelet/glamour v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.72
 	github.com/pion/stun/v3 v3.1.1
