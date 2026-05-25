@@ -4,7 +4,7 @@ go 1.25.5
 
 require (
 	github.com/bassosimone/closepool v0.0.0-20260510173206-317d036a9a9d
-	github.com/bassosimone/dnstest v0.0.0-20260511084620-a4f6ad427695
+	github.com/bassosimone/dnstest v0.0.0-20260525094743-b1e56ab3dd3f
 	github.com/bassosimone/pkitest v0.0.0-20260506051517-569dfef1de64
 	github.com/bassosimone/runtimex v0.0.0-20260430082757-ec3a7b516e79
 	github.com/charmbracelet/glamour v1.0.0
@@ -14,8 +14,8 @@ require (
 	github.com/quic-go/quic-go v0.59.1
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/net v0.54.0
-	golang.org/x/sys v0.44.0
+	golang.org/x/net v0.55.0
+	golang.org/x/sys v0.45.0
 	golang.org/x/tools v0.45.0
 	mvdan.cc/sh/v3 v3.13.1
 )
@@ -28,7 +28,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834 // indirect
 	github.com/charmbracelet/x/ansi v0.11.7 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
-	github.com/charmbracelet/x/exp/slice v0.0.0-20260517005351-920740d613be // indirect
+	github.com/charmbracelet/x/exp/slice v0.0.0-20260524005558-961435f30453 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
@@ -52,7 +52,7 @@ require (
 	github.com/yuin/goldmark v1.8.2 // indirect
 	github.com/yuin/goldmark-emoji v1.0.6 // indirect
 	go.uber.org/mock v0.6.0 // indirect
-	golang.org/x/crypto v0.51.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
 	golang.org/x/mod v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
