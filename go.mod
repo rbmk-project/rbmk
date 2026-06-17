@@ -3,10 +3,10 @@ module github.com/rbmk-project/rbmk
 go 1.25.5
 
 require (
-	github.com/bassosimone/closepool v0.0.0-20260510173206-317d036a9a9d
-	github.com/bassosimone/dnstest v0.0.0-20260608045954-c081bd6f2cbb
-	github.com/bassosimone/pkitest v0.0.0-20260608030630-3ea085cb927c
-	github.com/bassosimone/runtimex v0.0.0-20260430082757-ec3a7b516e79
+	github.com/bassosimone/closepool v0.0.0-20260615105548-51bffcf14d2b
+	github.com/bassosimone/dnstest v0.0.0-20260616123603-0cfa0c816b13
+	github.com/bassosimone/pkitest v0.0.0-20260615122033-8e73e7843b18
+	github.com/bassosimone/runtimex v0.0.0-20260615112505-ee72c4f0769e
 	github.com/charmbracelet/glamour v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.72
@@ -21,19 +21,19 @@ require (
 )
 
 require (
-	github.com/alecthomas/chroma/v2 v2.26.1 // indirect
+	github.com/alecthomas/chroma/v2 v2.27.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834 // indirect
 	github.com/charmbracelet/x/ansi v0.11.7 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
-	github.com/charmbracelet/x/exp/slice v0.0.0-20260607010151-cd19a2bba55f // indirect
+	github.com/charmbracelet/x/exp/slice v0.0.0-20260615092313-b57e5e6d29bb // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dlclark/regexp2/v2 v2.2.1 // indirect
+	github.com/dlclark/regexp2/v2 v2.2.2 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
