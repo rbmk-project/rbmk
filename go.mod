@@ -3,7 +3,7 @@ module github.com/rbmk-project/rbmk
 go 1.25.5
 
 require (
-	github.com/bassosimone/closepool v0.0.0-20260615105548-51bffcf14d2b
+	github.com/bassosimone/closepool v0.0.0-20260622072442-c2ef49d20318
 	github.com/bassosimone/dnstest v0.0.0-20260616123603-0cfa0c816b13
 	github.com/bassosimone/pkitest v0.0.0-20260615122033-8e73e7843b18
 	github.com/bassosimone/runtimex v0.0.0-20260615112505-ee72c4f0769e
@@ -28,7 +28,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834 // indirect
 	github.com/charmbracelet/x/ansi v0.11.7 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
-	github.com/charmbracelet/x/exp/slice v0.0.0-20260615092313-b57e5e6d29bb // indirect
+	github.com/charmbracelet/x/exp/slice v0.0.0-20260622092256-25656177ba8e // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
