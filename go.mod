@@ -16,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/net v0.56.0
 	golang.org/x/sys v0.46.0
-	golang.org/x/tools v0.46.0
+	golang.org/x/tools v0.47.0
 	mvdan.cc/sh/v3 v3.13.1
 )
 
