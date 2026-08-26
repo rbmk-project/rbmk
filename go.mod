@@ -3,10 +3,10 @@ module github.com/rbmk-project/rbmk
 go 1.25.5
 
 require (
-	github.com/bassosimone/closepool v0.0.0-20260817125228-04059f8b42c1
-	github.com/bassosimone/dnstest v0.0.0-20260817133007-71254cf4c67c
-	github.com/bassosimone/pkitest v0.0.0-20260817131923-f15e2a15150a
-	github.com/bassosimone/runtimex v0.0.0-20260817130226-a470a996118d
+	github.com/bassosimone/closepool v0.0.0-20260823101641-96f861c1173c
+	github.com/bassosimone/dnstest v0.0.0-20260825073620-815899f7ed46
+	github.com/bassosimone/pkitest v0.0.0-20260824081820-97f68d45ac20
+	github.com/bassosimone/runtimex v0.0.0-20260823103059-603841e26ca3
 	github.com/charmbracelet/glamour v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.73
@@ -28,7 +28,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834 // indirect
 	github.com/charmbracelet/x/ansi v0.11.8 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.15 // indirect
-	github.com/charmbracelet/x/exp/slice v0.0.0-20260816001655-68d539dca504 // indirect
+	github.com/charmbracelet/x/exp/slice v0.0.0-20260823001701-96af6d2cb5f6 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
