@@ -18,6 +18,7 @@ jobs:
           # version indicated inside the `go.mod`
           - "1.25"
           - "1.26"
+          - "1.27"
 
     runs-on: ubuntu-latest
     steps:
@@ -43,7 +44,7 @@ jobs:
         uses: actions/setup-go@v7
         with:
           # Here we should use the current go version
-          go-version: "1.26"
+          go-version: "1.27"
 
       - name: Measure Coverage
         run: go test -short -race -covermode=atomic -coverprofile=coverage.out ./...
