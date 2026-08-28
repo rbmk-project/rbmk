@@ -3,10 +3,10 @@ module github.com/rbmk-project/rbmk
 go 1.25.5
 
 require (
-	github.com/bassosimone/closepool v0.0.0-20260823101641-96f861c1173c
-	github.com/bassosimone/dnstest v0.0.0-20260825073620-815899f7ed46
-	github.com/bassosimone/pkitest v0.0.0-20260824081820-97f68d45ac20
-	github.com/bassosimone/runtimex v0.0.0-20260823103059-603841e26ca3
+	github.com/bassosimone/closepool v0.0.0-20260828072703-e4e18db93a56
+	github.com/bassosimone/dnstest v0.0.0-20260828083113-92de75834e42
+	github.com/bassosimone/pkitest v0.0.0-20260828082631-dc79fe632a24
+	github.com/bassosimone/runtimex v0.0.0-20260828074549-6e2e561f98d1
 	github.com/charmbracelet/glamour v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.73
@@ -40,7 +40,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
-	github.com/pion/dtls/v3 v3.1.5 // indirect
+	github.com/pion/dtls/v3 v3.1.6 // indirect
 	github.com/pion/logging v0.2.4 // indirect
 	github.com/pion/transport/v4 v4.1.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
