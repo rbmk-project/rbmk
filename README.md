@@ -25,7 +25,9 @@ outages, misconfigurations, censorship, and performance issues.
 
 ## Minimum Required Go Version
 
-Go 1.26
+The "oldstable" version. That is, the one before the current stable.
+
+You can find it at https://go.dev/dl/.
 
 ## Installation
 

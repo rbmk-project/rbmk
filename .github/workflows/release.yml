@@ -23,9 +23,7 @@ jobs:
     strategy:
       matrix:
         goversion:
-          # We should most likely only use the latest version of Go
-          # but I'm keeping the matrix for flexibility
-          - "1.25"
+          - "stable"
 
     runs-on: ubuntu-latest
     steps:
