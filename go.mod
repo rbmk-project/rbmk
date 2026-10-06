@@ -3,10 +3,10 @@ module github.com/rbmk-project/rbmk
 go 1.26.0
 
 require (
-	github.com/bassosimone/closepool v0.0.0-20260928111144-9eef701bea99
-	github.com/bassosimone/dnstest v0.0.0-20260928112322-b128c7797e99
-	github.com/bassosimone/pkitest v0.0.0-20260928112139-c2ca7e68520a
-	github.com/bassosimone/runtimex v0.0.0-20260928111457-f2fe934d5065
+	github.com/bassosimone/closepool v0.0.0-20261005144423-6328e0244d72
+	github.com/bassosimone/dnstest v0.0.0-20261005145717-2d50c4555014
+	github.com/bassosimone/pkitest v0.0.0-20261005145452-7b85881f912d
+	github.com/bassosimone/runtimex v0.0.0-20261005144844-77dc639b0e90
 	github.com/charmbracelet/glamour v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/miekg/dns v1.1.73
