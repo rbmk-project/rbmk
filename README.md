@@ -25,9 +25,7 @@ outages, misconfigurations, censorship, and performance issues.
 
 ## Minimum Required Go Version
 
-The "stable" version. That is, the one before the current stable.
-
-You can find it at https://go.dev/dl/.
+The version specified in [go.mod](go.mod).
 
 ## Installation
 
